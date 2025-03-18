@@ -20,9 +20,6 @@ button {
   background-color: transparent;
 }
 
-input {
-  /* outline: none; */
-}
 #root {
   overflow: hidden;
 }
