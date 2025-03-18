@@ -1,0 +1,136 @@
+import React, { useEffect, useState } from "react";
+import { Center } from "../../../public/assets/style";
+import styled from "styled-components";
+import { supabase } from "../../supabase";
+import HotDealCard from "../../compontents/card/HotDealCard";
+import type {
+  CardImageType,
+  HotDealCardType,
+} from "compontents/card/card.type";
+import { theme } from "../../../public/assets/styles/theme";
+import moment from "moment";
+import Countdown, { CountdownRenderProps } from "react-countdown";
+
+const StoreHotDeal = () => {
+  const [objects, setObjects] = useState<HotDealCardType[]>([]);
+  const todays = moment().format("YYYY-MM-DD");
+  const handleData = async () => {
+    const { data, error } = await supabase
+      .from("sale")
+      .select(
+        `
+      object_seq,
+      today_sale,
+      objects:object_seq (*)
+    `
+      )
+      .eq("today_sale", "True")
+      .eq("today_sale_date", todays);
+
+    if (!data) return;
+    setObjects(data ?? []);
+    if (error) {
+      console.error("Supabase Error:", error);
+    }
+  };
+  // 두 자리 숫자로 맞춰주는 함수
+  const padZero = (num: number) => String(num).padStart(2, "0");
+  useEffect(() => {
+    handleData();
+  }, []);
+  const renderer = ({ hours, minutes, seconds }: CountdownRenderProps) => {
+    return (
+      <span>
+        오늘 할인 {padZero(hours)}:{padZero(minutes)}:{padZero(seconds)}
+      </span>
+    );
+  };
+  return (
+    <div>
+      <MainTitle>
+        <Center>
+          <div>
+            <span>오늘의 특가</span>
+            <em>딱 하루만! 오늘의 특가 찬스</em>
+          </div>
+        </Center>
+      </MainTitle>
+      <ObjectBox>
+        <div className="title">
+          <h2>오늘의 특가</h2>
+          <Countdown
+            date={moment(todays).add(1, "day")}
+            renderer={renderer}
+          ></Countdown>
+        </div>
+        <div className="items">
+          {objects &&
+            objects?.map((item) => (
+              <HotDealCard key={item.object_seq} data={item}></HotDealCard>
+            ))}
+        </div>
+      </ObjectBox>
+    </div>
+  );
+};
+
+export default StoreHotDeal;
+const ObjectBox = styled.div`
+  padding: 30px;
+  background-color: #fff;
+  margin: -10px auto 0;
+  z-index: 99;
+  position: relative;
+  border-radius: 5px;
+  width: 1080px;
+  .title {
+    position: relative;
+    h2 {
+      padding-bottom: 10px;
+      border-bottom: 2px solid #000;
+    }
+    span {
+      font-size: 20px;
+      font-weight: bold;
+      color: ${theme.color.main};
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+  }
+
+  > div.items {
+    display: grid;
+    grid-template-columns: repeat(2, 500px);
+    justify-content: space-between;
+    row-gap: 35px;
+    padding: 40px 0;
+  }
+`;
+const MainTitle = styled.div`
+  position: relative;
+  height: 150px;
+  background: url("/public/assets/images/icons/bg_sp_visual.png") 50% 0
+    no-repeat;
+  z-index: 2;
+  > div {
+    > div {
+      display: flex;
+      column-gap: 17px;
+      align-items: baseline;
+      padding-top: 60px;
+      em,
+      span {
+        color: #fff;
+      }
+
+      span {
+        font-size: 35px;
+        font-weight: bold;
+      }
+      em {
+        font-weight: 200;
+      }
+    }
+  }
+`;

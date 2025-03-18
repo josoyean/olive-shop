@@ -1,0 +1,28 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+span {
+  color: #333;
+  white-space: nowrap;
+}
+li,
+ul {
+  list-style-type: none;
+}
+em {
+  font-style: normal;
+}
+button {
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+input {
+  /* outline: none; */
+}
+#root {
+  overflow: hidden;
+}
