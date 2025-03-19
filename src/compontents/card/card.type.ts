@@ -1,5 +1,5 @@
 export interface CardImageType {
-  [key: string]: string | string[] | boolean | number | undefined; // 동적으로 속성 추가 가능
+  [key: string]: string | string[] | boolean | number | undefined | null; // 동적으로 속성 추가 가능
   name?: string; // 동적으로 속성 키와 값을 추가
   img?: string; // 동적으로 속성 키와 값을 추가
   sale?: boolean;
@@ -20,6 +20,7 @@ export interface CardImageType {
   brand_seq: number;
   brand: string;
   object_seq: number;
+  one_more: number | null;
 }
 export interface BrandType {
   [key: string]: string | string[] | boolean | number | undefined; // 동적으로 속성 추가 가능

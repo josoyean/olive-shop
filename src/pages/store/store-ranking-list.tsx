@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
-import { Center } from "../../../public/assets/style";
+import { Center, MainTitle } from "../../../public/assets/style";
 import { GubMenu } from "../../app-layout";
 import { supabase } from "../../supabase";
 import type { CardImageType } from "compontents/card/card.type";
@@ -31,14 +31,14 @@ const StoreRankingList: React.FC = () => {
   }, [handleData]);
   return (
     <div>
-      <MainTitle>
+      <MainLine>
         <Center>
           <div>
             <span>랭킹</span>
             <em>오늘의 랭킹! 요즘 가장 핫한 상품</em>
           </div>
         </Center>
-      </MainTitle>
+      </MainLine>
       <Center>
         <div>
           <CategoryMenu />
@@ -91,33 +91,6 @@ const CommonMenu = styled.div`
     }
   }
 `;
-const MainTitle = styled.div`
-  position: relative;
-  height: 100px;
-  background: url("/public/assets/images/icons/bg_best1_top.png") 50% 0
-    no-repeat;
-  z-index: 2;
-  > div {
-    > div {
-      display: flex;
-      column-gap: 17px;
-      align-items: baseline;
-      padding-top: 30px;
-      em,
-      span {
-        /* color: #fff; */
-      }
-
-      span {
-        font-size: 35px;
-        font-weight: bold;
-      }
-      em {
-        font-weight: 200;
-      }
-    }
-  }
-`;
 
 const Container = styled.div`
   display: grid;
@@ -152,5 +125,20 @@ const Container = styled.div`
   .tags,
   h5 {
     text-align: center;
+  }
+`;
+
+const MainLine = styled(MainTitle)`
+  height: 100px;
+  background: url("/public/assets/images/icons/bg_best1_top.png") 50% 0
+    no-repeat;
+
+  > div {
+    > div {
+      padding-top: 30px;
+      em,
+      span {
+      }
+    }
   }
 `;

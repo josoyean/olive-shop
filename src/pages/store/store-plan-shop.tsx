@@ -2,11 +2,10 @@ import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { supabase } from "../../supabase";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Center } from "../../../public/assets/style";
+import { Center, MainTitle } from "../../../public/assets/style";
 import CategoryMenu from "../../compontents/CategoryMenu";
 import type { PlanShopType } from "compontents/card/card.type";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
-import { ElectricScooterSharp } from "@mui/icons-material";
 import EmptyComponent from "../../compontents/EmptyComponent";
 const StorePlanShopList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,19 +47,19 @@ const StorePlanShopList = () => {
   }, [handleData]);
   return (
     <div>
-      <MainTitle>
+      <MainLine>
         <Center>
           <div>
             <span>기획전</span>
             <em>꼭 갖고 싶은 그 상품들! 다양한 혜택까지!</em>
           </div>
         </Center>
-      </MainTitle>
+      </MainLine>
       <Center>
         <div>
           <CategoryMenu style={{ margin: "-38px 0 0 0" }} />
           <Container $len={objects.length === 0 ? true : false}>
-            <h2>지금 진행 중인 행사예요</h2>
+            {objects.length !== 0 && <h2>지금 진행 중인 행사예요</h2>}
             <div>
               {objects && objects?.length > 0 ? (
                 <>
@@ -180,31 +179,8 @@ const Container = styled.div<{ $len: boolean }>`
     column-gap: 20px;
   }
 `;
-const MainTitle = styled.div`
-  position: relative;
+const MainLine = styled(MainTitle)`
   height: 150px;
   background: url("/public/assets/images/icons/bg_promo_top.png") 50% 0
     no-repeat;
-  z-index: 2;
-  /* margin: ; */
-  > div {
-    > div {
-      display: flex;
-      column-gap: 17px;
-      align-items: baseline;
-      padding-top: 30px;
-      em,
-      span {
-        /* color: #fff; */
-      }
-
-      span {
-        font-size: 35px;
-        font-weight: bold;
-      }
-      em {
-        font-weight: 200;
-      }
-    }
-  }
 `;

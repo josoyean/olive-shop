@@ -9,6 +9,7 @@ const CategoryMenu = ({
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const menuType = searchParams.get("menuType");
+  const tabsType = searchParams.get("tabsType");
   return (
     <CommonMenu style={{ ...style }}>
       <ul>
@@ -16,7 +17,11 @@ const CategoryMenu = ({
           className={menuType === "전체" ? " action" : ""}
           onClick={(event) => {
             event.preventDefault();
-            setSearchParams({ menuType: "전체" });
+            setSearchParams(
+              !tabsType
+                ? { menuType: "전체" }
+                : { menuType: "전체", tabsType: tabsType }
+            );
           }}
         >
           전체
@@ -28,7 +33,11 @@ const CategoryMenu = ({
               className={menu.title.name === menuType ? " action" : ""}
               onClick={(event) => {
                 event.preventDefault();
-                setSearchParams({ menuType: menu.title.name });
+                setSearchParams(
+                  !tabsType
+                    ? { menuType: menu.title.name }
+                    : { menuType: menu.title.name, tabsType: tabsType }
+                );
               }}
             >
               {menu.title.name}

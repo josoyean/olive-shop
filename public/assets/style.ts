@@ -131,3 +131,29 @@ export const ObjectsBox = styled.div`
     margin-top: 40px;
   }
 `;
+export const MainTitle = styled.div`
+  position: relative;
+  z-index: 2;
+
+  > div {
+    > div {
+      display: flex;
+      column-gap: 17px;
+      align-items: baseline;
+      padding-top: 30px;
+      em,
+      span {
+        /* color: #fff; */
+      }
+
+      span {
+        font-size: 40px;
+        font-weight: bold;
+      }
+      em {
+        font-weight: 300;
+        font-size: 17px;
+      }
+    }
+  }
+`;

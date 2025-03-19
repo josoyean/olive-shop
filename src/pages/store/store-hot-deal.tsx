@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Center } from "../../../public/assets/style";
+import { Center, MainTitle } from "../../../public/assets/style";
 import styled from "styled-components";
 import { supabase } from "../../supabase";
 import HotDealCard from "../../compontents/card/HotDealCard";
@@ -41,20 +41,20 @@ const StoreHotDeal = () => {
   const renderer = ({ hours, minutes, seconds }: CountdownRenderProps) => {
     return (
       <span>
-        오늘 할인 {padZero(hours)}:{padZero(minutes)}:{padZero(seconds)}
+        오늘의 특가 {padZero(hours)}:{padZero(minutes)}:{padZero(seconds)}
       </span>
     );
   };
   return (
     <div>
-      <MainTitle>
+      <MainLine>
         <Center>
           <div>
             <span>오늘의 특가</span>
             <em>딱 하루만! 오늘의 특가 찬스</em>
           </div>
         </Center>
-      </MainTitle>
+      </MainLine>
       <ObjectBox>
         <div className="title">
           <h2>오늘의 특가</h2>
@@ -78,7 +78,7 @@ export default StoreHotDeal;
 const ObjectBox = styled.div`
   padding: 30px;
   background-color: #fff;
-  margin: -10px auto 0;
+  margin: -55px auto 0;
   z-index: 99;
   position: relative;
   border-radius: 5px;
@@ -107,29 +107,18 @@ const ObjectBox = styled.div`
     padding: 40px 0;
   }
 `;
-const MainTitle = styled.div`
-  position: relative;
+
+const MainLine = styled(MainTitle)`
   height: 150px;
   background: url("/public/assets/images/icons/bg_sp_visual.png") 50% 0
     no-repeat;
-  z-index: 2;
+
   > div {
     > div {
-      display: flex;
-      column-gap: 17px;
-      align-items: baseline;
-      padding-top: 60px;
+      padding-top: 30px;
       em,
       span {
         color: #fff;
-      }
-
-      span {
-        font-size: 35px;
-        font-weight: bold;
-      }
-      em {
-        font-weight: 200;
       }
     }
   }

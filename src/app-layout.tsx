@@ -68,7 +68,7 @@ const GubNav: NavTyle[] = [
     img: "../assets/images/icons/cosmetics.png",
   },
   {
-    path: "",
+    path: "/store/goods-sale?menuType=전체&tabsType=핫인기세일",
     name: "세일",
     img: "../assets/images/icons/sale.png",
   },

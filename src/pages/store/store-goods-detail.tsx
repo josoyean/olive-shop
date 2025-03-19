@@ -17,7 +17,9 @@ import {
   addProducts,
   clearProducts,
 } from "../../redex/reducers/recentProductsData";
-
+interface Test {
+  [key: string]: number;
+}
 const StoreGoodsDetail = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -61,6 +63,20 @@ const StoreGoodsDetail = () => {
     // autoplay: true,
     autoplaySpeed: 5000,
     arrows: true,
+  };
+
+  const calculatePrice = (
+    buyCount: number,
+    oneMore: number | null | undefined,
+    price: number
+  ) => {
+    if (!oneMore) return buyCount * price;
+
+    if (buyCount % (oneMore + 1) === 0) {
+      // return price * (buyCount - 1);
+      buyCount = buyCount - 1;
+    }
+    return buyCount * price;
   };
   return (
     <Center>
@@ -122,6 +138,9 @@ const StoreGoodsDetail = () => {
               <TagWrapper>
                 {objects?.sale && <TagText className="sale">세일</TagText>}
                 {objects?.coupon && <TagText className="coupon">쿠폰</TagText>}
+                {objects?.one_more && (
+                  <TagText className="oneMore">{objects.one_more}+1</TagText>
+                )}
                 {handlePrice(
                   objects?.sale,
                   objects?.count,
@@ -176,15 +195,24 @@ const StoreGoodsDetail = () => {
                   </button>
                 </div>
               </BuyContainer>
+              {objects?.one_more && (
+                <OneMoreContainer>
+                  <span>
+                    <em>{objects?.one_more}+1</em> 적용되어 구매됩니다
+                  </span>
+                </OneMoreContainer>
+              )}
               <PriceContainer>
                 <span>
-                  {(
+                  {calculatePrice(
+                    buyCount,
+                    objects?.one_more,
                     handlePrice(
                       objects?.sale,
                       objects?.count,
                       objects?.discount_rate
-                    ) * buyCount
-                  ).toLocaleString() || 0}
+                    )
+                  )?.toLocaleString() || 0}
                   원
                 </span>
               </PriceContainer>
@@ -287,7 +315,19 @@ const StoreGoodsDetail = () => {
     </Center>
   );
 };
-
+const OneMoreContainer = styled.div`
+  border: 1px solid ${theme.lineColor.sub};
+  padding: 15px 10px;
+  background-color: #f9f9f9;
+  /* margin-top: 20px; */
+  span {
+    font-weight: 600;
+    font-size: 15px;
+    em {
+      color: ${theme.color.main};
+    }
+  }
+`;
 const SliderContainer = styled.div`
   margin-bottom: 50px;
   border-top: 2px solid #000;
@@ -583,6 +623,9 @@ const TagText = styled.span`
   }
   &.free {
     background-color: #ad85ed;
+  }
+  &.oneMore {
+    background-color: #ff8942;
   }
 `;
 

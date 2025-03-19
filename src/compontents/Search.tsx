@@ -3,7 +3,7 @@ import InputBase from "@mui/material/InputBase";
 import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import { useTheme } from "styled-components";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { theme } from "../../public/assets/styles/theme";
@@ -22,6 +22,7 @@ const Search = ({
   searchValue: string;
   setSearchValue: React.Dispatch<React.SetStateAction<string>>;
 }) => {
+  const componentRef = useRef<HTMLDivElement | null>(null);
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -36,7 +37,23 @@ const Search = ({
     setOpenedSearch(false);
     navigate(`/store/search-main?getSearchValue=${searchValue}`);
   };
-
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        componentRef.current &&
+        !componentRef.current.contains(event.target as Node)
+      ) {
+        // 여기서 원하는 작업을 수행
+        setOpenedSearch(false);
+      }
+    }
+    // 마운트 시 document에 이벤트 리스너 추가
+    document.addEventListener("mousedown", handleClickOutside);
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [componentRef]);
   return (
     <Container>
       <Paper
@@ -61,11 +78,8 @@ const Search = ({
             setSearchValue(event.target.value);
           }}
           value={searchValue}
-          onFocus={(event) => {
+          onFocus={(event: React.FocusEvent<HTMLInputElement>) => {
             setOpenedSearch(true);
-          }}
-          onBlur={(event) => {
-            setOpenedSearch(false);
           }}
         />
         <IconButton type="submit" sx={{ p: "10px" }}>
@@ -73,25 +87,27 @@ const Search = ({
         </IconButton>
       </Paper>
       {openedSearch && (
-        <SearchContainer>
+        <SearchContainer ref={componentRef}>
           <h4>최근 검색어</h4>
           <SearchBox>
             {searchData?.save ? (
               searchData?.searchValue?.length > 0 ? (
                 <SearchLists>
                   {searchData?.searchValue?.map((item, index) => (
-                    <div>
+                    <div key={index}>
                       <span
-                        key={index}
-                        onClick={() =>
-                          navigate(`/store/search-main?getSearchValue=${item}`)
-                        }
+                        onClick={() => {
+                          navigate(`/store/search-main?getSearchValue=${item}`);
+                          setSearchValue(item);
+                          setOpenedSearch(false);
+                        }}
                       >
                         {item}
                       </span>
                       <em
                         onClick={(event) => {
                           event.preventDefault();
+                          event.stopPropagation(); // prevent
                           if (!searchData.save) return;
                           dispatch(
                             deleteSearchText({
@@ -99,6 +115,7 @@ const Search = ({
                               searchValue: item,
                             })
                           );
+                          setOpenedSearch(false);
                         }}
                       >
                         X
@@ -186,7 +203,7 @@ const SearchContainer = styled.div`
 const SearchBox = styled.div`
   height: 200px;
   > span {
-    color: #888;
+    cursor: pointer;
     font-size: 14px;
     display: block;
     margin-top: 20px;
@@ -198,6 +215,10 @@ const SearchLists = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 2px;
+    span {
+      cursor: pointer;
+    }
   }
   em {
     cursor: pointer;

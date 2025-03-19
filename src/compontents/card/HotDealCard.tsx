@@ -71,6 +71,9 @@ const HotDealCard = ({ data }: { data: HotDealCardType }) => {
         <Tags>
           {data?.objects?.sale && <span className="sale">세일</span>}
           {data?.objects?.coupon && <span className="coupon">쿠폰</span>}
+          {data?.objects?.one_more && (
+            <span className="oneMore">{data?.objects?.one_more}+1</span>
+          )}
           {handlePrice(
             data.objects?.sale,
             data.objects?.count,
@@ -101,6 +104,9 @@ const Tags = styled.div`
     }
     &.free {
       background-color: #ad85ed;
+    }
+    &.oneMore {
+      background-color: #ff8942;
     }
   }
 `;

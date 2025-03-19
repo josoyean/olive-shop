@@ -5,25 +5,18 @@ import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import { GubMenu } from "../../app-layout";
 import { supabase } from "../../supabase";
-import { CardImageType } from "compontents/card/card.type";
+import {
+  CardImageType,
+  filteredSearch,
+} from "../../compontents/card/card.type";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
+import { handleFilter } from "../../bin/common";
 interface menuType {
   name: string;
   path?: string;
   type?: string;
 }
-interface SearchType {
-  menu: string;
-  item: string;
-  title: string;
-}
 
-const filteredSearch: menuType[] = [
-  { name: "인기순", type: "popular" },
-  { name: "낮은 가격순", type: "lowPrice" },
-  { name: "높은 가격순", type: "highPrice" },
-  { name: "할인율순", type: "sale" },
-];
 const StoreList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [menu, setMenu] = useState<menuType[]>([]);
@@ -37,28 +30,23 @@ const StoreList = () => {
   const searchTitle = searchParams.get("title") || "";
 
   const handleData = async (title: string | null) => {
+    let query = supabase.from("objects").select("*");
     if (!title) {
       // 대분류까지
-      const { data: objectsData, error: cartError } = await supabase
-        .from("objects")
-        .select("*")
-        .eq("objectTypeMain", searchItem);
-
-      setObjects(!objectsData ? [] : objectsData);
+      query = query.eq("objectTypeMain", searchItem);
     } else {
       // 소분류까지 - 전부다
-      const { data: objectsData, error: cartError } = await supabase
-        .from("objects")
-        .select("*")
+      query = query
         .eq("objectTypeMain", searchItem)
         .eq("objectTypeSub", searchTitle);
-      setObjects(!objectsData ? [] : objectsData);
     }
+    const { data: objectsData, error } = await query;
+    setObjects(objectsData ?? []);
+    const filteredData = handleFilter("popular", objectsData ?? []);
+    setObjectsList(filteredData);
   };
   useEffect(() => {
     handleData(searchTitle);
-    handleFilter("popular");
-
     if (searchTitle !== "") return;
     const searchMenuFilter = GubMenu.filter(
       (menu, index) => menu.title.name === searchMenu
@@ -68,45 +56,6 @@ const StoreList = () => {
     )[0].sub;
     setMenu(searchItemFilter);
   }, [searchTitle, searchItem]);
-
-  const handleFilter = useCallback(
-    (type: string = "popular") => {
-      if (type === "lowPrice") {
-        const items: CardImageType[] = (objects ?? [])?.sort(
-          (a, b) =>
-            a.count -
-            a.count * 0.01 * (a.discount_rate ?? 0) -
-            (b.count - b.count * 0.01 * (b.discount_rate ?? 0))
-        );
-        setObjectsList(items);
-      } else if (type === "highPrice") {
-        const items: CardImageType[] = (objects ?? [])?.sort(
-          (a, b) =>
-            b.count -
-            b.count * 0.01 * (b.discount_rate ?? 0) -
-            (a.count - a.count * 0.01 * (a.discount_rate ?? 0))
-        );
-        setObjectsList(items);
-      } else if (type === "sale") {
-        const items: CardImageType[] = (objects ?? [])?.sort(
-          (a, b) => (b?.discount_rate ?? 0) - (a?.discount_rate ?? 0)
-        );
-        setObjectsList(items);
-      } else {
-        const items: CardImageType[] = (objects ?? [])?.sort(
-          (a, b) => (b?.view_count ?? 0) - (a?.view_count ?? 0)
-        );
-        setObjectsList(items);
-      }
-
-      setSelected(type);
-    },
-    [objects]
-  );
-
-  useEffect(() => {
-    handleFilter(selected);
-  }, [objects]);
 
   return (
     <Center>
@@ -151,7 +100,12 @@ const StoreList = () => {
                 }
                 onClick={(event) => {
                   event.preventDefault();
-                  handleFilter(item?.type);
+                  const filteredData = handleFilter(
+                    item?.type ?? "popular",
+                    objects ?? []
+                  );
+                  setObjectsList(filteredData);
+                  setSelected(item.type);
                 }}
               >
                 {item.name}

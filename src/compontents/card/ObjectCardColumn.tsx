@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { theme } from "../../../public/assets/styles/theme";
 import BestIcon from "../BestIcon";
@@ -68,6 +68,9 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
       <TagWrapper className="tags">
         {data?.sale && <TagText className="sale">세일</TagText>}
         {data?.coupon && <TagText className="coupon">쿠폰</TagText>}
+        {data?.one_more && (
+          <TagText className="oneMore">{data.one_more}+1</TagText>
+        )}
         {handlePrice(data?.sale, data?.count, data?.discount_rate) > 20000 && (
           <TagText className="free">무배</TagText>
         )}
@@ -167,7 +170,7 @@ const TagWrapper = styled.div`
 
 const TagText = styled.span`
   color: #fff;
-  padding: 2px 5px;
+  padding: 2px 6px;
   border-radius: 10px;
   font-size: ${theme.fontSize.small};
   margin-right: 2px;
@@ -179,5 +182,8 @@ const TagText = styled.span`
   }
   &.free {
     background-color: #ad85ed;
+  }
+  &.oneMore {
+    background-color: #ff8942;
   }
 `;

@@ -1,21 +1,16 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Center } from "../../../public/assets/style";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../../supabase";
-import { CardImageType, BrandType } from "compontents/card/card.type";
+import {
+  CardImageType,
+  BrandType,
+  filteredSearch,
+} from "../../compontents/card/card.type";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
-interface menuType {
-  name: string;
-  path?: string;
-  type?: string;
-}
-const filteredSearch: menuType[] = [
-  { name: "인기순", type: "popular" },
-  { name: "낮은 가격순", type: "lowPrice" },
-  { name: "높은 가격순", type: "highPrice" },
-  { name: "할인율순", type: "sale" },
-];
+import { handleFilter } from "../../bin/common";
+
 const SearchMain = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -28,7 +23,7 @@ const SearchMain = () => {
   const [objectsList, setObjectsList] = useState<CardImageType[]>([]);
   const [brandInfo, setBrandInfo] = useState<BrandType>({});
   const handleData = async (value: string) => {
-    const { data: brandData, error: cartError } = await supabase
+    const { data: brandData } = await supabase
       .from("brands")
       .select("*")
       .eq("name", value)
@@ -38,62 +33,30 @@ const SearchMain = () => {
     if (brandData) {
       //브랜드 종류 있을때
       setBrandInfo(brandData);
-      const { data: nameData, error: nameError } = await supabase
+      const { data: nameData } = await supabase
         .from("objects")
         .select("*")
         .eq("brand_seq", seq);
       setObjects(nameData ?? []);
       setBrandYN(true);
+      const filterData = handleFilter("popular", nameData ?? []);
+      setObjectsList(filterData);
     } else {
       // 브랜드 종류 없을때
-      const { data: nameData, error: nameError } = await supabase
+      const { data: nameData } = await supabase
         .from("objects")
         .select("*")
         .ilike("name", `%${value}%`);
       setBrandYN(false);
+      const filterData = handleFilter("popular", nameData ?? []);
+      setObjectsList(filterData);
       setObjects(nameData ?? []);
     }
   };
   useEffect(() => {
     handleData(searchValue ?? "");
   }, [searchValue]);
-  useEffect(() => {
-    handleFilter("popular");
-  }, [objects]);
-  const handleFilter = useCallback(
-    (type: string = "popular") => {
-      if (type === "lowPrice") {
-        const items: CardImageType[] = (objects ?? [])?.sort(
-          (a, b) =>
-            a.count -
-            a.count * 0.01 * (a.discount_rate ?? 0) -
-            (b.count - b.count * 0.01 * (b.discount_rate ?? 0))
-        );
-        setObjectsList(items);
-      } else if (type === "highPrice") {
-        const items: CardImageType[] = (objects ?? [])?.sort(
-          (a, b) =>
-            b.count -
-            b.count * 0.01 * (b.discount_rate ?? 0) -
-            (a.count - a.count * 0.01 * (a.discount_rate ?? 0))
-        );
-        setObjectsList(items);
-      } else if (type === "sale") {
-        const items: CardImageType[] = (objects ?? [])?.sort(
-          (a, b) => (b?.discount_rate ?? 0) - (a?.discount_rate ?? 0)
-        );
-        setObjectsList(items);
-      } else {
-        const items: CardImageType[] = (objects ?? [])?.sort(
-          (a, b) => (b?.view_count ?? 0) - (a?.view_count ?? 0)
-        );
-        setObjectsList(items);
-      }
 
-      setSelected(type);
-    },
-    [objects]
-  );
   return (
     <Center>
       <Container>
@@ -142,7 +105,12 @@ const SearchMain = () => {
                       }
                       onClick={(event) => {
                         event.preventDefault();
-                        handleFilter(item?.type);
+                        const filterData = handleFilter(
+                          item?.type ?? "popular",
+                          objects ?? []
+                        );
+                        setObjectsList(filterData);
+                        setSelected(item?.type);
                       }}
                     >
                       {item.name}
@@ -246,8 +214,6 @@ const ObjectsBox = styled.div`
       display: flex;
       column-gap: 15px;
       align-items: center;
-
-      /* justify-content: flex-end; */
       img {
         cursor: pointer;
       }
