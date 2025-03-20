@@ -44,7 +44,6 @@ const StoreGoodsSale = () => {
 
   useEffect(() => {
     handleLoadData();
-    window.scrollTo(0, 0);
   }, [handleLoadData]);
 
   return (

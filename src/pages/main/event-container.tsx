@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { Center } from "../../../public/assets/style";
 import type { EventImagesType } from "../main";
+import { useNavigate } from "react-router-dom";
 
 interface EventTypes {
   title: string;
@@ -9,12 +10,21 @@ interface EventTypes {
 }
 const EventContainer: React.FC<EventTypes> = (props) => {
   const { title, images } = props;
+  const navigate = useNavigate();
   return (
     <Container>
       <h2>{title}</h2>
       <ImagesContainer grid={images?.length}>
         {images?.map((image, index) => (
-          <div key={index}>
+          <div
+            key={index}
+            onClick={(event) => {
+              event.preventDefault();
+              navigate(
+                `/store/brand-detail?getBrand=${image?.objects?.brand_seq}`
+              );
+            }}
+          >
             <img src={image.img} alt="이벤트 사진" />
             <h4 dangerouslySetInnerHTML={{ __html: image.mainText ?? "" }}></h4>
             <h6>{image.subText}</h6>

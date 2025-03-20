@@ -4,6 +4,8 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { supabase } from "../../supabase";
+import type { CardImageType } from "compontents/card/card.type";
+import { useNavigate } from "react-router-dom";
 
 interface BannerType {
   object_seq: number;
@@ -11,9 +13,11 @@ interface BannerType {
   item: string;
   img: string;
   id: number;
+  objects: CardImageType;
 }
 
 const BannerContainer: React.FC = () => {
+  const navigate = useNavigate();
   const [slideIndex, setSlideIndex] = useState<number>(0);
   const [updateCount, setUpdateCount] = useState<number>(0);
   const [banner, setBanner] = useState<BannerType[]>();
@@ -31,7 +35,9 @@ const BannerContainer: React.FC = () => {
 
   useEffect(() => {
     const bannersData = async () => {
-      const { data, error } = await supabase.from("banners").select("*");
+      const { data, error } = await supabase
+        .from("banners")
+        .select(`*,objects:object_seq(*)`);
       if (!data) return;
       setBanner(data);
     };
@@ -42,7 +48,15 @@ const BannerContainer: React.FC = () => {
       <BannerWrapper>
         <Slider className="slider-container" {...settings}>
           {banner?.map((item, index) => (
-            <SliderBox key={index}>
+            <SliderBox
+              key={index}
+              onClick={(event) => {
+                event.preventDefault();
+                navigate(
+                  `/store/brand-detail?getBrand=${item?.objects?.brand_seq}`
+                );
+              }}
+            >
               <img src={item.img} alt={item.item} />
             </SliderBox>
           ))}

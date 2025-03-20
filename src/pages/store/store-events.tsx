@@ -29,7 +29,6 @@ const StoreEvents = () => {
 
   useEffect(() => {
     handleLoadData();
-    window.scrollTo(0, 0);
   }, [handleLoadData]);
   return (
     <div>
@@ -106,7 +105,6 @@ const StoreEvents = () => {
                       return;
                     }
                     navigate("/store/event-detail", { state: { ...item } });
-                    window.scrollTo(0, 0);
                   }}
                 >
                   <img className="event-img" src={item.img} alt="event-img" />

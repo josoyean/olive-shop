@@ -14,6 +14,7 @@ export interface EventImagesType {
   created_at: string;
   object_seq: number;
   id: number;
+  objects?: CardImageType;
 }
 
 const MainPage: React.FC = () => {
@@ -25,7 +26,9 @@ const MainPage: React.FC = () => {
   //CardImageType
   useEffect(() => {
     const weeklyData = async () => {
-      const { data, error } = await supabase.from("weeklyItems").select("*");
+      const { data, error } = await supabase
+        .from("weeklyItems")
+        .select(`*,objects:object_seq(*)`);
 
       if (error || !data) {
         setWeeklyItems([]);
@@ -35,7 +38,9 @@ const MainPage: React.FC = () => {
     };
 
     const newData = async () => {
-      const { data, error } = await supabase.from("newItems").select("*");
+      const { data, error } = await supabase
+        .from("newItems")
+        .select(`*,objects:object_seq(*)`);
       if (error || !data) {
         setNewItems([]);
         return;

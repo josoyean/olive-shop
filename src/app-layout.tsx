@@ -327,7 +327,6 @@ const AppLayout: React.FC = () => {
   const userCartsCount = useSelector((state: RootState) => state?.cartCount);
   const [menuBar, setMenuBar] = useState<boolean>(false);
   const componentRef = useRef<HTMLElement>(null);
-  const [userCartCount, setUserCartCount] = useState<number>(0);
   const [searchValue, setSearchValue] = useState<string>("");
   useEffect(() => {
     function handleClickOutside(event: any) {
@@ -339,10 +338,8 @@ const AppLayout: React.FC = () => {
         setMenuBar(false);
       }
     }
-
     // 마운트 시 document에 이벤트 리스너 추가
     document.addEventListener("mousedown", handleClickOutside);
-
     // 컴포넌트 언마운트 시 이벤트 리스너 제거
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -351,12 +348,9 @@ const AppLayout: React.FC = () => {
 
   useEffect(() => {
     if (!menuBar) return;
-
     const timer = setTimeout(() => {
       setMenuBar(false);
     }, 10000);
-
-    // cleanup: menuBar가 false가 되거나 컴포넌트가 unmount될 때 타이머 클리어
     return () => clearTimeout(timer);
   }, [menuBar]);
 
@@ -378,6 +372,9 @@ const AppLayout: React.FC = () => {
     stateUser();
   }, [navigate]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   const handleSignedOut = async () => {
     await signOut(auth)
       .then(() => {

@@ -43,7 +43,6 @@ const StorePlanShopList = () => {
   }, [menuType]);
   useEffect(() => {
     handleData();
-    window.scrollTo(0, 0);
   }, [handleData]);
   return (
     <div>

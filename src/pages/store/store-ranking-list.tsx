@@ -27,7 +27,6 @@ const StoreRankingList: React.FC = () => {
 
   useEffect(() => {
     handleData();
-    window.scrollTo(0, 0);
   }, [handleData]);
   return (
     <div>

@@ -18,7 +18,6 @@ const HotDealCard = ({ data }: { data: HotDealCardType }) => {
       onClick={(event) => {
         event.preventDefault();
         navigate(`/store/goods-detail?getGoods=${data?.objects?.object_seq}`);
-        window.scrollTo(0, 0);
       }}
     >
       <div className="img_box">
