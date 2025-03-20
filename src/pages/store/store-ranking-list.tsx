@@ -55,7 +55,7 @@ const StoreRankingList: React.FC = () => {
               <EmptyComponent
                 mainText="선택 결과가 없어요"
                 subText="랭킹 타입을 다시 선택해주세요"
-              ></EmptyComponent>
+              />
             )}
           </Container>
         </div>

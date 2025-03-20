@@ -67,3 +67,19 @@ export interface PlanShopType {
   sub_text: string;
   objects: CardImageType[];
 }
+
+export interface EventType {
+  id: number;
+  event_seq: number | undefined;
+  created_at: string;
+  buy_member: boolean;
+  on_line: boolean;
+  off_line: boolean;
+  img: string;
+  main_title: string;
+  sub_title: string;
+  start_date: string;
+  end_date: string;
+  detail_text: string;
+  detail_img: string;
+}

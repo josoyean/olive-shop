@@ -73,7 +73,7 @@ const GubNav: NavTyle[] = [
     img: "../assets/images/icons/sale.png",
   },
   {
-    path: "",
+    path: "/store/events?tabsType=모든회원",
     name: "이벤트",
     img: "../assets/images/icons/event.png",
   },

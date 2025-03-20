@@ -41,6 +41,7 @@ const StoreGoodsSale = () => {
     setObjects(data ?? []);
     setObjectsList(filteredData);
   }, [tabsType, menuType]);
+
   useEffect(() => {
     handleLoadData();
     window.scrollTo(0, 0);

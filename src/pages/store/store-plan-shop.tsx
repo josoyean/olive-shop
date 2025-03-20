@@ -99,7 +99,7 @@ const StorePlanShopList = () => {
                 <EmptyComponent
                   mainText="선택 결과가 없어요"
                   subText="기획전 타입을 다시 선택해주세요"
-                ></EmptyComponent>
+                />
               )}
             </div>
           </Container>

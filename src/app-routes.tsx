@@ -15,6 +15,8 @@ import StoreHotDeal from "./pages/store/store-hot-deal";
 import StoreRankingList from "./pages/store/store-ranking-list";
 import StorePlanShopList from "./pages/store/store-plan-shop";
 import StoreGoodsSale from "./pages/store/store-goods-sale";
+import StoreEvents from "./pages/store/store-events";
+import StoreEventDetail from "./pages/store/store-event-detail";
 
 const routes: RouteObject[] = [
   {
@@ -72,6 +74,14 @@ const routes: RouteObject[] = [
       {
         path: "store/goods-sale",
         element: <StoreGoodsSale />,
+      },
+      {
+        path: "store/events",
+        element: <StoreEvents />,
+      },
+      {
+        path: "store/event-detail",
+        element: <StoreEventDetail />,
       },
     ],
   },
