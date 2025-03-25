@@ -47,8 +47,12 @@ const memberNav: NavTyle[] = [
     path: "/login",
   },
   {
-    name: "장바구니",
+    name: "주문배송",
     path: "",
+  },
+  {
+    name: "장바구니",
+    path: "/store/user-cart?t_header_type=1",
   },
 ];
 const GubNav: NavTyle[] = [

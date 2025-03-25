@@ -9,6 +9,7 @@ import { handlePrice } from "../../bin/common";
 const ObjectCardRow: React.FC<CardProps> = (props) => {
   const { size, imgSize, data } = props;
   const navigate = useNavigate();
+
   return (
     <CardWapper
       $size={size}
@@ -29,13 +30,14 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
 
         <div>
           <Count>
-            {data.sale && <span>{(data.count ?? 0).toLocaleString()}원</span>}
+            {data?.saleItem !== null && (
+              <span>{(data.count ?? 0).toLocaleString()}원</span>
+            )}
             <em>
-              {data?.option && "~"}
               {handlePrice(
-                data?.sale,
+                data?.saleItem !== null ? true : false,
                 data?.count,
-                data?.discount_rate
+                data?.saleItem?.discount_rate
               ).toLocaleString()}
               원{data?.option && "~"}
             </em>
@@ -47,8 +49,11 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
           {data?.one_more && (
             <TagText className="oneMore">{data.one_more}+1</TagText>
           )}
-          {handlePrice(data?.sale, data?.count, data?.discount_rate) >
-            20000 && <TagText className="free">무배</TagText>}
+          {handlePrice(
+            data?.saleItem !== null ? true : false,
+            data?.count,
+            data?.saleItem?.discount_rate
+          ) > 20000 && <TagText className="free">무배</TagText>}
         </TagWrapper>
         {data.best && <BestIcon />}
       </div>

@@ -9,9 +9,13 @@ const cartState = createSlice({
     modify: (state: number, action: PayloadAction<number>) => {
       return action.payload;
     },
+    deleteCart: (state: number, action: PayloadAction<number>) => {
+      state = state - action.payload;
+      return state;
+    },
   },
 });
 
 // 액션 생성자와 리듀서를 내보냄
-export const { modify } = cartState.actions;
+export const { modify, deleteCart } = cartState.actions;
 export default cartState.reducer;

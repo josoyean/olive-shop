@@ -34,8 +34,9 @@ const StorePlanShopList = () => {
       objects: objectsData?.filter((obj) => obj.brand_seq === brand_seq),
     }));
 
-    const groupedFilter = grouped.some((item) => item.objects.length < 2);
-    if (groupedFilter) {
+    console.log(grouped);
+    const groupedFilter = grouped.every((item) => item.objects.length >= 2);
+    if (!groupedFilter) {
       setObjects([]);
       return;
     }

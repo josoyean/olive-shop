@@ -9,7 +9,7 @@ import type { CardImageType } from "compontents/card/card.type";
 import type { RootState } from "redex/store";
 import { addToCart } from "../../pages/carts/addToCart";
 import Slider from "react-slick";
-import { handleCartCount, handlePrice } from "../../bin/common";
+import { calculatePrice, handleCartCount, handlePrice } from "../../bin/common";
 import { useSelector, useDispatch } from "react-redux";
 import { modify } from "../../redex/reducers/userCartCount";
 import ObjectCardRow from "../../compontents/card/ObjectCardRow";
@@ -65,19 +65,18 @@ const StoreGoodsDetail = () => {
     arrows: true,
   };
 
-  const calculatePrice = (
-    buyCount: number,
-    oneMore: number | null | undefined,
-    price: number
-  ) => {
-    if (!oneMore) return buyCount * price;
+  // const calculatePrice = (
+  //   buyCount: number,
+  //   oneMore: number | null | undefined,
+  //   price: number
+  // ) => {
+  //   if (!oneMore) return buyCount * price;
 
-    if (buyCount % (oneMore + 1) === 0) {
-      // return price * (buyCount - 1);
-      buyCount = buyCount - 1;
-    }
-    return buyCount * price;
-  };
+  //   if (buyCount % (oneMore + 1) === 0) {
+  //     buyCount = buyCount - 1;
+  //   }
+  //   return buyCount * price;
+  // };
   return (
     <Center>
       <div>
@@ -240,7 +239,6 @@ const StoreGoodsDetail = () => {
                           navigate("/login");
                           return;
                         } else {
-                          alert("장바구니에 추가되었습니다");
                           if (!objects) return;
                           const add = addToCart({
                             dataInfo: objects,

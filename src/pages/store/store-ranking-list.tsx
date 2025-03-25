@@ -15,11 +15,16 @@ const StoreRankingList: React.FC = () => {
   const menuType = searchParams.get("menuType");
   const [selectedMenu, setSelectedMenu] = useState<string>("전체");
   const [objects, setObjects] = useState<CardImageType[]>([]);
+
+  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const handleData = useCallback(async () => {
-    let query = supabase.from("objects").select("*");
+    let query = supabase.from("objects").select("*,saleItem(*)");
     if (menuType !== "전체") {
       query = query.eq("objectTypeMain", menuType);
     }
+    query = query
+      .filter("saleItem.start_sale_date", "lte", today)
+      .filter("saleItem.end_sale_date", "gte", today);
     const { data, error } = await query;
     const filteredData = handleFilter("popular", data ?? []);
     setObjects(filteredData ?? []);

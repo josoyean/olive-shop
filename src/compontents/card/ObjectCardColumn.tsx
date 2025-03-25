@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { theme } from "../../../public/assets/styles/theme";
 import BestIcon from "../BestIcon";
@@ -15,6 +15,7 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
   const navigate = useNavigate();
   const userData = useSelector((state: RootState) => state?.user.token);
   const dispatch = useDispatch();
+
   return (
     <CardWapper
       $size={size}
@@ -32,12 +33,14 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
 
       <div className="text-box">
         <Count>
-          {data?.sale && <span>{(data?.count ?? 0).toLocaleString()}원</span>}
+          {data?.saleItem !== null && (
+            <span>{(data?.count ?? 0).toLocaleString()}원</span>
+          )}
           <em>
             {handlePrice(
-              data?.sale,
+              data?.saleItem !== null ? true : false,
               data?.count,
-              data?.discount_rate
+              data?.saleItem?.discount_rate
             ).toLocaleString()}
             원{data?.option && "~"}
           </em>
@@ -54,7 +57,7 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
               navigate("/login");
               return;
             } else {
-              alert("장바구니에 추가되었습니다");
+              delete data.saleItem;
               const add = addToCart({ dataInfo: data, addCount: 1 });
               if (await add) {
                 const cartCount = await handleCartCount(userData);
@@ -65,14 +68,16 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
         />
       </div>
       <TagWrapper className="tags">
-        {data?.sale && <TagText className="sale">세일</TagText>}
+        {data?.saleItem !== null && <TagText className="sale">세일</TagText>}
         {data?.coupon && <TagText className="coupon">쿠폰</TagText>}
         {data?.one_more && (
           <TagText className="oneMore">{data.one_more}+1</TagText>
         )}
-        {handlePrice(data?.sale, data?.count, data?.discount_rate) > 20000 && (
-          <TagText className="free">무배</TagText>
-        )}
+        {handlePrice(
+          data?.saleItem !== null ? true : false,
+          data?.count,
+          data?.saleItem?.discount_rate
+        ) > 20000 && <TagText className="free">무배</TagText>}
       </TagWrapper>
       {data?.best && <BestIcon />}
     </CardWapper>

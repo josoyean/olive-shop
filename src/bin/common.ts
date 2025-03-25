@@ -104,3 +104,18 @@ export const handlePrice = (
     return Math.round(count);
   }
 };
+
+//  행사 이벤트 적용
+export const calculatePrice = (
+  buyCount: number,
+  oneMore: number | null | undefined,
+  price: number
+) => {
+  if (!oneMore) return buyCount * price;
+
+  if (oneMore === 1) {
+    return ((buyCount % 2 === 0 ? buyCount : buyCount + 1) / 2) * price;
+  } else if (oneMore === 2) {
+    return Math.round((buyCount - Math.floor(buyCount / 3)) * price);
+  }
+};

@@ -20,6 +20,7 @@ const BannerContainer: React.FC = () => {
   const navigate = useNavigate();
   const [slideIndex, setSlideIndex] = useState<number>(0);
   const [updateCount, setUpdateCount] = useState<number>(0);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const [banner, setBanner] = useState<BannerType[]>();
   const settings = {
     dots: true,
@@ -29,8 +30,14 @@ const BannerContainer: React.FC = () => {
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 10000,
-    afterChange: () => setUpdateCount(updateCount + 1),
-    beforeChange: (current, next) => setSlideIndex(next),
+    afterChange: () => {
+      setUpdateCount(updateCount + 1);
+      setIsDragging(false);
+    },
+    beforeChange: (current, next: number) => {
+      setSlideIndex(next);
+      setIsDragging(true);
+    },
   };
 
   useEffect(() => {
@@ -38,11 +45,19 @@ const BannerContainer: React.FC = () => {
       const { data, error } = await supabase
         .from("banners")
         .select(`*,objects:object_seq(*)`);
-      if (!data) return;
-      setBanner(data);
+      setBanner(data ?? []);
     };
     bannersData();
   }, []);
+
+  const handleClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    seq: number
+  ) => {
+    if (isDragging) return; // 드래그 중이면 클릭 이벤트 무시
+
+    navigate(`/store/brand-detail?getBrand=${seq}`);
+  };
   return (
     <div>
       <BannerWrapper>
@@ -52,9 +67,7 @@ const BannerContainer: React.FC = () => {
               key={index}
               onClick={(event) => {
                 event.preventDefault();
-                navigate(
-                  `/store/brand-detail?getBrand=${item?.objects?.brand_seq}`
-                );
+                handleClick(event, item?.objects?.brand_seq);
               }}
             >
               <img src={item.img} alt={item.item} />
@@ -77,7 +90,7 @@ const BannerWrapper = styled.div`
   max-width: 1920px;
   margin: 0 auto;
   position: relative;
-
+  z-index: 999;
   .slick-dots {
     bottom: 10px;
 

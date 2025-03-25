@@ -67,7 +67,6 @@ const Login = () => {
 
       if (!idSnapshot.empty) {
         const email = idSnapshot.docs[0].data().email;
-
         handleSignin(email, data);
       }
     } catch (error) {
@@ -91,7 +90,7 @@ const Login = () => {
   }, []);
   return (
     <Center>
-      <Container>
+      <Container style={{ height: "calc(100vh - 311px)", minHeight: "515px" }}>
         <h1>로그인</h1>
         <FormControl onSubmit={handleSubmit(onSubmit, onError)}>
           <InputWrapper className="input-wrapper">
@@ -159,6 +158,7 @@ const Login = () => {
   );
 };
 export default Login;
+// height: calc(100vh - 308px);
 const LabelWrapper = styled.div`
   display: flex;
   width: 400px;

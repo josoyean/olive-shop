@@ -1,5 +1,12 @@
 export interface CardImageType {
-  [key: string]: string | string[] | boolean | number | undefined | null; // 동적으로 속성 추가 가능
+  [key: string]:
+    | string
+    | string[]
+    | boolean
+    | number
+    | undefined
+    | null
+    | object; // 동적으로 속성 추가 가능
   name?: string; // 동적으로 속성 키와 값을 추가
   img?: string; // 동적으로 속성 키와 값을 추가
   sale?: boolean;
@@ -20,7 +27,9 @@ export interface CardImageType {
   brand_seq: number;
   brand: string;
   object_seq: number;
+  object_count?: number;
   one_more: number | null;
+  saleItem?: SaleType | undefined;
 }
 export interface BrandType {
   [key: string]: string | string[] | boolean | number | undefined; // 동적으로 속성 추가 가능
@@ -54,9 +63,18 @@ export const filteredSearch: menuType[] = [
 ];
 
 export interface HotDealCardType {
-  object_seq: number | undefined;
-  today_sale: boolean | undefined;
-  objects: CardImageType;
+  object_seq?: number | undefined;
+  today_sale?: boolean | undefined;
+  objects?: CardImageType;
+  start_sale_date?: string;
+  end_sale_date?: string;
+  created_at?: string;
+  today_sale_date?: string;
+  count?: number;
+  discount_rate?: number;
+  id?: number;
+  object_count?: number | undefined;
+  one_more: number | null;
 }
 
 export interface PlanShopType {
@@ -82,4 +100,50 @@ export interface EventType {
   end_date: string;
   detail_text: string;
   detail_img: string;
+}
+
+export interface SaleType {
+  id: number;
+  created_at: string | undefined;
+  object_seq: number | undefined;
+  discount_rate: number | undefined;
+  count: number | undefined;
+  start_sale_date: string | undefined;
+  end_sale_date: string | undefined;
+  one_more: number | null;
+  today_sale_date: string | undefined;
+}
+
+export interface CartType {
+  [key: string]:
+    | string
+    | string[]
+    | boolean
+    | number
+    | undefined
+    | null
+    | object; // 동적으로 속성 추가 가능
+  name?: string; // 동적으로 속성 키와 값을 추가
+  img?: string; // 동적으로 속성 키와 값을 추가
+  sale?: boolean;
+  discount_rate?: number | undefined;
+  count?: number | undefined;
+  best?: boolean;
+  attention?: boolean;
+  option?: boolean;
+  recommend?: boolean;
+  coupon?: boolean;
+  created_at?: string;
+  view_count?: number | undefined;
+  soldOut?: boolean;
+  subImg?: string[];
+  detailImg?: string;
+  objectTypeMain?: string;
+  objectTypeSub?: string;
+  brand_seq: number;
+  brand: string;
+  object_seq: number;
+  object_count?: number;
+  one_more: number | null;
+  objects?: CardImageType | undefined | null;
 }

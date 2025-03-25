@@ -23,21 +23,23 @@ const StoreGoodsSale = () => {
   const [objects, setObjects] = useState<CardImageType[]>([]);
   const [objectsList, setObjectsList] = useState<CardImageType[]>([]);
   const handleLoadData = useCallback(async () => {
-    let query = supabase.from("objects").select("*");
-    if (tabsType === "핫인기세일") {
-      // 핫인기세일
-      query = query.eq("sale", "True");
-    } else {
+    let query = supabase.from("objects").select("*,saleItem(*)");
+    if (tabsType !== "핫인기세일") {
       // 증정하나더
       query = query.in("one_more", [1, 2]);
-      // query = query.not("one_more", "is", null);
     }
 
     if (menuType !== "전체") {
       query = query.eq("objectTypeMain", menuType);
     }
     const { data } = await query;
-    const filteredData = handleFilter("popular", data ?? []);
+
+    const filteredData = handleFilter(
+      "popular",
+      tabsType === "핫인기세일"
+        ? data?.filter((item) => item.saleItem) ?? []
+        : data ?? []
+    );
     setObjects(data ?? []);
     setObjectsList(filteredData);
   }, [tabsType, menuType]);

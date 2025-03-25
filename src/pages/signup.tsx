@@ -133,6 +133,8 @@ const SignUp = () => {
         id: data.id,
         email: data.email,
         userId: user.uid,
+        addressMain: "",
+        addressSub: "",
       });
       alert("회원가입이 완료되었습니다.");
       navigate("/login");

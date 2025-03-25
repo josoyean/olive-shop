@@ -14,19 +14,18 @@ import Countdown, { CountdownRenderProps } from "react-countdown";
 const StoreHotDeal = () => {
   const [objects, setObjects] = useState<HotDealCardType[]>([]);
   const todays = moment().format("YYYY-MM-DD");
+  const today = new Date().toISOString().split("T")[0];
   const handleData = async () => {
     const { data, error } = await supabase
-      .from("sale")
+      .from("saleItem")
       .select(
         `
-      object_seq,
-      today_sale,
+     *,
       objects:object_seq (*)
     `
       )
-      .eq("today_sale", "True")
       .eq("today_sale_date", todays);
-
+    console.log(data);
     if (!data) return;
     setObjects(data ?? []);
     if (error) {
