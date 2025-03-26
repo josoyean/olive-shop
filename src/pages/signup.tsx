@@ -39,6 +39,7 @@ interface DataType {
   phoneNumber: string;
   code: string;
   email: string;
+  postNumber: string;
 }
 
 const SignUp = () => {
@@ -135,6 +136,7 @@ const SignUp = () => {
         userId: user.uid,
         addressMain: "",
         addressSub: "",
+        postNumber: "",
       });
       alert("회원가입이 완료되었습니다.");
       navigate("/login");

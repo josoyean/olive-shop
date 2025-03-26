@@ -23,3 +23,8 @@ button {
 #root {
   overflow: hidden;
 }
+
+table {
+  border-spacing: 0;
+  border: 0;
+}

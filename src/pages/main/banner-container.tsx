@@ -139,4 +139,5 @@ const ButtonWrapper = styled.div`
   left: calc((100% - 1020px) / 2 + 300px);
   color: ${({ theme }) => theme.fontColor.sub};
   font-size: ${({ theme }) => theme.fontSize.large};
+  font-weight: bold;
 `;

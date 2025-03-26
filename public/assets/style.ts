@@ -157,3 +157,14 @@ export const MainTitle = styled.div`
     }
   }
 `;
+
+export const GreenBtn = styled.button`
+  border: 1px solid #9bce26;
+  color: #9bce26;
+  background: #fff;
+  height: 28px;
+  padding: 0 5px;
+  font-size: 12px !important;
+  line-height: 28px;
+  border-radius: 5px;
+`;

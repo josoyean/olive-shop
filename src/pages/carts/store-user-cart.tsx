@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Center, MainTitle } from "../../../public/assets/style";
 import styled from "styled-components";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "redex/store";
 import { supabase } from "../../supabase";
@@ -16,17 +16,21 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { addToCart } from "./addToCart";
+import { kMaxLength } from "buffer";
+import StoreUserPayment from "./store-user-cart-payment";
 interface PriceType {
   [key: string]: number;
 }
 const StoreUserCart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const locatiton = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const headerType = searchParams.get("t_header_type");
   const cartsCount = useSelector((state: RootState) => state?.cartCount);
   const userToken = useSelector((state: RootState) => state?.user.token);
   const [products, setProducts] = useState<CartType[]>([]);
+  const [paymentProducts, setPaymentProducts] = useState<CartType[]>([]);
   const [checkedItems, setCheckedItem] = useState<number[]>();
   const [price, setPrice] = useState<PriceType | null>();
   const handleLoadData = async () => {
@@ -45,8 +49,12 @@ const StoreUserCart = () => {
     setCheckedItem(selected);
   };
   useEffect(() => {
-    handleLoadData();
-  }, [userToken]);
+    if (headerType === "1") {
+      handleLoadData();
+    } else if (headerType === "2") {
+      console.log("안녕", locatiton);
+    }
+  }, [headerType, userToken]);
 
   //장바구니 제품 삭제
   const handleDelete = async (seq: number[]) => {
@@ -121,8 +129,14 @@ const StoreUserCart = () => {
       <MainLine>
         <Center>
           <div className="top-l">
-            <span>장바구니</span>
-            <em>{cartsCount}</em>
+            <span>
+              {headerType === "1"
+                ? "장바구니"
+                : headerType === "2"
+                ? "주문/결제"
+                : "주문완료"}
+            </span>
+            {headerType === "1" && <em>{cartsCount}</em>}
           </div>
 
           <div className="top-r">
@@ -137,215 +151,242 @@ const StoreUserCart = () => {
         </Center>
       </MainLine>
       <Center>
-        <Container>
-          <div className="title-box">
-            <h2>올리브샵 배송상품</h2>
-            <ButtonBox>
-              <button
-                className="gray_btn"
-                style={{ marginRight: "10px" }}
-                onClick={(event) => {
-                  event.preventDefault();
+        {/* 장바구니 */}
+        {headerType === "1" && (
+          <Container>
+            <div className="title-box">
+              <h2>올리브샵 배송상품</h2>
+              <ButtonBox>
+                <button
+                  className="gray_btn"
+                  style={{ marginRight: "10px" }}
+                  onClick={(event) => {
+                    event.preventDefault();
 
-                  if (checkedItems?.length === 0) {
-                    alert("삭제할 제품을 선택해주세요");
-                    return;
-                  }
-                  console.log(checkedItems);
-                  handleDelete(checkedItems ?? []);
-                }}
-              >
-                선택상품 삭제
-              </button>
-              <button
-                className="delete_btn gray_btn"
-                onClick={(event) => {
-                  event.preventDefault();
-                  const items = products.filter(
-                    (product) => product.objects?.soldOut
-                  );
-                  const selected = items.map((item) => item.object_seq);
+                    if (checkedItems?.length === 0) {
+                      alert("삭제할 제품을 선택해주세요");
+                      return;
+                    }
+                    console.log(checkedItems);
+                    handleDelete(checkedItems ?? []);
+                  }}
+                >
+                  선택상품 삭제
+                </button>
+                <button
+                  className="delete_btn gray_btn"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    const items = products.filter(
+                      (product) => product.objects?.soldOut
+                    );
+                    const selected = items.map((item) => item.object_seq);
 
-                  if (selected?.length === 0) {
-                    alert("품절된 제품이 없습니다");
-                    return;
-                  }
-                  handleDelete(selected ?? []);
-                }}
-              >
-                품절상품 삭제
-              </button>
-            </ButtonBox>
-          </div>
-          <ProductBox>
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col" style={{ width: "40px" }}>
-                    <label htmlFor="">
-                      <input
-                        type="checkbox"
-                        placeholder="아이디 저장"
-                        // {...register("saveId")}
-                        onChange={(event) => {
-                          handleAllChecked(event.target.checked);
-                          // setValue("saveId", event.target.checked);
-                        }}
-                        checked={
-                          checkedItems?.length ===
-                          (products ?? []).filter(
-                            (product) => product.objects?.soldOut === false
-                          )?.length
-                        }
-                      />
-                    </label>
-                  </th>
-                  <th scope="col" style={{ width: "390px" }}>
-                    상품정보
-                  </th>
-                  <th scope="col" style={{ width: "110px" }}>
-                    판매자
-                  </th>
-                  <th scope="col" style={{ width: "80px" }}>
-                    수량
-                  </th>
-                  <th scope="col" style={{ width: "110px" }}>
-                    구매가
-                  </th>
-                  <th scope="col" style={{ width: "110px" }}>
-                    배송정보
-                  </th>
-                  <th scope="col" style={{ width: "130px" }}>
-                    선택
-                  </th>
-                </tr>
-              </thead>
-
-              {products && products.length > 0 ? (
-                <tbody>
-                  {products?.map((product, index) => (
-                    <tr
-                      key={index}
-                      className={product?.objects?.soldOut ? "soldOut" : ""}
-                    >
-                      <td style={{ textAlign: "center" }}>
+                    if (selected?.length === 0) {
+                      alert("품절된 제품이 없습니다");
+                      return;
+                    }
+                    handleDelete(selected ?? []);
+                  }}
+                >
+                  품절상품 삭제
+                </button>
+              </ButtonBox>
+            </div>
+            <ProductBox>
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col" style={{ width: "40px" }}>
+                      <label htmlFor="">
                         <input
                           type="checkbox"
                           placeholder="아이디 저장"
-                          disabled={product?.objects?.soldOut}
-                          checked={
-                            product?.objects?.soldOut
-                              ? false
-                              : checkedItems?.includes(product?.object_seq)
-                          }
                           onChange={(event) => {
-                            setCheckedItem((prev) =>
-                              (prev ?? []).includes(product?.object_seq)
-                                ? (prev ?? []).filter(
-                                    (item) => item !== product?.object_seq
-                                  )
-                                : [...(prev ?? []), product?.object_seq]
-                            );
+                            handleAllChecked(event.target.checked);
                           }}
+                          checked={
+                            checkedItems?.length ===
+                            (products ?? []).filter(
+                              (product) => product.objects?.soldOut === false
+                            )?.length
+                          }
                         />
-                      </td>
-                      <TableBody style={{ padding: "30px" }}>
-                        <Information
-                          onClick={(event) => {
-                            event.preventDefault();
-                            navigate(
-                              `/store/goods-detail?getGoods=${product?.object_seq}`
-                            );
-                          }}
-                        >
-                          <img src={product.img} alt="productImg" />
-                          <div>
-                            {moment().isBetween(
-                              product?.objects?.saleItem?.start_sale_date,
-                              product?.objects?.saleItem?.end_sale_date
-                            ) && (
-                              <em>
-                                {moment(
-                                  product?.objects?.saleItem?.start_sale_date
-                                ).format("MM/DD")}
-                                ~
-                                {moment(
-                                  product?.objects?.saleItem?.end_sale_date
-                                ).format("MM/DD")}
-                                까지
-                              </em>
-                            )}
+                      </label>
+                    </th>
+                    <th scope="col" style={{ width: "390px" }}>
+                      상품정보
+                    </th>
+                    <th scope="col" style={{ width: "110px" }}>
+                      판매자
+                    </th>
+                    <th scope="col" style={{ width: "80px" }}>
+                      수량
+                    </th>
+                    <th scope="col" style={{ width: "110px" }}>
+                      구매가
+                    </th>
+                    <th scope="col" style={{ width: "110px" }}>
+                      배송정보
+                    </th>
+                    <th scope="col" style={{ width: "130px" }}>
+                      선택
+                    </th>
+                  </tr>
+                </thead>
 
-                            <span>
-                              {product?.brand}
-                              {product?.objects?.soldOut ? "품절" : ""}
-                            </span>
-
-                            <p>{product?.name}</p>
-                            <Tags>
-                              {product?.sale && (
-                                <span className="sale">세일</span>
-                              )}
-                              {product?.coupon && (
-                                <span className="coupon">쿠폰</span>
-                              )}
-                              {product?.objects?.saleItem?.one_more && (
-                                <span className="oneMore">
-                                  {product?.objects?.saleItem?.one_more}+1
-                                </span>
-                              )}
-                            </Tags>
-                          </div>
-                        </Information>
-                      </TableBody>
-                      <TableBody className="count">
-                        {product?.objects?.count?.toLocaleString()}원
-                      </TableBody>
-                      <TableBody className="count">
-                        <FormControl sx={{ m: 1, minWidth: 50 }} size="small">
-                          <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            value={product?.object_count}
-                            onChange={(event) => {
-                              if (!product?.objects?.object_seq) return;
-                              handleCountChange(event, product?.objects);
-                            }}
+                {products && products.length > 0 ? (
+                  <tbody>
+                    {products?.map((product, index) => (
+                      <tr
+                        key={index}
+                        className={product?.objects?.soldOut ? "soldOut" : ""}
+                      >
+                        <td style={{ textAlign: "center" }}>
+                          <input
+                            type="checkbox"
+                            placeholder="아이디 저장"
                             disabled={product?.objects?.soldOut}
+                            checked={
+                              product?.objects?.soldOut
+                                ? false
+                                : checkedItems?.includes(product?.object_seq)
+                            }
+                            onChange={(event) => {
+                              setCheckedItem((prev) =>
+                                (prev ?? []).includes(product?.object_seq)
+                                  ? (prev ?? []).filter(
+                                      (item) => item !== product?.object_seq
+                                    )
+                                  : [...(prev ?? []), product?.object_seq]
+                              );
+                            }}
+                          />
+                        </td>
+                        <TableBody style={{ padding: "30px" }}>
+                          <Information
+                            onClick={(event) => {
+                              event.preventDefault();
+                              navigate(
+                                `/store/goods-detail?getGoods=${product?.object_seq}`
+                              );
+                            }}
                           >
-                            <MenuItem value={1}>1</MenuItem>
-                            <MenuItem value={2}>2</MenuItem>
-                            <MenuItem value={3}>3</MenuItem>
-                            <MenuItem value={4}>4</MenuItem>
-                            <MenuItem value={5}>5</MenuItem>
-                            <MenuItem value={6}>6</MenuItem>
-                            <MenuItem value={7}>7</MenuItem>
-                            <MenuItem value={8}>8</MenuItem>
-                            <MenuItem value={9}>9</MenuItem>
-                            <MenuItem value={10}>10</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </TableBody>
-                      <TableBody className="discount">
-                        {moment().isBetween(
-                          product?.objects?.saleItem?.start_sale_date,
-                          product?.objects?.saleItem?.end_sale_date
-                        ) ? (
-                          <>
-                            <em>
-                              {calculatePrice(
-                                product?.object_count ?? 0,
-                                product?.objects?.saleItem?.one_more,
-                                handlePrice(
-                                  false,
-                                  product?.objects?.count,
-                                  product?.objects?.saleItem?.discount_rate
-                                )
-                              )?.toLocaleString()}
-                              원
-                            </em>
-                            <p>
-                              {calculatePrice(
+                            <div className="img-wrapper">
+                              <img src={product.img} alt="productImg" />
+                              {product?.objects?.soldOut && <span>품절</span>}
+                            </div>
+                            <div className="infor-wrapper">
+                              {moment().isBetween(
+                                product?.objects?.saleItem?.start_sale_date,
+                                product?.objects?.saleItem?.end_sale_date
+                              ) && (
+                                <em>
+                                  {moment(
+                                    product?.objects?.saleItem?.start_sale_date
+                                  ).format("MM/DD")}
+                                  ~
+                                  {moment(
+                                    product?.objects?.saleItem?.end_sale_date
+                                  ).format("MM/DD")}
+                                  까지
+                                </em>
+                              )}
+
+                              <span>{product?.brand}</span>
+
+                              <p>{product?.name}</p>
+                              <Tags>
+                                {product?.sale && (
+                                  <span className="sale">세일</span>
+                                )}
+                                {product?.coupon && (
+                                  <span className="coupon">쿠폰</span>
+                                )}
+                                {product?.objects?.saleItem?.one_more && (
+                                  <span className="oneMore">
+                                    {product?.objects?.saleItem?.one_more}+1
+                                  </span>
+                                )}
+                              </Tags>
+                            </div>
+                          </Information>
+                        </TableBody>
+                        <TableBody className="count">
+                          {product?.objects?.count?.toLocaleString()}원
+                        </TableBody>
+                        <TableBody className="count">
+                          <FormControl sx={{ m: 1, minWidth: 50 }} size="small">
+                            <Select
+                              labelId="demo-simple-select-label"
+                              id="demo-simple-select"
+                              value={product?.object_count}
+                              onChange={(event) => {
+                                if (!product?.objects?.object_seq) return;
+                                handleCountChange(event, product?.objects);
+                              }}
+                              disabled={product?.objects?.soldOut}
+                            >
+                              <MenuItem value={1}>1</MenuItem>
+                              <MenuItem value={2}>2</MenuItem>
+                              <MenuItem value={3}>3</MenuItem>
+                              <MenuItem value={4}>4</MenuItem>
+                              <MenuItem value={5}>5</MenuItem>
+                              <MenuItem value={6}>6</MenuItem>
+                              <MenuItem value={7}>7</MenuItem>
+                              <MenuItem value={8}>8</MenuItem>
+                              <MenuItem value={9}>9</MenuItem>
+                              <MenuItem value={10}>10</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </TableBody>
+                        <TableBody className="discount">
+                          {moment().isBetween(
+                            product?.objects?.saleItem?.start_sale_date,
+                            product?.objects?.saleItem?.end_sale_date
+                          ) ? (
+                            <>
+                              <em>
+                                {calculatePrice(
+                                  product?.object_count ?? 0,
+                                  product?.objects?.saleItem?.one_more,
+                                  handlePrice(
+                                    false,
+                                    product?.objects?.count,
+                                    product?.objects?.saleItem?.discount_rate
+                                  )
+                                )?.toLocaleString()}
+                                원
+                              </em>
+                              <p>
+                                {calculatePrice(
+                                  product?.object_count ?? 0,
+                                  product?.objects?.saleItem?.one_more,
+                                  handlePrice(
+                                    true,
+                                    product?.objects?.count,
+                                    product?.objects?.saleItem?.discount_rate
+                                  )
+                                )?.toLocaleString()}
+                                원
+                              </p>
+                            </>
+                          ) : (
+                            calculatePrice(
+                              product?.object_count ?? 0,
+                              product?.objects?.saleItem?.one_more,
+                              handlePrice(
+                                false,
+                                product?.objects?.count,
+                                product?.objects?.saleItem?.discount_rate
+                              )
+                            )?.toLocaleString()
+                          )}
+                        </TableBody>
+                        <TableBody className="delivery">
+                          {
+                            <>
+                              {(calculatePrice(
                                 product?.object_count ?? 0,
                                 product?.objects?.saleItem?.one_more,
                                 handlePrice(
@@ -353,134 +394,126 @@ const StoreUserCart = () => {
                                   product?.objects?.count,
                                   product?.objects?.saleItem?.discount_rate
                                 )
-                              )?.toLocaleString()}
-                              원
-                            </p>
-                          </>
-                        ) : (
-                          calculatePrice(
-                            product?.object_count ?? 0,
-                            product?.objects?.saleItem?.one_more,
-                            handlePrice(
-                              false,
-                              product?.objects?.count,
-                              product?.objects?.saleItem?.discount_rate
-                            )
-                          )?.toLocaleString()
-                        )}
-                      </TableBody>
-                      <TableBody className="delivery">
-                        {
-                          <>
-                            {calculatePrice(
-                              product?.object_count ?? 0,
-                              product?.objects?.saleItem?.one_more,
-                              handlePrice(
-                                moment().isBetween(
-                                  product?.objects?.saleItem?.start_sale_date,
-                                  product?.objects?.saleItem?.end_sale_date
-                                ),
-                                product?.objects?.count,
-                                product?.objects?.saleItem?.discount_rate
-                              )
-                            ) ?? 0 >= 20000
-                              ? "무료 배송"
-                              : "2,500원"}
-                            {calculatePrice(
-                              product?.object_count ?? 0,
-                              product?.objects?.saleItem?.one_more,
-                              handlePrice(
-                                moment().isBetween(
-                                  product?.objects?.saleItem?.start_sale_date,
-                                  product?.objects?.saleItem?.end_sale_date
-                                ),
-                                product?.objects?.count,
-                                product?.objects?.saleItem?.discount_rate
-                              )
-                            )}
-                            <p>도서산간 제외</p>
-                          </>
-                        }
-                      </TableBody>
-                      <td>
-                        <ButtonBox>
-                          <button
-                            className="buy_btn"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              if (product?.objects?.soldOut) {
-                                alert("품절된 상품입니다");
-                                return;
-                              }
-                            }}
-                          >
-                            바로구매
-                          </button>
-                          <button
-                            className="delete_btn gray_btn"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              handleDelete([product.object_seq]);
-                            }}
-                          >
-                            삭제
-                          </button>
-                        </ButtonBox>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              ) : (
-                ""
-              )}
-            </table>
-          </ProductBox>
-          <TotalPriceInfo>
-            <div className="total">
-              <p>총 판매가</p>
-              <span>{(price?.totalCount ?? 0).toLocaleString()}원</span>
-              <em>-</em>
-            </div>
-            <div className="discount">
-              <p>총 할인금액</p>
-              <span>{(price?.disCount ?? 0).toLocaleString()}원</span>
-              <em>+</em>
-            </div>
-            <div className="delivery">
-              <p>총 배송비</p>
-              <span>{(price?.totalPrice ?? 0) < 20000 ? "2,500" : "0"}원</span>
-            </div>
-            <div className="totalPrice">
-              <p>총 결제예상금액</p>
-              <span>
-                {(
-                  (price?.totalPrice ?? 0) +
-                  ((price?.totalPrice ?? 0) >= 20000 ? 0 : 2500)
-                ).toLocaleString()}
-                원
-              </span>
-            </div>
-          </TotalPriceInfo>
-          <PaymentBox>
-            <button
-              className=""
-              style={{ marginRight: "10px" }}
-              onClick={(event) => {
-                event.preventDefault();
-              }}
-            >
-              선택주문 ({checkedItems?.length})
-            </button>
-            <button
-              className="all-payment"
-              onClick={(event) => {
-                event.preventDefault();
-              }}
-            >
-              전체주문
-            </button>
-          </PaymentBox>
-        </Container>
+                              ) ?? 0) >= 20000
+                                ? "무료 배송"
+                                : "2,500원"}
+                              <p>도서산간 제외</p>
+                            </>
+                          }
+                        </TableBody>
+                        <td>
+                          <ButtonBox>
+                            <button
+                              className="buy_btn"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                if (product?.objects?.soldOut) {
+                                  alert("품절된 상품입니다");
+                                  return;
+                                }
+                              }}
+                            >
+                              바로구매
+                            </button>
+                            <button
+                              className="delete_btn gray_btn"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                handleDelete([product.object_seq]);
+                              }}
+                            >
+                              삭제
+                            </button>
+                          </ButtonBox>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                ) : (
+                  ""
+                )}
+              </table>
+            </ProductBox>
+            <TotalPriceInfo>
+              <div className="total">
+                <p>총 판매가</p>
+                <span>{(price?.totalCount ?? 0).toLocaleString()}원</span>
+                <em>-</em>
+              </div>
+              <div className="discount">
+                <p>총 할인금액</p>
+                <span>{(price?.disCount ?? 0).toLocaleString()}원</span>
+                <em>+</em>
+              </div>
+              <div className="delivery">
+                <p>총 배송비</p>
+                <span>
+                  {(price?.totalPrice ?? 0) < 20000 ? "2,500" : "0"}원
+                </span>
+              </div>
+              <div className="totalPrice">
+                <p>총 결제예상금액</p>
+                <span>
+                  {(
+                    (price?.totalPrice ?? 0) +
+                    ((price?.totalPrice ?? 0) >= 20000 ? 0 : 2500)
+                  ).toLocaleString()}
+                  원
+                </span>
+              </div>
+            </TotalPriceInfo>
+            <PaymentBox>
+              <button
+                className=""
+                style={{ marginRight: "10px" }}
+                onClick={(event) => {
+                  event.preventDefault();
+
+                  const selectedProduct = products?.filter((product) =>
+                    checkedItems?.includes(product?.objects?.object_seq ?? 0)
+                  );
+                  // setPaymentProducts(selectedProduct);
+                  // setSearchParams({ t_header_type: "2" });
+
+                  navigate("/store/user-cart?t_header_type=2", {
+                    state: {
+                      products: selectedProduct,
+                      searchParams: { t_header_type: "2" },
+                    },
+                  });
+                }}
+              >
+                선택주문 ({checkedItems?.length})
+              </button>
+              <button
+                className="all-payment"
+                onClick={(event) => {
+                  event.preventDefault();
+                  // setPaymentProducts(
+                  //   products.filter(
+                  //     (product) => product?.objects?.soldOut === false
+                  //   )
+                  // );
+                  // setSearchParams({ t_header_type: "2" });
+
+                  navigate("/store/user-cart?t_header_type=2", {
+                    state: {
+                      products: products.filter(
+                        (product) => product?.objects?.soldOut === false
+                      ),
+                      searchParams: { t_header_type: "2" },
+                    },
+                  });
+                }}
+              >
+                전체주문
+              </button>
+            </PaymentBox>
+          </Container>
+        )}
+
+        {/*  주문 결제 */}
+        {headerType === "2" && <StoreUserPayment />}
       </Center>
     </div>
   );
@@ -645,11 +678,32 @@ const Information = styled.div`
   column-gap: 20px;
   display: flex;
   align-items: center;
-  img {
+  .img-wrapper {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
     width: 85px;
     height: 85px;
+    img {
+      width: 85px;
+      height: 85px;
+    }
+    span {
+      position: absolute;
+      width: 100%;
+      line-height: 22px;
+      height: 22px;
+      font-size: 12px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      bottom: 0;
+      left: 0;
+      text-align: center;
+      right: 0;
+    }
   }
-  > div {
+  > div.infor-wrapper {
+    max-width: 228px;
     /* display: flex;
     flex-direction: column;
     row-gap: 5px; */
@@ -734,24 +788,7 @@ const ProductBox = styled.div`
     }
   }
 `;
-const Container = styled.div`
-  padding: 20px;
-  margin-top: -20px;
-  background-color: #fff;
-  z-index: 9;
-  position: relative;
-  border-radius: 5px;
-  div.title-box {
-    border-top: 2px solid #000;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 0;
-    .gray_btn {
-      width: 90px;
-    }
-  }
-`;
+
 const MainLine = styled(MainTitle)`
   height: 100px;
   background: url("/public/assets/images/icons/bg_sale_top.png") 50% 0 no-repeat;
@@ -792,6 +829,24 @@ const MainLine = styled(MainTitle)`
           color: #000;
         }
       }
+    }
+  }
+`;
+const Container = styled.div`
+  padding: 20px;
+  margin-top: -20px;
+  background-color: #fff;
+  z-index: 9;
+  position: relative;
+  border-radius: 5px;
+  div.title-box {
+    border-top: 2px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0;
+    .gray_btn {
+      width: 90px;
     }
   }
 `;

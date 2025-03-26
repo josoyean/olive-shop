@@ -84,6 +84,7 @@ const ProductBox = styled.div`
   cursor: pointer;
   border: 1px solid ${({ theme }) => theme.lineColor.main};
   position: relative;
+  overflow: hidden;
   img {
     width: 100%;
     height: 100%;
