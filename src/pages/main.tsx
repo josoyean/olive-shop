@@ -55,9 +55,9 @@ const MainPage: React.FC = () => {
       const { data, error } = await supabase
         .from("objects")
         .select("*, saleItem(*)")
-        .eq("attention", "True")
-        .filter("saleItem.start_sale_date", "lte", today)
-        .filter("saleItem.end_sale_date", "gte", today);
+        .eq("attention", "True");
+      // .filter("saleItem.start_sale_date", "lte", today)
+      // .filter("saleItem.end_sale_date", "gte", today);
 
       setAttentionItems(!data ? [] : data);
     };
@@ -65,9 +65,9 @@ const MainPage: React.FC = () => {
       const { data, error } = await supabase
         .from("objects")
         .select("*, saleItem(*)")
-        .eq("recommend", "True")
-        .filter("saleItem.start_sale_date", "lte", today)
-        .filter("saleItem.end_sale_date", "gte", today);
+        .eq("recommend", "True");
+      // .filter("saleItem.start_sale_date", "lte", today)
+      // .filter("saleItem.end_sale_date", "gte", today);
       setRecommendItems(!data ? [] : data);
     };
 
@@ -75,13 +75,14 @@ const MainPage: React.FC = () => {
       // const { data, error } = await supabase.from("objects").select("*");
       const { data, error } = await supabase
         .from("objects")
-        .select("*, saleItem(*)")
-        .filter("saleItem.start_sale_date", "lte", today)
-        .filter("saleItem.end_sale_date", "gte", today);
+        .select("*, saleItem(*)");
+      // .filter("saleItem.start_sale_date", "lte", today)
+      // .filter("saleItem.end_sale_date", "gte", today);
       const items: CardImageType[] | undefined = data
         ?.slice() // 원본 배열 유지 (안 하면 원본이 변함)
         ?.sort((a, b) => b.view_count - a.view_count) // 내림차순 정렬
         ?.slice(0, 10); // 상위 10개만 추출
+      console.log(data);
       setObjectItems(!items ? [] : items);
     };
 

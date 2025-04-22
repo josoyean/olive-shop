@@ -29,7 +29,7 @@ export interface CardImageType {
   object_seq: number;
   object_count?: number;
   one_more: number | null;
-  saleItem?: SaleType | undefined;
+  saleItem?: SaleType | undefined | null;
 }
 export interface BrandType {
   [key: string]: string | string[] | boolean | number | undefined; // 동적으로 속성 추가 가능
@@ -48,6 +48,7 @@ export interface CardProps {
   img?: string;
   imgSize?: string;
   data: CardImageType;
+  onClick?: () => void | undefined;
 }
 
 interface menuType {
@@ -107,6 +108,7 @@ export interface SaleType {
   created_at: string | undefined;
   object_seq: number | undefined;
   discount_rate: number | undefined;
+  today_discount_rate: number | undefined;
   count: number | undefined;
   start_sale_date: string | undefined;
   end_sale_date: string | undefined;
@@ -140,10 +142,54 @@ export interface CartType {
   detailImg?: string;
   objectTypeMain?: string;
   objectTypeSub?: string;
-  brand_seq: number;
-  brand: string;
+  brand_seq?: number;
+  brand?: string;
   object_seq: number;
   object_count?: number;
-  one_more: number | null;
+  one_more?: number | null;
   objects?: CardImageType | undefined | null;
+}
+
+export interface PaymentType {
+  [key: string]:
+    | string
+    | string[]
+    | boolean
+    | number
+    | undefined
+    | null
+    | object; // 동적으로 속성 추가 가능
+  object_seq: number;
+  created_at?: string;
+  orderId?: string;
+}
+
+export interface OrderType {
+  [key: string]:
+    | string
+    | string[]
+    | boolean
+    | number
+    | undefined
+    | null
+    | object;
+}
+
+export interface ReviewType {
+  [key: string]:
+    | string
+    | string[]
+    | boolean
+    | number
+    | undefined
+    | null
+    | object;
+  id?: string;
+  created_at?: string;
+  reviewImg?: string[];
+  reviewText?: string;
+  userId?: string;
+  likeUserId?: string[];
+  score?: number;
+  object_seq?: number;
 }

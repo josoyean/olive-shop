@@ -22,9 +22,9 @@ const StoreRankingList: React.FC = () => {
     if (menuType !== "전체") {
       query = query.eq("objectTypeMain", menuType);
     }
-    query = query
-      .filter("saleItem.start_sale_date", "lte", today)
-      .filter("saleItem.end_sale_date", "gte", today);
+    // query = query
+    //   .filter("saleItem.start_sale_date", "lte", today)
+    //   .filter("saleItem.end_sale_date", "gte", today);
     const { data, error } = await query;
     const filteredData = handleFilter("popular", data ?? []);
     setObjects(filteredData ?? []);

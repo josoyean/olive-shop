@@ -5,16 +5,18 @@ import userState from "./reducers/userReducer";
 import cartState from "./reducers/userCartCount";
 import recentProductsState from "./reducers/recentProductsData";
 import userSearchState from "./reducers/userSearch";
+import cartDataState from "./reducers/userCartData";
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["user", "cartCount", "recentProducts", "searchData"],
+  whitelist: ["user", "cartCount", "recentProducts", "searchData", "cartDate"],
 };
 const rootReducer = combineReducers({
   user: userState,
   cartCount: cartState,
   recentProducts: recentProductsState,
   searchData: userSearchState,
+  cartDate: cartDataState,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -32,3 +34,4 @@ export const store = configureStore({
 export const persistor = persistStore(store);
 // RootState 정의
 export type RootState = ReturnType<typeof store.getState>; // store.getState()의 반환값 타입
+export type AppDispatch = typeof store.dispatch;

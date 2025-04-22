@@ -7,7 +7,6 @@ import moment from "moment";
 const StoreEventDetail = () => {
   const information = useLocation().state;
 
-  console.log(information);
   return (
     <Center>
       <Container>

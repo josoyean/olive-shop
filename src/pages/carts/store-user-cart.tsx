@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Center, MainTitle } from "../../../public/assets/style";
+import { Center, MainTitle, Tags } from "../../../public/assets/style";
 import styled from "styled-components";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,16 +8,20 @@ import { supabase } from "../../supabase";
 import type { CardImageType, CartType } from "compontents/card/card.type";
 import { theme } from "../../../public/assets/styles/theme";
 import moment from "moment";
-import { calculatePrice, handleCartCount, handlePrice } from "../../bin/common";
+import {
+  calculatePrice,
+  handleCartCount,
+  handleCartItems,
+  handlePrice,
+} from "../../bin/common";
 import { deleteCart, modify } from "../../redex/reducers/userCartCount";
-import Box from "@mui/material/Box";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import { addToCart } from "./addToCart";
-import { kMaxLength } from "buffer";
 import StoreUserPayment from "./store-user-cart-payment";
+import StoreUserOrder from "./store-user-order";
+import { modifyCartItems } from "./addItemCart";
+import EmptyComponent from "../../compontents/EmptyComponent";
 interface PriceType {
   [key: string]: number;
 }
@@ -25,23 +29,17 @@ const StoreUserCart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const locatiton = useLocation();
+  const today = new Date().toISOString().split("T")[0];
   const [searchParams, setSearchParams] = useSearchParams();
   const headerType = searchParams.get("t_header_type");
   const cartsCount = useSelector((state: RootState) => state?.cartCount);
   const userToken = useSelector((state: RootState) => state?.user.token);
+  const cartItems = useSelector((state: RootState) => state?.cartDate);
   const [products, setProducts] = useState<CartType[]>([]);
-  const [paymentProducts, setPaymentProducts] = useState<CartType[]>([]);
   const [checkedItems, setCheckedItem] = useState<number[]>();
   const [price, setPrice] = useState<PriceType | null>();
-  const handleLoadData = async () => {
-    const query = supabase
-      .from("carts")
-      .select("*,objects(*,saleItem(*))")
-      .eq("userId", userToken);
-
-    const { data } = await query;
+  const handleLoadData = async (data: CartType[]) => {
     setProducts(data ?? []);
-    console.log(data);
     const items = (data ?? []).filter(
       (product) => product.objects?.soldOut === false
     );
@@ -50,11 +48,13 @@ const StoreUserCart = () => {
   };
   useEffect(() => {
     if (headerType === "1") {
-      handleLoadData();
+      handleLoadData(cartItems);
     } else if (headerType === "2") {
       console.log("안녕", locatiton);
+    } else if (headerType === "3") {
+      console.log("3안녕", locatiton);
     }
-  }, [headerType, userToken]);
+  }, [headerType, userToken, cartItems]);
 
   //장바구니 제품 삭제
   const handleDelete = async (seq: number[]) => {
@@ -66,9 +66,7 @@ const StoreUserCart = () => {
 
     if (!data) {
       alert("제품 삭제가 되었습니다");
-      handleLoadData();
-      const count = await handleCartCount(userToken);
-      dispatch(modify(count));
+      handleCartItems(userToken, dispatch);
       return;
     }
   };
@@ -95,7 +93,7 @@ const StoreUserCart = () => {
             (item?.objects?.count ?? 0) *
               (item?.object_count ?? 0) *
               0.01 *
-              (item?.objects?.discount_rate ?? 0);
+              (item?.objects?.saleItem?.discount_rate ?? 0);
         }
       });
     });
@@ -113,15 +111,15 @@ const StoreUserCart = () => {
   ) => {
     const selected = (event.target as HTMLSelectElement).value;
 
-    const update = addToCart({
-      dataInfo: objects,
-      addCount: Number(selected),
-      mode: "update",
+    const update = modifyCartItems({
+      objects: objects,
+      count: Number(selected),
+      dispatch: dispatch,
     });
 
     if (await update) {
       alert("수량 변경이 완료 되었습니다");
-      handleLoadData();
+      handleCartItems(userToken, dispatch);
     }
   };
   return (
@@ -136,7 +134,7 @@ const StoreUserCart = () => {
                 ? "주문/결제"
                 : "주문완료"}
             </span>
-            {headerType === "1" && <em>{cartsCount}</em>}
+            {headerType === "1" && <em>{cartItems?.length}</em>}
           </div>
 
           <div className="top-r">
@@ -156,42 +154,44 @@ const StoreUserCart = () => {
           <Container>
             <div className="title-box">
               <h2>올리브샵 배송상품</h2>
-              <ButtonBox>
-                <button
-                  className="gray_btn"
-                  style={{ marginRight: "10px" }}
-                  onClick={(event) => {
-                    event.preventDefault();
+              {cartItems?.length > 0 && (
+                <ButtonBox>
+                  <button
+                    className="gray_btn"
+                    style={{ marginRight: "10px" }}
+                    onClick={(event) => {
+                      event.preventDefault();
 
-                    if (checkedItems?.length === 0) {
-                      alert("삭제할 제품을 선택해주세요");
-                      return;
-                    }
-                    console.log(checkedItems);
-                    handleDelete(checkedItems ?? []);
-                  }}
-                >
-                  선택상품 삭제
-                </button>
-                <button
-                  className="delete_btn gray_btn"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    const items = products.filter(
-                      (product) => product.objects?.soldOut
-                    );
-                    const selected = items.map((item) => item.object_seq);
+                      if (checkedItems?.length === 0) {
+                        alert("삭제할 제품을 선택해주세요");
+                        return;
+                      }
+                      console.log(checkedItems);
+                      handleDelete(checkedItems ?? []);
+                    }}
+                  >
+                    선택상품 삭제
+                  </button>
+                  <button
+                    className="delete_btn gray_btn"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      const items = products.filter(
+                        (product) => product.objects?.soldOut
+                      );
+                      const selected = items.map((item) => item.object_seq);
 
-                    if (selected?.length === 0) {
-                      alert("품절된 제품이 없습니다");
-                      return;
-                    }
-                    handleDelete(selected ?? []);
-                  }}
-                >
-                  품절상품 삭제
-                </button>
-              </ButtonBox>
+                      if (selected?.length === 0) {
+                        alert("품절된 제품이 없습니다");
+                        return;
+                      }
+                      handleDelete(selected ?? []);
+                    }}
+                  >
+                    품절상품 삭제
+                  </button>
+                </ButtonBox>
+              )}
             </div>
             <ProductBox>
               <table>
@@ -206,10 +206,11 @@ const StoreUserCart = () => {
                             handleAllChecked(event.target.checked);
                           }}
                           checked={
+                            cartItems?.length > 0 &&
                             checkedItems?.length ===
-                            (products ?? []).filter(
-                              (product) => product.objects?.soldOut === false
-                            )?.length
+                              (products ?? []).filter(
+                                (product) => product.objects?.soldOut === false
+                              )?.length
                           }
                         />
                       </label>
@@ -308,6 +309,11 @@ const StoreUserCart = () => {
                                     {product?.objects?.saleItem?.one_more}+1
                                   </span>
                                 )}
+                                {today ===
+                                  product?.objects?.saleItem
+                                    ?.today_sale_date && (
+                                  <span className="today_sale">오특</span>
+                                )}
                               </Tags>
                             </div>
                           </Information>
@@ -318,6 +324,7 @@ const StoreUserCart = () => {
                         <TableBody className="count">
                           <FormControl sx={{ m: 1, minWidth: 50 }} size="small">
                             <Select
+                              sx={{ height: 30 }}
                               labelId="demo-simple-select-label"
                               id="demo-simple-select"
                               value={product?.object_count}
@@ -341,20 +348,19 @@ const StoreUserCart = () => {
                           </FormControl>
                         </TableBody>
                         <TableBody className="discount">
-                          {moment().isBetween(
+                          {moment(today).isBetween(
                             product?.objects?.saleItem?.start_sale_date,
                             product?.objects?.saleItem?.end_sale_date
+                          ) ||
+                          moment().diff(
+                            product?.objects?.saleItem?.today_sale_date
                           ) ? (
                             <>
                               <em>
                                 {calculatePrice(
                                   product?.object_count ?? 0,
                                   product?.objects?.saleItem?.one_more,
-                                  handlePrice(
-                                    false,
-                                    product?.objects?.count,
-                                    product?.objects?.saleItem?.discount_rate
-                                  )
+                                  handlePrice(null, product?.objects?.count)
                                 )?.toLocaleString()}
                                 원
                               </em>
@@ -363,9 +369,8 @@ const StoreUserCart = () => {
                                   product?.object_count ?? 0,
                                   product?.objects?.saleItem?.one_more,
                                   handlePrice(
-                                    true,
-                                    product?.objects?.count,
-                                    product?.objects?.saleItem?.discount_rate
+                                    product?.objects?.saleItem,
+                                    product?.objects?.count
                                   )
                                 )?.toLocaleString()}
                                 원
@@ -375,11 +380,7 @@ const StoreUserCart = () => {
                             calculatePrice(
                               product?.object_count ?? 0,
                               product?.objects?.saleItem?.one_more,
-                              handlePrice(
-                                false,
-                                product?.objects?.count,
-                                product?.objects?.saleItem?.discount_rate
-                              )
+                              handlePrice(null, product?.objects?.count)
                             )?.toLocaleString()
                           )}
                         </TableBody>
@@ -390,9 +391,8 @@ const StoreUserCart = () => {
                                 product?.object_count ?? 0,
                                 product?.objects?.saleItem?.one_more,
                                 handlePrice(
-                                  true,
-                                  product?.objects?.count,
-                                  product?.objects?.saleItem?.discount_rate
+                                  product?.objects?.saleItem,
+                                  product?.objects?.count
                                 )
                               ) ?? 0) >= 20000
                                 ? "무료 배송"
@@ -430,90 +430,102 @@ const StoreUserCart = () => {
                     ))}
                   </tbody>
                 ) : (
-                  ""
+                  <tbody>
+                    <tr>
+                      <td colSpan={7}>
+                        <EmptyComponent
+                          mainText=""
+                          subText="바구니에 <br/>저장된 상품이 없습니다"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
                 )}
               </table>
             </ProductBox>
-            <TotalPriceInfo>
-              <div className="total">
-                <p>총 판매가</p>
-                <span>{(price?.totalCount ?? 0).toLocaleString()}원</span>
-                <em>-</em>
-              </div>
-              <div className="discount">
-                <p>총 할인금액</p>
-                <span>{(price?.disCount ?? 0).toLocaleString()}원</span>
-                <em>+</em>
-              </div>
-              <div className="delivery">
-                <p>총 배송비</p>
-                <span>
-                  {(price?.totalPrice ?? 0) < 20000 ? "2,500" : "0"}원
-                </span>
-              </div>
-              <div className="totalPrice">
-                <p>총 결제예상금액</p>
-                <span>
-                  {(
-                    (price?.totalPrice ?? 0) +
-                    ((price?.totalPrice ?? 0) >= 20000 ? 0 : 2500)
-                  ).toLocaleString()}
-                  원
-                </span>
-              </div>
-            </TotalPriceInfo>
-            <PaymentBox>
-              <button
-                className=""
-                style={{ marginRight: "10px" }}
-                onClick={(event) => {
-                  event.preventDefault();
 
-                  const selectedProduct = products?.filter((product) =>
-                    checkedItems?.includes(product?.objects?.object_seq ?? 0)
-                  );
-                  // setPaymentProducts(selectedProduct);
-                  // setSearchParams({ t_header_type: "2" });
+            {cartItems?.length > 0 && (
+              <>
+                <TotalPriceInfo>
+                  <div className="total">
+                    <p>총 판매가</p>
+                    <span>{(price?.totalCount ?? 0).toLocaleString()}원</span>
+                    <em>-</em>
+                  </div>
+                  <div className="discount">
+                    <p>총 할인금액</p>
+                    <span>{(price?.disCount ?? 0).toLocaleString()}원</span>
+                    <em>+</em>
+                  </div>
+                  <div className="delivery">
+                    <p>총 배송비</p>
+                    <span>
+                      {(price?.totalPrice ?? 0) < 20000 ? "2,500" : "0"}원
+                    </span>
+                  </div>
+                  <div className="totalPrice">
+                    <p>총 결제예상금액</p>
+                    <span>
+                      {(
+                        (price?.totalPrice ?? 0) +
+                        ((price?.totalPrice ?? 0) >= 20000 ? 0 : 2500)
+                      ).toLocaleString()}
+                      원
+                    </span>
+                  </div>
+                </TotalPriceInfo>
+                <PaymentBox>
+                  <button
+                    className=""
+                    style={{ marginRight: "10px" }}
+                    onClick={(event) => {
+                      event.preventDefault();
 
-                  navigate("/store/user-cart?t_header_type=2", {
-                    state: {
-                      products: selectedProduct,
-                      searchParams: { t_header_type: "2" },
-                    },
-                  });
-                }}
-              >
-                선택주문 ({checkedItems?.length})
-              </button>
-              <button
-                className="all-payment"
-                onClick={(event) => {
-                  event.preventDefault();
-                  // setPaymentProducts(
-                  //   products.filter(
-                  //     (product) => product?.objects?.soldOut === false
-                  //   )
-                  // );
-                  // setSearchParams({ t_header_type: "2" });
+                      const selectedProduct = products?.filter((product) =>
+                        checkedItems?.includes(
+                          product?.objects?.object_seq ?? 0
+                        )
+                      );
 
-                  navigate("/store/user-cart?t_header_type=2", {
-                    state: {
-                      products: products.filter(
-                        (product) => product?.objects?.soldOut === false
-                      ),
-                      searchParams: { t_header_type: "2" },
-                    },
-                  });
-                }}
-              >
-                전체주문
-              </button>
-            </PaymentBox>
+                      navigate("/store/user-cart?t_header_type=2", {
+                        state: {
+                          products: selectedProduct,
+                          searchParams: { t_header_type: "2" },
+                          price: price,
+                        },
+                      });
+                    }}
+                  >
+                    선택주문 ({checkedItems?.length})
+                  </button>
+                  <button
+                    className="all-payment"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      navigate("/store/user-cart?t_header_type=2", {
+                        state: {
+                          products: products.filter(
+                            (product) => product?.objects?.soldOut === false
+                          ),
+                          searchParams: { t_header_type: "2" },
+                          price: price,
+                        },
+                      });
+                    }}
+                  >
+                    전체주문
+                  </button>
+                </PaymentBox>
+              </>
+            )}
           </Container>
         )}
 
         {/*  주문 결제 */}
         {headerType === "2" && <StoreUserPayment />}
+
+        {/* 주문완료 */}
+        {headerType === "3" && <StoreUserOrder />}
       </Center>
     </div>
   );
@@ -732,29 +744,7 @@ const Information = styled.div`
     }
   }
 `;
-const Tags = styled.div`
-  justify-content: normal !important;
-  column-gap: 1px;
-  span {
-    color: #fff;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: ${theme.fontSize.small};
-    margin-right: 2px;
-    &.sale {
-      background-color: #f65c60;
-    }
-    &.coupon {
-      background-color: #9bce26;
-    }
-    &.free {
-      background-color: #ad85ed;
-    }
-    &.oneMore {
-      background-color: #ff8942;
-    }
-  }
-`;
+
 const ProductBox = styled.div`
   table {
     width: 100%;

@@ -6,10 +6,8 @@ import type { RootState } from "../../redex/store";
 import type { CardProps } from "./card.type";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { addToCart } from "../../pages/carts/addToCart";
-import { supabase } from "../../supabase";
-import { modify } from "../../redex/reducers/userCartCount";
 import { handleCartCount, handlePrice } from "../../bin/common";
+import { addItemCart } from "../../pages/carts/addItemCart";
 const ObjectCardColumn: React.FC<CardProps> = (props) => {
   const { size, data } = props;
   const navigate = useNavigate();
@@ -37,12 +35,8 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
             <span>{(data?.count ?? 0).toLocaleString()}원</span>
           )}
           <em>
-            {handlePrice(
-              data?.saleItem !== null ? true : false,
-              data?.count,
-              data?.saleItem?.discount_rate
-            ).toLocaleString()}
-            원{data?.option && "~"}
+            {handlePrice(data?.saleItem, data?.count).toLocaleString()}원
+            {data?.option && "~"}
           </em>
         </Count>
         <img
@@ -57,12 +51,11 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
               navigate("/login");
               return;
             } else {
-              delete data.saleItem;
-              const add = addToCart({ dataInfo: data, addCount: 1 });
-              if (await add) {
-                const cartCount = await handleCartCount(userData);
-                dispatch(modify(cartCount ?? 0));
+              if (data?.soldOut) {
+                alert("품절된 상품입니다.");
+                return;
               }
+              addItemCart({ objects: data, addCount: 1, dispatch: dispatch });
             }
           }}
         />
@@ -70,14 +63,13 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
       <TagWrapper className="tags">
         {data?.saleItem !== null && <TagText className="sale">세일</TagText>}
         {data?.coupon && <TagText className="coupon">쿠폰</TagText>}
-        {data?.one_more && (
-          <TagText className="oneMore">{data.one_more}+1</TagText>
+        {!data?.saleItem ||
+          (data?.saleItem?.one_more && (
+            <TagText className="oneMore">{data?.saleItem?.one_more}+1</TagText>
+          ))}
+        {handlePrice(data?.saleItem, data?.count) >= 20000 && (
+          <TagText className="free">무배</TagText>
         )}
-        {handlePrice(
-          data?.saleItem !== null ? true : false,
-          data?.count,
-          data?.saleItem?.discount_rate
-        ) > 20000 && <TagText className="free">무배</TagText>}
       </TagWrapper>
       {data?.best && <BestIcon />}
     </CardWapper>

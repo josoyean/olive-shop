@@ -8,6 +8,7 @@ import type { PlanShopType } from "compontents/card/card.type";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
 import EmptyComponent from "../../compontents/EmptyComponent";
 const StorePlanShopList = () => {
+  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const menuType = searchParams.get("menuType");
@@ -21,7 +22,12 @@ const StorePlanShopList = () => {
       setObjects([]);
       return;
     }
-    let query = supabase.from("objects").select("*").eq("soldOut", "False");
+    let query = supabase
+      .from("objects")
+      .select("*,saleItem(*)")
+      .eq("soldOut", "False");
+    // .filter("saleItem.start_sale_date", "lte", today)
+    // .filter("saleItem.end_sale_date", "gte", today);
 
     if (menuType !== "전체") {
       query = query.eq("objectTypeMain", menuType);
@@ -34,7 +40,6 @@ const StorePlanShopList = () => {
       objects: objectsData?.filter((obj) => obj.brand_seq === brand_seq),
     }));
 
-    console.log(grouped);
     const groupedFilter = grouped.every((item) => item.objects.length >= 2);
     if (!groupedFilter) {
       setObjects([]);

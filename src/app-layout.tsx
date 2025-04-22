@@ -44,7 +44,7 @@ const memberNav: NavTyle[] = [
   },
   {
     name: "마이페이지",
-    path: "/login",
+    path: "",
   },
   {
     name: "주문배송",
@@ -328,7 +328,7 @@ const AppLayout: React.FC = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const userData = useSelector((state: RootState) => state?.user);
-  const userCartsCount = useSelector((state: RootState) => state?.cartCount);
+  const cartItems = useSelector((state: RootState) => state?.cartDate);
   const [menuBar, setMenuBar] = useState<boolean>(false);
   const componentRef = useRef<HTMLElement>(null);
   const [searchValue, setSearchValue] = useState<string>("");
@@ -416,7 +416,7 @@ const AppLayout: React.FC = () => {
                       {item.name}
                       {item.name == "장바구니" && (
                         <em style={{ color: "#116dff", marginLeft: "5px" }}>
-                          {"(" + userCartsCount + ")"}
+                          {"(" + cartItems?.length + ")"}
                         </em>
                       )}
                     </span>

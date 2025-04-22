@@ -37,6 +37,7 @@ const Search = ({
     setOpenedSearch(false);
     navigate(`/store/search-main?getSearchValue=${searchValue}`);
   };
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (

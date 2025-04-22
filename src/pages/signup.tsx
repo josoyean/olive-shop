@@ -137,6 +137,9 @@ const SignUp = () => {
         addressMain: "",
         addressSub: "",
         postNumber: "",
+        deliveryPhone: "",
+        enterInfo: "",
+        deliveryName: "",
       });
       alert("회원가입이 완료되었습니다.");
       navigate("/login");

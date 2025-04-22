@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { handlePrice } from "../../bin/common";
 
 const ObjectCardRow: React.FC<CardProps> = (props) => {
-  const { size, imgSize, data } = props;
+  const { size, imgSize, data, onClick } = props;
   const navigate = useNavigate();
 
   return (
@@ -16,6 +16,7 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
       onClick={(event) => {
         event.preventDefault();
         navigate(`/store/goods-detail?getGoods=${data?.object_seq}`);
+        onClick?.();
       }}
       $imgSize={imgSize}
       $soldOut={data?.soldOut}
@@ -34,26 +35,23 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
               <span>{(data.count ?? 0).toLocaleString()}원</span>
             )}
             <em>
-              {handlePrice(
-                data?.saleItem !== null ? true : false,
-                data?.count,
-                data?.saleItem?.discount_rate
-              ).toLocaleString()}
-              원{data?.option && "~"}
+              {handlePrice(data?.saleItem, data?.count).toLocaleString()}원
+              {data?.option && "~"}
             </em>
           </Count>
         </div>
         <TagWrapper>
-          {data?.sale && <TagText className="sale">세일</TagText>}
+          {data?.saleItem !== null && <TagText className="sale">세일</TagText>}
           {data?.coupon && <TagText className="coupon">쿠폰</TagText>}
-          {data?.one_more && (
-            <TagText className="oneMore">{data.one_more}+1</TagText>
+          {!data?.saleItem ||
+            (data?.saleItem?.one_more && (
+              <TagText className="oneMore">
+                {data?.saleItem?.one_more}+1
+              </TagText>
+            ))}
+          {handlePrice(data?.saleItem, data?.count) >= 20000 && (
+            <TagText className="free">무배</TagText>
           )}
-          {handlePrice(
-            data?.saleItem !== null ? true : false,
-            data?.count,
-            data?.saleItem?.discount_rate
-          ) > 20000 && <TagText className="free">무배</TagText>}
         </TagWrapper>
         {data.best && <BestIcon />}
       </div>

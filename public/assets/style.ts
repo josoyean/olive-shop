@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { theme } from "./styles/theme";
 
 export const Center = styled.div`
   width: 1020px;
@@ -167,4 +168,36 @@ export const GreenBtn = styled.button`
   font-size: 12px !important;
   line-height: 28px;
   border-radius: 5px;
+`;
+
+export const Tags = styled.div`
+  justify-content: normal !important;
+  column-gap: 1px;
+  span {
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: ${theme.fontSize.small};
+    margin-right: 2px;
+    &.sale {
+      background-color: #f65c60;
+    }
+    &.coupon {
+      background-color: #9bce26;
+    }
+    &.free {
+      background-color: #ad85ed;
+    }
+    &.oneMore {
+      background-color: #ff8942;
+    }
+    &.today_sale {
+      background-color: #6fcff7;
+    }
+  }
+`;
+
+export const Info = styled.span`
+  font-weight: 600;
+  color: red;
 `;

@@ -2,32 +2,41 @@ import React, { useEffect } from "react";
 import styled from "styled-components";
 import { theme } from "../../../public/assets/styles/theme";
 import type { CardImageType, HotDealCardType } from "./card.type";
-import { handleCartCount, handlePrice } from "../../bin/common";
+import {
+  handleCartCount,
+  handlePrice,
+  handlePriceTest,
+} from "../../bin/common";
 import type { RootState } from "redex/store";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { addToCart } from "../../pages/carts/addToCart";
-import { modify } from "../../redex/reducers/userCartCount";
+import { addItemCart } from "../../pages/carts/addItemCart";
 
-const HotDealCard = ({ data }: { data: HotDealCardType }) => {
+const HotDealCard = ({ data }: { data: CardImageType }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const today = new Date().toISOString().split("T")[0];
   const userData = useSelector((state: RootState) => state?.user.token);
 
   return (
     <Container
       onClick={(event) => {
         event.preventDefault();
-        navigate(`/store/goods-detail?getGoods=${data?.objects?.object_seq}`);
+        console.log(data.object_seq);
+        navigate(`/store/goods-detail?getGoods=${data?.object_seq}`);
       }}
     >
       <div className="img_box">
-        <img src={data?.objects?.img} className="img" alt="" />
+        <img src={data?.img} className="img" alt="" />
         <span>
-          <span>{data?.objects?.discount_rate}%</span>
+          <span>
+            {(data?.saleItem?.discount_rate || 0) +
+              (data?.saleItem?.today_discount_rate || 0)}
+            %
+          </span>
         </span>
 
-        {data?.objects?.soldOut && (
+        {data?.soldOut && (
           <div>
             <em>품절</em>
           </div>
@@ -46,42 +55,41 @@ const HotDealCard = ({ data }: { data: HotDealCardType }) => {
               navigate("/login");
               return;
             } else {
-              const add = addToCart({ dataInfo: data?.objects, addCount: 1 });
-              if (await add) {
-                const cartCount = await handleCartCount(userData);
-                dispatch(modify(cartCount ?? 0));
+              if (data?.soldOut) {
+                alert("품절된 상품입니다.");
+                return;
               }
+              addItemCart({ objects: data, addCount: 1, dispatch: dispatch });
             }
           }}
         />
-        <em>{data?.objects?.name}</em>
+        <em>{data?.name}</em>
         <Count>
           <em>
-            {handlePrice(
-              true,
-              data?.objects?.count,
-              data?.discount_rate
-            )?.toLocaleString()}
-            원{data?.objects?.option && "~"}
+            {handlePrice(data?.saleItem, data?.count)?.toLocaleString()}원
+            {data?.option && "~"}
           </em>
-          {<span>{(data?.objects?.count ?? 0).toLocaleString()}원</span>}
+          {<span>{(data?.count ?? 0).toLocaleString()}원</span>}
         </Count>
+
         <Tags>
           <span className="sale">세일</span>
-          {data?.objects?.coupon && <span className="coupon">쿠폰</span>}
-          {data?.objects?.one_more && (
-            <span className="oneMore">{data?.objects?.one_more}+1</span>
+          {data?.coupon && <span className="coupon">쿠폰</span>}
+          {data?.saleItem?.one_more && (
+            <span className="oneMore">{data?.saleItem?.one_more}+1</span>
           )}
-          {handlePrice(
-            data.objects?.sale,
-            data.objects?.count,
-            data.objects?.discount_rate
-          ) > 20000 && <span className="free">무배</span>}
+          {handlePrice(data?.saleItem, data?.count) >= 20000 && (
+            <span className="free">무배</span>
+          )}
+          {today === data?.saleItem?.today_sale_date && (
+            <span className="today_sale">오특</span>
+          )}
         </Tags>
       </div>
     </Container>
   );
 };
+
 const Tags = styled.div`
   span {
     float: left;
@@ -107,6 +115,10 @@ const Tags = styled.div`
     &.oneMore {
       color: #ff8942;
       border-color: #ff8942;
+    }
+    &.today_sale {
+      color: #6fcff7;
+      border-color: #6fcff7;
     }
   }
 `;

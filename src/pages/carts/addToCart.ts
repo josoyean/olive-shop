@@ -52,10 +52,11 @@ export const addToCart = async ({
       }
     }
   } else {
+    const { saleItem, ...cleanedObject } = dataInfo;
     const { data: existingItem, error } = await supabase.from("carts").insert([
       {
         object_count: addCount,
-        ...dataInfo,
+        ...cleanedObject,
         created_at: new Date().toISOString(),
         userId: user?.uid, // 사용자 ID 추가
       },

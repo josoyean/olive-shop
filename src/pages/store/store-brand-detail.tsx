@@ -13,6 +13,7 @@ import { handleFilter } from "../../bin/common";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
 
 const StoreBrandDetail = () => {
+  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const [searchParams] = useSearchParams();
   const searchParam = searchParams.get("getBrand");
 
@@ -35,8 +36,10 @@ const StoreBrandDetail = () => {
 
     const { data: nameData, error: nameError } = await supabase
       .from("objects")
-      .select("*")
-      .eq("brand_seq", value);
+      .select("*,saleItem(*)")
+      .eq("brand_seq", value)
+      .filter("saleItem.start_sale_date", "lte", today)
+      .filter("saleItem.end_sale_date", "gte", today);
     setObjects(nameData ?? []);
 
     const data = nameData?.map((item) => item?.objectTypeMain).sort();

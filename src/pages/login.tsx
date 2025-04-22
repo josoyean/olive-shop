@@ -16,6 +16,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { handleCartItems } from "../bin/common";
 // import { createUserWithEmailAndPassword } from "firebase/auth";
 interface DataType {
   id: string;
@@ -23,6 +24,8 @@ interface DataType {
   saveId: boolean;
 }
 const Login = () => {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
   const user = useSelector((state: RootState) => state?.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -50,6 +53,7 @@ const Login = () => {
             ...(data.saveId ? { userId: data.id } : {}),
           })
         );
+        handleCartItems(token, dispatch, false);
         navigate("/");
       })
       .catch((error) => {
@@ -59,17 +63,18 @@ const Login = () => {
   };
 
   const onSubmit = async (data: DataType) => {
+    console.log(currentUser);
     try {
       const usersRef = collection(db, "users"); // users 컬렉션 참조
       const id = query(usersRef, where("id", "==", data.id)); // 특정 이메일 찾기
 
       const idSnapshot = await getDocs(id);
-
       if (!idSnapshot.empty) {
         const email = idSnapshot.docs[0].data().email;
         handleSignin(email, data);
       }
     } catch (error) {
+      console.log(error);
       console.error(error);
     }
   };

@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Center } from "../../../public/assets/style";
+import { Center, Tags } from "../../../public/assets/style";
 import { theme } from "../../../public/assets/styles/theme";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "../../supabase";
 import { useNavigate } from "react-router-dom";
-import type { CardImageType } from "compontents/card/card.type";
+import type { CardImageType, ReviewType } from "compontents/card/card.type";
 import type { RootState } from "redex/store";
-import { addToCart } from "../../pages/carts/addToCart";
 import Slider from "react-slick";
-import { calculatePrice, handleCartCount, handlePrice } from "../../bin/common";
+import {
+  calculatePrice,
+  calculatePriceNY,
+  handlePrice,
+  handleCartCount,
+} from "../../bin/common";
 import { useSelector, useDispatch } from "react-redux";
 import { modify } from "../../redex/reducers/userCartCount";
 import ObjectCardRow from "../../compontents/card/ObjectCardRow";
@@ -17,34 +21,54 @@ import {
   addProducts,
   clearProducts,
 } from "../../redex/reducers/recentProductsData";
+import { addItemCart } from "../../pages/carts/addItemCart";
 interface Test {
   [key: string]: number;
 }
 const StoreGoodsDetail = () => {
+  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const [objects, setObjects] = useState<CardImageType>();
   const [objectItems, setObjectItems] = useState<CardImageType[]>([]);
+  const [reviewItems, setReviewItems] = useState<ReviewType[]>([]);
   const [imgIndex, setImageIndex] = useState<number>(0);
   const [buyCount, setBuyCount] = useState<number>(1);
   const [detailOpened, setDetailOpened] = useState<boolean>(false);
+  const [openedTabs, setOpenedTabs] = useState<number>(1);
+  const [reviewScore, setReviewSore] = useState<number[]>();
   const userData = useSelector((state: RootState) => state?.user.token);
   const productData = useSelector((state: RootState) => state?.recentProducts);
   const searchObject = searchParams.get("getGoods");
   const handleData = async (item: string) => {
     const { data: selectedData, error: cartError } = await supabase
       .from("objects")
-      .select("*")
+      .select("*,saleItem(*)")
       .eq("object_seq", item);
+
     const selected = !selectedData ? {} : selectedData[0];
+
     setObjects(selected);
     dispatch(addProducts(selected));
 
     const { data: objectData, error } = await supabase
       .from("objects")
-      .select("*");
+      .select("*,saleItem(*)");
     setObjectItems(!objectData ? [] : objectData);
+    console.log(objectData);
+    const { data: reviewData, reviewError } = await supabase
+      .from("reviews")
+      .select("*,objects(*)")
+      .eq("object_seq", item);
+
+    const totalScore = reviewData?.map((item) => item?.score);
+    //  const totalScore =
+    //    reviewData?.map((item) => item?.score)?.reduce((a, c) => a + c) /
+    //    (reviewData?.length || 0);
+
+    setReviewSore(totalScore ?? []);
+    setReviewItems(reviewData ?? []);
   };
 
   useEffect(() => {
@@ -58,25 +82,30 @@ const StoreGoodsDetail = () => {
     speed: 500,
     slidesToShow: 3,
     slidesToScroll: 1,
-
     swipeToSlide: true,
-    // autoplay: true,
     autoplaySpeed: 5000,
     arrows: true,
   };
 
-  // const calculatePrice = (
-  //   buyCount: number,
-  //   oneMore: number | null | undefined,
-  //   price: number
-  // ) => {
-  //   if (!oneMore) return buyCount * price;
+  const getStarWidth = (index: number) => {
+    const score =
+      (reviewScore ?? [])?.reduce((a, c) => a + c) / (reviewScore?.length || 0);
+    if (score >= index + 1) return "100%"; // 꽉 찬 별
+    if (score > index && score < index + 1) {
+      const decimal = score - index;
+      return `${decimal * 100}%`; // 일부만 채운 별
+    }
+    return "0%"; // 비어있는 별
+  };
 
-  //   if (buyCount % (oneMore + 1) === 0) {
-  //     buyCount = buyCount - 1;
-  //   }
-  //   return buyCount * price;
-  // };
+  const getGraphHeight = (index: number): string => {
+    if (!reviewScore || reviewScore.length === 0) return "0%";
+
+    const count = reviewScore.filter((item) => item === index + 1).length;
+    const percentage = (count * 100) / reviewScore.length;
+    return `${percentage}%`;
+  };
+
   return (
     <Center>
       <div>
@@ -121,30 +150,36 @@ const StoreGoodsDetail = () => {
                 {objects?.brand + " >"}{" "}
               </h3>
               <h2>{objects?.name}</h2>
+
               <Count>
-                {objects?.sale && (
+                {!objects?.saleItem || (
                   <span>{(objects?.count ?? 0).toLocaleString()}원</span>
                 )}
                 <em>
                   {handlePrice(
-                    objects?.sale,
-                    objects?.count,
-                    objects?.discount_rate
+                    objects?.saleItem,
+                    objects?.count
                   ).toLocaleString()}
                   원{objects?.option && "~"}
                 </em>
               </Count>
               <TagWrapper>
-                {objects?.sale && <TagText className="sale">세일</TagText>}
-                {objects?.coupon && <TagText className="coupon">쿠폰</TagText>}
-                {objects?.one_more && (
-                  <TagText className="oneMore">{objects.one_more}+1</TagText>
+                {objects?.saleItem !== null && (
+                  <span className="sale">세일</span>
                 )}
-                {handlePrice(
-                  objects?.sale,
-                  objects?.count,
-                  objects?.discount_rate
-                ) > 20000 && <TagText className="free">무배</TagText>}
+                {objects?.coupon && <span className="coupon">쿠폰</span>}
+                {!objects?.saleItem ||
+                  (objects?.saleItem?.one_more && (
+                    <span className="oneMore">
+                      {objects?.saleItem?.one_more}+1
+                    </span>
+                  ))}
+                {handlePrice(objects?.saleItem, objects?.count) >= 20000 && (
+                  <span className="free">무배</span>
+                )}
+                {today === objects?.saleItem?.today_sale_date && (
+                  <span className="today_sale">오특</span>
+                )}
               </TagWrapper>
             </div>
             <div>
@@ -194,10 +229,10 @@ const StoreGoodsDetail = () => {
                   </button>
                 </div>
               </BuyContainer>
-              {objects?.one_more && (
+              {objects?.saleItem?.one_more && (
                 <OneMoreContainer>
                   <span>
-                    <em>{objects?.one_more}+1</em> 적용되어 구매됩니다
+                    <em>{objects?.saleItem?.one_more}+1</em> 적용되어 구매됩니다
                   </span>
                 </OneMoreContainer>
               )}
@@ -205,12 +240,8 @@ const StoreGoodsDetail = () => {
                 <span>
                   {calculatePrice(
                     buyCount,
-                    objects?.one_more,
-                    handlePrice(
-                      objects?.sale,
-                      objects?.count,
-                      objects?.discount_rate
-                    )
+                    objects?.saleItem?.one_more,
+                    handlePrice(objects?.saleItem, objects?.count)
                   )?.toLocaleString() || 0}
                   원
                 </span>
@@ -220,7 +251,8 @@ const StoreGoodsDetail = () => {
                   <button
                     className="soldOut"
                     onClick={(event) => {
-                      alert("품절 입니다.");
+                      event.preventDefault();
+                      alert("품절된 상품입니다.");
                     }}
                   >
                     품절
@@ -233,21 +265,18 @@ const StoreGoodsDetail = () => {
                       onClick={async (event) => {
                         event.preventDefault();
                         event.stopPropagation();
-
                         if (userData === "") {
                           alert("로그인후 이용해주세요");
                           navigate("/login");
                           return;
                         } else {
                           if (!objects) return;
-                          const add = addToCart({
-                            dataInfo: objects,
+
+                          addItemCart({
+                            objects: objects,
                             addCount: buyCount,
+                            dispatch: dispatch,
                           });
-                          if (await add) {
-                            const cartCount = await handleCartCount(userData);
-                            dispatch(modify(cartCount ?? 0));
-                          }
                         }
                       }}
                     >
@@ -256,7 +285,51 @@ const StoreGoodsDetail = () => {
                     <button
                       className="buy"
                       onClick={(event) => {
-                        alert("준비중 입니다");
+                        event.preventDefault();
+                        if (userData === "") {
+                          alert("로그인후 이용해주세요");
+                          navigate("/login");
+                          return;
+                        }
+
+                        if (
+                          objects?.saleItem !== null &&
+                          calculatePriceNY(
+                            buyCount,
+                            objects?.saleItem?.one_more
+                          )
+                        ) {
+                          alert("추가상품을 선택해주세요.");
+                          return;
+                        }
+                        const totalCount = calculatePrice(
+                          buyCount,
+                          objects?.saleItem?.one_more,
+                          handlePrice(null, objects?.count)
+                        );
+                        const totalPrice = calculatePrice(
+                          buyCount,
+                          objects?.saleItem?.one_more,
+                          handlePrice(objects?.saleItem, objects?.count)
+                        );
+
+                        navigate("/store/user-cart?t_header_type=2", {
+                          state: {
+                            products: [
+                              {
+                                objects,
+                                object_count: buyCount,
+                                object_seq: objects?.object_seq,
+                              },
+                            ],
+                            searchParams: { t_header_type: "2" },
+                            price: {
+                              totalCount: totalCount || 0,
+                              disCount: (totalCount || 0) - (totalPrice || 0),
+                              totalPrice: totalPrice || 0,
+                            },
+                          },
+                        });
                       }}
                     >
                       바로구매
@@ -269,31 +342,90 @@ const StoreGoodsDetail = () => {
         </BoxContainer>
         <TabContainer>
           <div className="tabs">
-            <span className="active">상세보기</span>
             <span
-              onClick={() => {
-                alert("준비중 입니다");
+              className={`${openedTabs === 1 && "active"}`}
+              onClick={(event) => {
+                event.preventDefault();
+                setOpenedTabs(1);
+                setDetailOpened(false);
               }}
             >
-              리뷰
+              상세보기
+            </span>
+            <span
+              className={`${openedTabs === 2 && "active"}`}
+              onClick={(event) => {
+                event.preventDefault();
+                setOpenedTabs(2);
+              }}
+            >
+              리뷰 ({reviewItems?.length})
             </span>
           </div>
-          <DetailedContainer $open={detailOpened}>
-            <div>
-              <img src={objects?.detailImg} alt="상세이미지" />
+          {openedTabs === 1 ? (
+            <DetailedContainer $open={detailOpened}>
+              <div>
+                <img src={objects?.detailImg} alt="상세이미지" />
+              </div>
+              <button
+                className="moreButton"
+                type="button"
+                onClick={async (event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setDetailOpened(!detailOpened);
+                }}
+              >
+                상품설명 {detailOpened ? "접기" : "더보기"}
+              </button>
+            </DetailedContainer>
+          ) : (
+            <div style={{ padding: "50px 0" }}>
+              {reviewItems?.length > 0 ? (
+                <ReviewsContainer>
+                  <div className="score-graph">
+                    <div className="score">
+                      <span>총 {reviewItems?.length?.toLocaleString()}건</span>
+                      <em>
+                        {(reviewScore ?? [])?.reduce((a, c) => a + c) /
+                          (reviewScore?.length || 0)}{" "}
+                        점
+                      </em>
+                      <ul className="star-box">
+                        {[0, 1, 2, 3, 4].map((i) => (
+                          <li key={i}>
+                            <span
+                              className="rating"
+                              style={{ width: getStarWidth(i) }}
+                            ></span>
+                            <img
+                              src="/public/assets/images/icons/bg_rating_star.png"
+                              alt="bg_rating_star"
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="graph">
+                      <ul>
+                        {[0, 1, 2, 3, 4].map((i) => (
+                          <li key={i}>
+                            <em>{getGraphHeight(i + 1)}</em>
+                            <GraphHeight
+                              height={getGraphHeight(i + 1)}
+                            ></GraphHeight>
+                            <em style={{ color: "#888" }}>{i + 1}점</em>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </ReviewsContainer>
+              ) : (
+                ""
+              )}
             </div>
-            <button
-              className="moreButton"
-              type="button"
-              onClick={async (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                setDetailOpened(!detailOpened);
-              }}
-            >
-              상품설명 {detailOpened ? "접기" : "더보기"}
-            </button>
-          </DetailedContainer>
+          )}
         </TabContainer>
         <SliderContainer>
           <Slider className="slider-container" {...settings}>
@@ -305,6 +437,11 @@ const StoreGoodsDetail = () => {
                   imgSize="100px"
                   data={item}
                   key={index}
+                  onClick={() => {
+                    setOpenedTabs(1);
+                    setDetailOpened(false);
+                    window.scrollTo(0, 0);
+                  }}
                 />
               ))}
           </Slider>
@@ -313,6 +450,93 @@ const StoreGoodsDetail = () => {
     </Center>
   );
 };
+const GraphHeight = styled.span<{ height: string }>`
+  display: block;
+  width: 8px;
+  border-radius: 5px;
+  margin: 10px auto;
+  background-color: #e5e5e5;
+  height: 100px;
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    bottom: 0;
+    height: ${(theme) => theme.height};
+    background-color: #f27370;
+    border-radius: 5px;
+  }
+`;
+const ReviewsContainer = styled.div`
+  .score-graph {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    .score {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      row-gap: 12px;
+      > span {
+        font-size: 18px;
+        font-weight: 700;
+      }
+      em {
+        font-size: 35px;
+        font-weight: 900;
+      }
+    }
+
+    .star-box {
+      display: flex;
+      column-gap: 7px;
+      li {
+        width: 26px;
+        height: 26px;
+        position: relative;
+      }
+      span {
+        position: absolute;
+        z-index: 4;
+        top: 0;
+        left: 0;
+        display: block;
+        width: 100%;
+        height: 26px;
+        background-color: #f27370;
+      }
+      img {
+        width: 26px;
+        height: 26px;
+        z-index: 9;
+        position: absolute;
+        overflow: hidden;
+      }
+    }
+
+    .graph {
+      ul {
+        display: flex;
+        justify-content: center;
+        li {
+          width: 56px;
+          /* display: flex; */
+          /* flex-direction: column; */
+          /* align-items: center; */
+
+          em {
+            text-align: center;
+            display: block;
+            font-size: 14px;
+            color: #aaa;
+            font-weight: 700;
+          }
+        }
+      }
+    }
+  }
+`;
 const OneMoreContainer = styled.div`
   border: 1px solid ${theme.lineColor.sub};
   padding: 15px 10px;
@@ -600,30 +824,17 @@ const Count = styled.div`
     font-weight: 700;
   }
 `;
-const TagWrapper = styled.div`
+const TagWrapper = styled(Tags)`
   justify-content: normal !important;
   column-gap: 2px;
   display: flex;
   margin-top: 5px;
-`;
-
-const TagText = styled.span`
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 15px;
-  font-size: ${theme.fontSize.middle};
-  /* margin-right: 1px; */
-  &.sale {
-    background-color: #f65c60;
-  }
-  &.coupon {
-    background-color: #9bce26;
-  }
-  &.free {
-    background-color: #ad85ed;
-  }
-  &.oneMore {
-    background-color: #ff8942;
+  span {
+    font-size: ${theme.fontSize.middle};
+    padding: 4px 8px;
+    border-radius: 15px;
+    font-size: ${theme.fontSize.middle};
+    margin-right: 1px;
   }
 `;
 

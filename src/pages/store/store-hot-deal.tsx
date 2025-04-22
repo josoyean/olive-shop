@@ -17,15 +17,11 @@ const StoreHotDeal = () => {
   const today = new Date().toISOString().split("T")[0];
   const handleData = async () => {
     const { data, error } = await supabase
-      .from("saleItem")
-      .select(
-        `
-     *,
-      objects:object_seq (*)
-    `
-      )
-      .eq("today_sale_date", todays);
-    console.log(data);
+      .from("objects")
+      .select("*, saleItem(*)")
+      .not("saleItem", "is", null)
+      .eq("saleItem.today_sale_date", today);
+
     if (!data) return;
     setObjects(data ?? []);
     if (error) {

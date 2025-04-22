@@ -13,6 +13,7 @@ import {
 import EmptyComponent from "../../compontents/EmptyComponent";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
 const StoreGoodsSale = () => {
+  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const [searchParams, setSearchParams] = useSearchParams();
   const menuType = searchParams.get("menuType");
   const tabsType = searchParams.get("tabsType");
@@ -20,27 +21,34 @@ const StoreGoodsSale = () => {
   const [selected, setSelected] = useState<string | undefined>(
     filteredSearch[0].type
   );
-  const [objects, setObjects] = useState<CardImageType[]>([]);
+
   const [objectsList, setObjectsList] = useState<CardImageType[]>([]);
   const handleLoadData = useCallback(async () => {
     let query = supabase.from("objects").select("*,saleItem(*)");
-    if (tabsType !== "핫인기세일") {
-      // 증정하나더
-      query = query.in("one_more", [1, 2]);
-    }
 
     if (menuType !== "전체") {
       query = query.eq("objectTypeMain", menuType);
     }
+    // 증정하나더
+    if (tabsType === "핫인기세일") {
+      query = query.is("saleItem.one_more", null);
+    } else {
+      query = query.in("saleItem.one_more", [1, 2]);
+    }
+    //세일
+    if (tabsType === "핫인기세일") {
+      query = query
+        .filter("saleItem.start_sale_date", "lte", today)
+        .filter("saleItem.end_sale_date", "gte", today);
+    }
+
     const { data } = await query;
 
     const filteredData = handleFilter(
       "popular",
-      tabsType === "핫인기세일"
-        ? data?.filter((item) => item.saleItem) ?? []
-        : data ?? []
+      data?.filter((item) => item.saleItem) ?? []
     );
-    setObjects(data ?? []);
+
     setObjectsList(filteredData);
   }, [tabsType, menuType]);
 
@@ -66,6 +74,7 @@ const StoreGoodsSale = () => {
                 type="button"
                 onClick={(event) => {
                   event.preventDefault();
+                  setSelected("popular");
                   setSearchParams({
                     menuType: "전체",
                     tabsType: "핫인기세일",
@@ -80,6 +89,7 @@ const StoreGoodsSale = () => {
                 type="button"
                 onClick={(event) => {
                   event.preventDefault();
+                  setSelected("popular");
                   setSearchParams({
                     menuType: "전체",
                     tabsType: "증정하나더",
@@ -91,10 +101,11 @@ const StoreGoodsSale = () => {
             </div>
           </Tabs>
           <CategoryMenu style={{}} />
-          {objects && objects?.length > 0 ? (
+          {objectsList && objectsList?.length > 0 ? (
             <Container>
               <h2>
-                전체 <span>{objects?.length}</span>개의 상품이 등록되어 있습니다
+                전체 <span>{objectsList?.length}</span>개의 상품이 등록되어
+                있습니다
               </h2>
               <div className="filter">
                 {filteredSearch?.map((item) => (
@@ -110,7 +121,7 @@ const StoreGoodsSale = () => {
                       setSelected(item.type);
                       const filteredData = handleFilter(
                         item.type ?? "popular",
-                        objects ?? []
+                        objectsList ?? []
                       );
 
                       setObjectsList(filteredData);
@@ -121,14 +132,13 @@ const StoreGoodsSale = () => {
                 ))}
               </div>
               <div className="object">
-                {objectsList &&
-                  objectsList?.map((object) => (
-                    <ObjectCardColumn
-                      size="230px"
-                      data={object}
-                      key={object?.object_seq}
-                    />
-                  ))}
+                {objectsList?.map((object) => (
+                  <ObjectCardColumn
+                    size="230px"
+                    data={object}
+                    key={object?.object_seq}
+                  />
+                ))}
               </div>
             </Container>
           ) : (
