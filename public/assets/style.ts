@@ -34,7 +34,22 @@ export const Container = styled.div`
     align-items: center;
   }
 `;
-
+export const InputBox = styled.input<{ width: string; height: string | null }>`
+  width: ${({ width }) => width};
+  height: ${({ height }) => height || "50px"};
+  border: 1px solid ${({ theme }) => theme.lineColor.sub};
+  font-size: 15px;
+  color: #131518;
+  border-radius: 6px;
+  padding: 0px 10px;
+  &::placeholder {
+    font-size: 13px;
+  }
+  &:focus {
+    border-color: ${({ theme }) => theme.fontColor.main};
+    outline: none;
+  }
+`;
 export const InputWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -99,8 +114,6 @@ export const ObjectsBox = styled.div`
       display: flex;
       column-gap: 15px;
       align-items: center;
-
-      /* justify-content: flex-end; */
       img {
         cursor: pointer;
       }
@@ -200,4 +213,49 @@ export const Tags = styled.div`
 export const Info = styled.span`
   font-weight: 600;
   color: red;
+`;
+
+export const BlueButton = styled.button<{ width: string; height: string }>`
+  width: ${({ width }) => width};
+  height: ${({ height }) => height};
+  line-height: ${({ height }) => height};
+  border-radius: 3px;
+  background-color: ${({ theme }) => theme.color.main};
+  color: #fff;
+  white-space: nowrap;
+`;
+export const WhiteButton = styled.button<{
+  width: string | null;
+  height: string;
+}>`
+  width: ${({ width }) => width || "auto"};
+  height: ${({ height }) => height};
+  line-height: ${({ height }) => height};
+  border-radius: 3px;
+  background-color: #fff;
+  white-space: nowrap;
+  color: ${({ theme }) => theme.color.main};
+  border: 1px solid ${({ theme }) => theme.color.main};
+`;
+
+export const Textarea = styled.textarea<{
+  width: string;
+  height: string | null | undefined;
+}>`
+  width: ${({ width }) => width};
+  height: ${({ height }) => height || "120px"};
+
+  border: 1px solid ${({ theme }) => theme.lineColor.sub};
+  font-size: 15px;
+  color: #131518;
+  border-radius: 6px;
+  padding: 10px;
+  &:focus {
+    border-color: ${({ theme }) => theme.fontColor.main};
+    outline: none;
+  }
+  resize: none;
+  &::placeholder {
+    font-size: 13px;
+  }
 `;

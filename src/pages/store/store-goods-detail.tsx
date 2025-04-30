@@ -6,6 +6,15 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "../../supabase";
 import { useNavigate } from "react-router-dom";
 import type { CardImageType, ReviewType } from "compontents/card/card.type";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+import { auth, db } from "../../firebase";
 import type { RootState } from "redex/store";
 import Slider from "react-slick";
 import {
@@ -13,34 +22,49 @@ import {
   calculatePriceNY,
   handlePrice,
   handleCartCount,
+  handleSaleTF,
+  defaultProfile,
 } from "../../bin/common";
 import { useSelector, useDispatch } from "react-redux";
 import { modify } from "../../redex/reducers/userCartCount";
 import ObjectCardRow from "../../compontents/card/ObjectCardRow";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import {
   addProducts,
   clearProducts,
 } from "../../redex/reducers/recentProductsData";
 import { addItemCart } from "../../pages/carts/addItemCart";
+import EmptyComponent from "../../compontents/EmptyComponent";
+import { dividerClasses } from "@mui/material";
+import moment from "moment";
+import ModalContainer from "../../compontents/ModalContainer";
 interface Test {
   [key: string]: number;
 }
 const StoreGoodsDetail = () => {
   const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
+  const productData = useSelector((state: RootState) => state?.recentProducts);
+  const userData = useSelector((state: RootState) => state?.user.token);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
+
   const [objects, setObjects] = useState<CardImageType>();
   const [objectItems, setObjectItems] = useState<CardImageType[]>([]);
   const [reviewItems, setReviewItems] = useState<ReviewType[]>([]);
+  const [reviewImages, setReviewImages] = useState<ReviewType[]>([]);
   const [imgIndex, setImageIndex] = useState<number>(0);
   const [buyCount, setBuyCount] = useState<number>(1);
   const [detailOpened, setDetailOpened] = useState<boolean>(false);
   const [openedTabs, setOpenedTabs] = useState<number>(1);
   const [reviewScore, setReviewSore] = useState<number[]>();
-  const userData = useSelector((state: RootState) => state?.user.token);
-  const productData = useSelector((state: RootState) => state?.recentProducts);
   const searchObject = searchParams.get("getGoods");
+  const [detailReviews, setDetailReviews] = useState<ReviewType>({});
+
+  const [detailImgOpened, setDetailImgOpened] = useState<boolean>(false);
+  const [detailImgIndex, setDetailImgIndex] = useState<string>(0);
+  const [imgOpened, setImgOpened] = useState<boolean>(false);
   const handleData = async (item: string) => {
     const { data: selectedData, error: cartError } = await supabase
       .from("objects")
@@ -55,22 +79,63 @@ const StoreGoodsDetail = () => {
     const { data: objectData, error } = await supabase
       .from("objects")
       .select("*,saleItem(*)");
-    setObjectItems(!objectData ? [] : objectData);
-    console.log(objectData);
+    setObjectItems(
+      !objectData
+        ? []
+        : objectData?.filter((data) => data?.object_seq !== Number(item))
+    );
+
+    handleReviewData(item);
+  };
+
+  const handleReviewData = async (item: string) => {
     const { data: reviewData, reviewError } = await supabase
       .from("reviews")
       .select("*,objects(*)")
-      .eq("object_seq", item);
+      .eq("object_seq", item)
+      .order("created_at", { ascending: false });
 
     const totalScore = reviewData?.map((item) => item?.score);
-    //  const totalScore =
-    //    reviewData?.map((item) => item?.score)?.reduce((a, c) => a + c) /
-    //    (reviewData?.length || 0);
-
+    // const img = reviewData?.flatMap((item) => item?.reviewImg);
     setReviewSore(totalScore ?? []);
-    setReviewItems(reviewData ?? []);
+
+    const reviews = await handleReview(reviewData ?? []);
+
+    setReviewItems(reviews ?? []);
+    const img =
+      reviews?.flatMap((item) =>
+        item?.reviewImg?.map((img, index) => {
+          return { ...item, img: img, index: index };
+        })
+      ) ?? [];
+    setReviewImages(img ?? []);
   };
 
+  const handleReview = async (data: ReviewType[]): Promise<ReviewType[]> => {
+    const updatedData = await Promise.all(
+      data.map(async (item) => {
+        try {
+          const usersRef = collection(db, "users");
+          const q = query(usersRef, where("userId", "==", item.userId));
+          const idSnapshot = await getDocs(q);
+
+          if (!idSnapshot.empty) {
+            return {
+              ...item,
+              userInfo: idSnapshot.docs[0].data(), // null 제거
+            };
+          } else {
+            return null; // 유저가 없으면 null 반환
+          }
+        } catch (error) {
+          console.error("에러 발생:", error);
+          return null;
+        }
+      }) ?? []
+    );
+
+    return (updatedData ?? [])?.filter(Boolean);
+  };
   useEffect(() => {
     if (!searchObject) return;
     handleData(searchObject);
@@ -86,7 +151,25 @@ const StoreGoodsDetail = () => {
     autoplaySpeed: 5000,
     arrows: true,
   };
+  const reviewSettings = {
+    infinite: false,
+    // speed: 500,
+    swipeToSlide: true,
+    slidesToShow: 5,
+    arrows: false,
+    slidesToScroll: 1,
+    // centerMode: true,
+    // centerPadding: "0px",
+    // variableWidth: "120px",
+  };
 
+  const detailSettings = {
+    infinite: false,
+    swipeToSlide: true,
+    slidesToShow: 6,
+    slidesToScroll: 1,
+    focusOnSelect: true,
+  };
   const getStarWidth = (index: number) => {
     const score =
       (reviewScore ?? [])?.reduce((a, c) => a + c) / (reviewScore?.length || 0);
@@ -97,15 +180,49 @@ const StoreGoodsDetail = () => {
     }
     return "0%"; // 비어있는 별
   };
-
+  const getStarIndividualWidth = (index: number, score: number) => {
+    if (score >= index + 1) return "100%"; // 꽉 찬 별
+    if (score > index && score < index + 1) {
+      const decimal = score - index;
+      return `${decimal * 100}%`; // 일부만 채운 별
+    }
+    return "0%"; // 비어있는 별
+  };
   const getGraphHeight = (index: number): string => {
     if (!reviewScore || reviewScore.length === 0) return "0%";
 
     const count = reviewScore.filter((item) => item === index + 1).length;
-    const percentage = (count * 100) / reviewScore.length;
+    const percentage = ((count * 100) / reviewScore.length).toFixed(1);
     return `${percentage}%`;
   };
 
+  const handleLike = async (id: string) => {
+    console.log(id);
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    const currentLikes = data.likeUserId || [];
+    let newLikes = null;
+
+    if (data.likeUserId.includes(userData)) {
+      // 좋아요 누름
+      newLikes = currentLikes.filter((id) => id !== userData);
+    } else {
+      // 종아요 안누름
+      newLikes = [...currentLikes, userData];
+    }
+
+    await supabase
+      .from("reviews")
+      .update({ likeUserId: newLikes })
+      .eq("id", id)
+      .select();
+
+    handleReviewData(searchObject ?? "");
+  };
   return (
     <Center>
       <div>
@@ -152,7 +269,7 @@ const StoreGoodsDetail = () => {
               <h2>{objects?.name}</h2>
 
               <Count>
-                {!objects?.saleItem || (
+                {handleSaleTF(objects?.saleItem) && (
                   <span>{(objects?.count ?? 0).toLocaleString()}원</span>
                 )}
                 <em>
@@ -164,7 +281,7 @@ const StoreGoodsDetail = () => {
                 </em>
               </Count>
               <TagWrapper>
-                {objects?.saleItem !== null && (
+                {handleSaleTF(objects?.saleItem) && (
                   <span className="sale">세일</span>
                 )}
                 {objects?.coupon && <span className="coupon">쿠폰</span>}
@@ -266,9 +383,14 @@ const StoreGoodsDetail = () => {
                         event.preventDefault();
                         event.stopPropagation();
                         if (userData === "") {
-                          alert("로그인후 이용해주세요");
-                          navigate("/login");
-                          return;
+                          if (
+                            window.confirm(
+                              `로그인후 이용해주세요\n로그인 하시겠습니까?`
+                            )
+                          ) {
+                            navigate("/login");
+                            return;
+                          }
                         } else {
                           if (!objects) return;
 
@@ -287,9 +409,14 @@ const StoreGoodsDetail = () => {
                       onClick={(event) => {
                         event.preventDefault();
                         if (userData === "") {
-                          alert("로그인후 이용해주세요");
-                          navigate("/login");
-                          return;
+                          if (
+                            window.confirm(
+                              `로그인후 이용해주세요\n로그인 하시겠습니까?`
+                            )
+                          ) {
+                            navigate("/login");
+                            return;
+                          }
                         }
 
                         if (
@@ -387,8 +514,11 @@ const StoreGoodsDetail = () => {
                     <div className="score">
                       <span>총 {reviewItems?.length?.toLocaleString()}건</span>
                       <em>
-                        {(reviewScore ?? [])?.reduce((a, c) => a + c) /
-                          (reviewScore?.length || 0)}{" "}
+                        {Math.floor(
+                          ((reviewScore ?? [])?.reduce((a, c) => a + c) /
+                            (reviewScore?.length || 0)) *
+                            10
+                        ) / 10}{" "}
                         점
                       </em>
                       <ul className="star-box">
@@ -410,9 +540,9 @@ const StoreGoodsDetail = () => {
                       <ul>
                         {[0, 1, 2, 3, 4].map((i) => (
                           <li key={i}>
-                            <em>{getGraphHeight(i + 1)}</em>
+                            <em>{getGraphHeight(i)}</em>
                             <GraphHeight
-                              height={getGraphHeight(i + 1)}
+                              height={getGraphHeight(i)}
                             ></GraphHeight>
                             <em style={{ color: "#888" }}>{i + 1}점</em>
                           </li>
@@ -420,9 +550,138 @@ const StoreGoodsDetail = () => {
                       </ul>
                     </div>
                   </div>
+                  {reviewImages?.length > 0 && (
+                    <div className="reviews-img">
+                      {reviewImages?.map(
+                        (item, index) =>
+                          index < 8 && (
+                            <ReviewImg
+                              key={index}
+                              $last={index === 7 ? "block" : "none"}
+                              onClick={(event) => {
+                                event.preventDefault();
+                                if (index === 7) {
+                                  // 더보기 클릭
+                                  setImgOpened(true);
+                                } else {
+                                  // 일반 사진 클릭
+                                  setDetailImgIndex(item?.index ?? "0");
+                                  setDetailReviews(item);
+                                  setDetailImgOpened(true);
+                                }
+                              }}
+                            >
+                              <em>더보기 </em>
+                              <img src={item?.img || ""} alt="reviews-img" />
+                            </ReviewImg>
+                          )
+                      )}
+                    </div>
+                  )}
+
+                  <div className="reviews-box">
+                    {reviewItems?.map((item, index) => (
+                      <ReviewBox key={index}>
+                        <div className="user-info">
+                          <div>
+                            <img
+                              src={item?.userInfo?.profileImg || defaultProfile}
+                              alt="profileImg"
+                            />
+                          </div>
+                          <em>
+                            {item?.userInfo?.nickName || item?.userInfo?.name}
+                          </em>
+                        </div>
+                        <div className="reviews">
+                          <div className="score-date">
+                            <ul className="star-box">
+                              {[0, 1, 2, 3, 4].map((i) => (
+                                <li key={i}>
+                                  <span
+                                    className="rating"
+                                    style={{
+                                      width: getStarIndividualWidth(
+                                        i,
+                                        item?.score ?? 0
+                                      ),
+                                    }}
+                                  ></span>
+                                  <img
+                                    src="/public/assets/images/icons/bg_rating_star.png"
+                                    alt="bg_rating_star"
+                                  />
+                                </li>
+                              ))}
+                            </ul>
+                            <em>
+                              {moment(item?.created_at).format("YYYY.MM.DD")}
+                            </em>
+                          </div>
+                          {item?.reviewImg && item?.reviewImg?.length > 0 && (
+                            <div className="img-box">
+                              <ImgSliderContainer>
+                                <Slider
+                                  className="slider-container "
+                                  {...reviewSettings}
+                                >
+                                  {item?.reviewImg?.map((img, index) => (
+                                    <div
+                                      key={index}
+                                      className="img"
+                                      onClick={(event) => {
+                                        event.preventDefault();
+                                        setDetailImgIndex(String(index));
+                                        setDetailReviews(item);
+                                        setDetailImgOpened(true);
+                                      }}
+                                    >
+                                      <img src={img} alt="리뷰 이미지" />
+                                    </div>
+                                  ))}
+                                </Slider>
+                              </ImgSliderContainer>
+                            </div>
+                          )}
+                          <span>{item?.reviewText}</span>
+                          {/* item.userId !== userData && */}
+                          {
+                            <div
+                              className={`${
+                                item.likeUserId?.includes(userData) ? "on" : ""
+                              } ${
+                                item.userId === userData ? "my-review" : ""
+                              } like-box`}
+                            >
+                              <strong>이 리뷰가 도움이 돼요! </strong>
+                              <button
+                                onClick={(event) => {
+                                  event.preventDefault();
+                                  if (!userData) {
+                                    if (
+                                      window.confirm(
+                                        `로그인후 이용해주세요\n로그인 하시겠습니까?`
+                                      )
+                                    ) {
+                                      navigate("/login");
+                                      return;
+                                    }
+                                  }
+                                  if (item.userId === userData) return;
+                                  handleLike(userData);
+                                }}
+                              >
+                                {item?.likeUserId?.length}
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      </ReviewBox>
+                    ))}
+                  </div>
                 </ReviewsContainer>
               ) : (
-                ""
+                <EmptyComponent mainText="등록된 리뷰가 없습니다." subText="" />
               )}
             </div>
           )}
@@ -446,10 +705,417 @@ const StoreGoodsDetail = () => {
               ))}
           </Slider>
         </SliderContainer>
+        <ModalContainer
+          isOpen={imgOpened}
+          onClose={() => setImgOpened(false)}
+          widthCheck={"850px"}
+          header="사진목록"
+          heightCheck="500px"
+        >
+          {reviewImages?.length > 0 && (
+            <ReviewImagesModal>
+              {reviewImages?.map((item, index) => (
+                <div
+                  key={index}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setDetailImgOpened(true);
+                    setDetailImgIndex(item?.index ?? "0");
+                    setDetailReviews(item);
+                  }}
+                >
+                  <img src={item?.img} alt="사진목록 이미지" />
+                </div>
+              ))}
+            </ReviewImagesModal>
+          )}
+        </ModalContainer>
+        <ModalContainer
+          isOpen={detailImgOpened}
+          onClose={() => setDetailImgOpened(false)}
+          widthCheck={"850px"}
+          header="포토 상세"
+          heightCheck="600px"
+        >
+          <DetailReview>
+            <div className="img-wrap">
+              <div className="main-img">
+                <img
+                  src={detailReviews?.reviewImg?.[Number(detailImgIndex)] ?? ""}
+                  alt=""
+                />
+              </div>
+              <div className="sub-img">
+                <DetailSliderContainer>
+                  <Slider
+                    className="slider-container "
+                    {...detailSettings}
+                    initialSlide={0}
+                  >
+                    {detailReviews?.reviewImg?.map((item, index) => (
+                      <div
+                        key={index}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          setDetailImgIndex(String(index));
+                        }}
+                      >
+                        <img src={item ?? ""} alt="" />
+                      </div>
+                    ))}
+                  </Slider>
+                </DetailSliderContainer>
+              </div>
+            </div>
+            <div className="info">
+              <div className="reviews">
+                <div className="user-info">
+                  <div>
+                    <img
+                      src={
+                        detailReviews?.userInfo?.profileImg || defaultProfile
+                      }
+                      alt="profileImg"
+                    />
+                  </div>
+                  <em>
+                    {detailReviews?.userInfo?.nickName ||
+                      detailReviews?.userInfo?.name}
+                  </em>
+                </div>
+                <ul className="star-box">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <li key={i}>
+                      <span
+                        className="rating"
+                        style={{
+                          width: getStarIndividualWidth(
+                            i,
+                            detailReviews?.score ?? 0
+                          ),
+                        }}
+                      ></span>
+                      <img
+                        src="/public/assets/images/icons/bg_rating_star.png"
+                        alt="bg_rating_star"
+                      />
+                    </li>
+                  ))}
+                </ul>
+                <em>
+                  {moment(detailReviews?.created_at).format("YYYY.MM.DD")}
+                </em>
+                {/* </div> */}
+
+                <span>{detailReviews?.reviewText}</span>
+              </div>
+            </div>
+          </DetailReview>
+        </ModalContainer>
       </div>
     </Center>
   );
 };
+const DetailSliderContainer = styled.div`
+  .slick-track {
+    margin-left: unset;
+  }
+  .slick-slide {
+    width: 80px;
+    height: 80px;
+    padding-right: 5px;
+    &:last-child {
+      padding-right: 0;
+    }
+    /* margin: 0 5px; */
+    > div {
+      /* margin: 0 -5px; */
+      width: 100%;
+      height: 100%;
+      > div {
+        height: 100%;
+      }
+    }
+  }
+`;
+const DetailReview = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 20px;
+  height: 100%;
+  .img-wrap {
+    grid-column: 1 / span 2;
+    .main-img {
+      width: 100%;
+      height: calc(100% - 90px);
+    }
+    .sub-img {
+      margin-top: 10px;
+    }
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .info {
+    grid-column: 3 / span 1;
+  }
+
+  .user-info {
+    display: flex;
+    width: 255px;
+    column-gap: 7px;
+    align-items: center;
+    height: fit-content;
+    > div {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      overflow: hidden;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    em {
+      width: calc(100% - 100px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 19px;
+      color: #131518;
+    }
+  }
+
+  .reviews {
+    display: flex;
+    flex-direction: column;
+    row-gap: 8px;
+
+    > span {
+      color: #555;
+      line-height: 24px;
+      font-size: 16px;
+      display: inline-block;
+    }
+  }
+
+  .star-box {
+    display: flex;
+    column-gap: 4px;
+    li {
+      width: 20px;
+      height: 20px;
+      position: relative;
+    }
+    span {
+      position: absolute;
+      z-index: 4;
+      top: 0;
+      left: 0;
+      display: block;
+      width: 100%;
+      height: 20px;
+      background-color: #f27370;
+    }
+    img {
+      width: 20px;
+      height: 20px;
+      z-index: 9;
+      position: absolute;
+      overflow: hidden;
+    }
+  }
+`;
+const ReviewImagesModal = styled.div`
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: grid;
+  width: 100%;
+  grid-auto-rows: max-content;
+  grid-template-columns: repeat(9, 80px);
+  gap: 5px;
+  > div {
+    width: 80px;
+    height: 80px;
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+`;
+const ReviewBox = styled.div`
+  padding: 15px 0;
+  border-bottom: 1px solid ${({ theme }) => theme.lineColor.main};
+  display: flex;
+  .user-info {
+    display: flex;
+    width: 255px;
+    column-gap: 15px;
+    align-items: center;
+    height: fit-content;
+    > div {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    em {
+      width: calc(100% - 100px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 19px;
+      color: #131518;
+    }
+  }
+  .score-date {
+    display: flex;
+    flex-direction: row;
+    column-gap: 20px;
+    align-items: center;
+    em {
+      color: #888;
+      font-weight: 400;
+    }
+  }
+  .star-box {
+    display: flex;
+    column-gap: 7px;
+    li {
+      width: 23px;
+      height: 23px;
+      position: relative;
+    }
+    span {
+      position: absolute;
+      z-index: 4;
+      top: 0;
+      left: 0;
+      display: block;
+      width: 100%;
+      height: 23px;
+      background-color: #f27370;
+    }
+    img {
+      width: 23px;
+      height: 23px;
+      z-index: 9;
+      position: absolute;
+      overflow: hidden;
+    }
+  }
+
+  .reviews {
+    display: flex;
+    flex-direction: column;
+    row-gap: 12px;
+    width: calc(100% - 255px);
+    > span {
+      color: #555;
+      line-height: 24px;
+      font-size: 16px;
+      display: inline-block;
+    }
+  }
+  .img-box {
+  }
+  .like-box {
+    display: flex;
+    align-items: center;
+    column-gap: 15px;
+    button {
+      width: 60px;
+      border: 1px solid #131518;
+      color: #131518;
+      height: 25px;
+      border-radius: 20px;
+      font-size: 16px;
+    }
+
+    &.on {
+      button {
+        background-color: #116dff;
+        border: 1px solid #116dff;
+        color: #fff;
+      }
+    }
+    &.my-review {
+      button {
+        background-color: #eeeeee;
+        border: 1px solid #ccc;
+        color: #333333;
+      }
+    }
+  }
+`;
+const ImgSliderContainer = styled.div`
+  .slick-active {
+    border: none;
+  }
+  .slick-track {
+    margin-left: unset;
+  }
+  .img {
+    width: 148px !important;
+    //width: 165px !important;
+    //padding-right: 10px;
+    height: 148px;
+    position: relative;
+    &::after {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      content: "";
+      width: 20px;
+      height: 20px;
+      background: url(https://static.oliveyoung.co.kr/pc-static-root/image/product/ico_image_more.png)
+        0 0 / 20px auto no-repeat;
+    }
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+`;
+const ReviewImg = styled.div<{ $last: string }>`
+  width: 120px;
+  height: 120px;
+  cursor: pointer;
+  position: relative;
+  img {
+    width: 100%;
+    filter: ${(props) =>
+      props.$last === "block" ? "brightness(0.8)" : "none"};
+    height: 100%;
+  }
+  em {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: ${(props) => props.$last};
+    //display: block;
+    z-index: 19;
+    text-align: center;
+    line-height: 120px;
+    color: #fff;
+  }
+`;
+
 const GraphHeight = styled.span<{ height: string }>`
   display: block;
   width: 8px;
@@ -535,6 +1201,16 @@ const ReviewsContainer = styled.div`
         }
       }
     }
+  }
+
+  .reviews-img {
+    display: grid;
+    justify-content: space-between;
+    padding: 30px 0 20px 0;
+    margin: 20px 0;
+    border-bottom: 1px solid ${theme.lineColor.sub};
+    border-top: 1px solid ${theme.lineColor.sub};
+    grid-template-columns: repeat(8, 120px);
   }
 `;
 const OneMoreContainer = styled.div`

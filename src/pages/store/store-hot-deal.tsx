@@ -3,16 +3,13 @@ import { Center, MainTitle } from "../../../public/assets/style";
 import styled from "styled-components";
 import { supabase } from "../../supabase";
 import HotDealCard from "../../compontents/card/HotDealCard";
-import type {
-  CardImageType,
-  HotDealCardType,
-} from "compontents/card/card.type";
+import type { CardImageType } from "compontents/card/card.type";
 import { theme } from "../../../public/assets/styles/theme";
 import moment from "moment";
 import Countdown, { CountdownRenderProps } from "react-countdown";
 
 const StoreHotDeal = () => {
-  const [objects, setObjects] = useState<HotDealCardType[]>([]);
+  const [objects, setObjects] = useState<CardImageType[]>([]);
   const todays = moment().format("YYYY-MM-DD");
   const today = new Date().toISOString().split("T")[0];
   const handleData = async () => {

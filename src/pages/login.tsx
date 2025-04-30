@@ -6,6 +6,7 @@ import { auth, db } from "../firebase";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../redex/store";
+import { useCookies } from "react-cookie";
 import { add, type UserInfoType } from "../redex/reducers/userReducer";
 import {
   collection,
@@ -16,14 +17,16 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { handleCartItems } from "../bin/common";
-// import { createUserWithEmailAndPassword } from "firebase/auth";
+import { handleCartItems, getUserInfo } from "../bin/common";
+import { setUserInfo } from "../redex/reducers/userInfo";
+
 interface DataType {
   id: string;
   password: string;
   saveId: boolean;
 }
 const Login = () => {
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
   const auth = getAuth();
   const currentUser = auth.currentUser;
   const user = useSelector((state: RootState) => state?.user);
@@ -46,15 +49,22 @@ const Login = () => {
       .then((userCredential) => {
         const token = userCredential.user.uid;
 
-        dispatch(
-          add({
-            token: token,
-            saveId: data.saveId,
-            ...(data.saveId ? { userId: data.id } : {}),
+        getUserInfo(token, dispatch)
+          .then((info) => {
+            dispatch(
+              add({
+                token: token,
+                saveId: data.saveId,
+                ...(data.saveId ? { userId: data.id } : {}),
+              })
+            );
+            setCookie("token", token, { maxAge: 1 * 24 * 60 * 60 }); // 1일
+            handleCartItems(token, dispatch, false);
+            navigate(-1);
           })
-        );
-        handleCartItems(token, dispatch, false);
-        navigate("/");
+          .catch((error) => {
+            return;
+          });
       })
       .catch((error) => {
         alert("일치한 회원정보가 없습니다.");
@@ -63,7 +73,6 @@ const Login = () => {
   };
 
   const onSubmit = async (data: DataType) => {
-    console.log(currentUser);
     try {
       const usersRef = collection(db, "users"); // users 컬렉션 참조
       const id = query(usersRef, where("id", "==", data.id)); // 특정 이메일 찾기

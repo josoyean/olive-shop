@@ -6,14 +6,7 @@ import { useForm, FieldErrors, Controller } from "react-hook-form";
 import { auth, db } from "../../firebase";
 import { supabase } from "../../supabase";
 import type { RootState } from "../../redex/store";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import MenuItem from "@mui/material/MenuItem";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -27,11 +20,17 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import moment from "moment";
 import type { CardImageType, CartType } from "compontents/card/card.type";
 import { theme } from "../../../public/assets/styles/theme";
-import { calculatePrice, randomOrderId, handlePrice } from "../../bin/common";
+import {
+  calculatePrice,
+  randomOrderId,
+  handlePrice,
+  getUserInfo,
+  isEmptyObject,
+} from "../../bin/common";
 import { deleteCart } from "../../redex/reducers/userCartCount";
 const postcodeScriptUrl =
   "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
-interface UserInfo {
+interface CardType {
   [key: string]: string;
 }
 
@@ -52,7 +51,7 @@ interface DataType {
   cardType: string;
   installment: number;
 }
-const koreanCardCompanyOptions: UserInfo[] = [
+const koreanCardCompanyOptions: CardType[] = [
   { label: "국민카드", value: "국민" },
   { label: "신한카드", value: "신한" },
   { label: "삼성카드", value: "삼성" },
@@ -76,6 +75,7 @@ const StoreUserPayment = () => {
   const dispatch = useDispatch();
   const open = useDaumPostcodePopup(postcodeScriptUrl);
   const userToken = useSelector((state: RootState) => state?.user.token);
+  const userInfoData = useSelector((state: RootState) => state?.userInfo);
   const [user, setUser] = useState<UserInfo>({});
   const [payment, setPayment] = useState(null);
 
@@ -96,31 +96,43 @@ const StoreUserPayment = () => {
 
   const enterType = watch("enter");
   const paymentType = watch("paymentType");
-  const userInfo = async () => {
-    try {
-      const usersRef = collection(db, "users"); // users 컬렉션 참조 installment
-      const id = query(usersRef, where("userId", "==", userToken)); // 특정 이메일 찾기
+  // const userInfo = async () => {
+  //   try {
+  //     const usersRef = collection(db, "users"); // users 컬렉션 참조 installment
+  //     const id = query(usersRef, where("userId", "==", userToken)); // 특정 이메일 찾기
 
-      // 특정 이메일 찾기
-      const idSnapshot = await getDocs(id);
+  //     // 특정 이메일 찾기
+  //     const idSnapshot = await getDocs(id);
 
-      if (!idSnapshot.empty) {
-        const data = idSnapshot.docs[0].data();
-        setValue("phoneNumber", data.deliveryPhone || data?.phoneNumber);
-        setValue("getName", data.deliveryName || data?.name);
-        setValue("addressMain", data?.addressMain);
-        setValue("addressSub", data?.addressSub);
-        setValue("postNumber", data?.postNumber);
-        setValue("enter", data?.enterInfo || "P");
-        setValue("paymentType", "C");
-        setUser(data);
-        // test(data);
-      }
-    } catch (error) {}
-  };
+  //     if (!idSnapshot.empty) {
+  //       const data = idSnapshot.docs[0].data();
+  //       setValue("phoneNumber", data.deliveryPhone || data?.phoneNumber);
+  //       setValue("getName", data.deliveryName || data?.name);
+  //       setValue("addressMain", data?.addressMain);
+  //       setValue("addressSub", data?.addressSub);
+  //       setValue("postNumber", data?.postNumber);
+  //       setValue("enter", data?.enterInfo || "P");
+  //       setValue("paymentType", "C");
+  //       setUser(data);
+  //       // test(data);
+  //     }
+  //   } catch (error) {}
+  // };
   useEffect(() => {
-    userInfo();
-  }, []);
+    if (isEmptyObject(userInfoData)) return;
+
+    setValue(
+      "phoneNumber",
+      userInfoData.deliveryPhone || userInfoData?.phoneNumber || ""
+    );
+    setValue("getName", userInfoData.deliveryName || userInfoData?.name || "");
+    setValue("addressMain", userInfoData?.addressMain || "");
+    setValue("addressSub", userInfoData?.addressSub || "");
+    setValue("postNumber", userInfoData?.postNumber || "");
+    setValue("enter", userInfoData?.enterInfo || "P");
+    setValue("paymentType", "C");
+    setUser(userInfoData);
+  }, [userInfoData]);
 
   const test = async (data: DataType) => {
     const orderId = moment().format("YYYYMMDDhhmmss");
@@ -168,8 +180,7 @@ const StoreUserPayment = () => {
       objectsInfo: productDate,
       deliveryStep: 1,
     };
-    console.log("insertDate", insertDate);
-    console.log("productDate", productDate);
+
     await supabase.from("payment").insert(insertDate);
 
     // navigate("/store/user-cart?t_header_type=3", {
@@ -217,12 +228,13 @@ const StoreUserPayment = () => {
         item?.objects?.saleItem?.one_more,
         handlePrice(item?.objects?.saleItem, item?.objects?.count)
       ),
+      payment_seq: moment().format("YYYYMMDDhhmmss") + item.object_seq,
     };
   });
   const onSubmit = async (data: DataType) => {
-    //  test(data);
+    test(data);
     //console.log(data);
-    //return;
+    return;
     const orderId = moment().format("YYYYMMDDhhmmss");
 
     const PaymentMethod =
@@ -350,6 +362,7 @@ const StoreUserPayment = () => {
           orderId: orderId,
         },
       });
+      getUserInfo(userToken, dispatch);
     }
   };
 
@@ -812,7 +825,7 @@ const StoreUserPayment = () => {
                                 </MenuItem>
                                 {koreanCardCompanyOptions &&
                                   koreanCardCompanyOptions?.map(
-                                    (option: UserInfo, index: number) => (
+                                    (option: CardType, index: number) => (
                                       <MenuItem
                                         value={option?.value}
                                         key={index}

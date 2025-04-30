@@ -4,7 +4,7 @@ import { theme } from "../../../public/assets/styles/theme";
 import BestIcon from "../BestIcon";
 import type { CardImageType, CardProps } from "./card.type";
 import { useNavigate } from "react-router-dom";
-import { handlePrice } from "../../bin/common";
+import { handlePrice, handleSaleTF } from "../../bin/common";
 
 const ObjectCardRow: React.FC<CardProps> = (props) => {
   const { size, imgSize, data, onClick } = props;
@@ -31,7 +31,7 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
 
         <div>
           <Count>
-            {data?.saleItem !== null && (
+            {handleSaleTF(data?.saleItem) && (
               <span>{(data.count ?? 0).toLocaleString()}원</span>
             )}
             <em>
@@ -41,7 +41,9 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
           </Count>
         </div>
         <TagWrapper>
-          {data?.saleItem !== null && <TagText className="sale">세일</TagText>}
+          {handleSaleTF(data?.saleItem) && (
+            <TagText className="sale">세일</TagText>
+          )}
           {data?.coupon && <TagText className="coupon">쿠폰</TagText>}
           {!data?.saleItem ||
             (data?.saleItem?.one_more && (

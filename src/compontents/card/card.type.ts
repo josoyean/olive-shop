@@ -63,20 +63,20 @@ export const filteredSearch: menuType[] = [
   { name: "할인율순", type: "sale" },
 ];
 
-export interface HotDealCardType {
-  object_seq?: number | undefined;
-  today_sale?: boolean | undefined;
-  objects?: CardImageType;
-  start_sale_date?: string;
-  end_sale_date?: string;
-  created_at?: string;
-  today_sale_date?: string;
-  count?: number;
-  discount_rate?: number;
-  id?: number;
-  object_count?: number | undefined;
-  one_more: number | null;
-}
+// export interface HotDealCardType {
+//   object_seq?: number | undefined;
+//   today_sale?: boolean | undefined;
+//   objects?: CardImageType;
+//   start_sale_date?: string;
+//   end_sale_date?: string;
+//   created_at?: string;
+//   today_sale_date?: string;
+//   count?: number;
+//   discount_rate?: number;
+//   id?: number;
+//   object_count?: number | undefined;
+//   one_more: number | null;
+// }
 
 export interface PlanShopType {
   brand_seq: number | undefined;
@@ -109,7 +109,6 @@ export interface SaleType {
   object_seq: number | undefined;
   discount_rate: number | undefined;
   today_discount_rate: number | undefined;
-  count: number | undefined;
   start_sale_date: string | undefined;
   end_sale_date: string | undefined;
   one_more: number | null;
@@ -142,12 +141,13 @@ export interface CartType {
   detailImg?: string;
   objectTypeMain?: string;
   objectTypeSub?: string;
-  brand_seq?: number;
   brand?: string;
   object_seq: number;
+  brand_seq?: number;
   object_count?: number;
   one_more?: number | null;
   objects?: CardImageType | undefined | null;
+  payment_seq?: string;
 }
 
 export interface PaymentType {
@@ -192,4 +192,45 @@ export interface ReviewType {
   likeUserId?: string[];
   score?: number;
   object_seq?: number;
+  userInfo?: UserInfoType;
+  img?: string;
+  index?: string;
+}
+
+export interface UserInfoType {
+  [key: string]:
+    | string
+    | string[]
+    | boolean
+    | number
+    | undefined
+    | null
+    | object;
+  createdAt?: string;
+  birthDy?: string;
+  phoneNumber?: string;
+  name?: string;
+  id?: string;
+  email?: string;
+  userId?: string;
+  addressMain?: string;
+  addressSub?: string;
+  postNumber?: string;
+  deliveryPhone?: string;
+  enterInfo?: string;
+  deliveryName?: string;
+  nickName?: string;
+  profileImg?: string;
+  infoText?: string;
+}
+
+export interface StringType {
+  [key: string]:
+    | string
+    | string[]
+    | boolean
+    | number
+    | undefined
+    | null
+    | object;
 }

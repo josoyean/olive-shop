@@ -13,6 +13,7 @@ import {
   handleCartCount,
   handleCartItems,
   handlePrice,
+  handleSaleTF,
 } from "../../bin/common";
 import { deleteCart, modify } from "../../redex/reducers/userCartCount";
 import MenuItem from "@mui/material/MenuItem";
@@ -39,6 +40,7 @@ const StoreUserCart = () => {
   const [checkedItems, setCheckedItem] = useState<number[]>();
   const [price, setPrice] = useState<PriceType | null>();
   const handleLoadData = async (data: CartType[]) => {
+    console.log(data);
     setProducts(data ?? []);
     const items = (data ?? []).filter(
       (product) => product.objects?.soldOut === false
@@ -93,10 +95,13 @@ const StoreUserCart = () => {
             (item?.objects?.count ?? 0) *
               (item?.object_count ?? 0) *
               0.01 *
-              (item?.objects?.saleItem?.discount_rate ?? 0);
+              ((handleSaleTF(item?.objects?.saleItem)
+                ? item?.objects?.saleItem?.discount_rate
+                : 0) ?? 0);
         }
       });
     });
+
     setPrice({
       totalCount: totalCount,
       disCount: disCount,
@@ -139,10 +144,10 @@ const StoreUserCart = () => {
 
           <div className="top-r">
             <span className={headerType === "1" ? "on" : ""}>
-              01 장바구니 {" >"}
+              01 장바구니 &gt;
             </span>
             <span className={headerType === "2" ? "on" : ""}>
-              02 주문/결제 {" >"}
+              02 주문/결제 &gt;
             </span>
             <span className={headerType === "3" ? "on" : ""}>03 주문완료</span>
           </div>
@@ -348,13 +353,7 @@ const StoreUserCart = () => {
                           </FormControl>
                         </TableBody>
                         <TableBody className="discount">
-                          {moment(today).isBetween(
-                            product?.objects?.saleItem?.start_sale_date,
-                            product?.objects?.saleItem?.end_sale_date
-                          ) ||
-                          moment().diff(
-                            product?.objects?.saleItem?.today_sale_date
-                          ) ? (
+                          {handleSaleTF(product?.objects?.saleItem) ? (
                             <>
                               <em>
                                 {calculatePrice(

@@ -6,10 +6,18 @@ import cartState from "./reducers/userCartCount";
 import recentProductsState from "./reducers/recentProductsData";
 import userSearchState from "./reducers/userSearch";
 import cartDataState from "./reducers/userCartData";
+import userInfoState from "./reducers/userInfo";
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["user", "cartCount", "recentProducts", "searchData", "cartDate"],
+  whitelist: [
+    "user",
+    "cartCount",
+    "recentProducts",
+    "searchData",
+    "cartDate",
+    "userInfo",
+  ],
 };
 const rootReducer = combineReducers({
   user: userState,
@@ -17,6 +25,7 @@ const rootReducer = combineReducers({
   recentProducts: recentProductsState,
   searchData: userSearchState,
   cartDate: cartDataState,
+  userInfo: userInfoState,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -140,6 +140,9 @@ const SignUp = () => {
         deliveryPhone: "",
         enterInfo: "",
         deliveryName: "",
+        nickName: "",
+        profileImg: "",
+        infoText: "",
       });
       alert("회원가입이 완료되었습니다.");
       navigate("/login");

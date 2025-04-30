@@ -18,6 +18,8 @@ import StoreGoodsSale from "./pages/store/store-goods-sale";
 import StoreEvents from "./pages/store/store-events";
 import StoreEventDetail from "./pages/store/store-event-detail";
 import StoreUserCart from "./pages/carts/store-user-cart";
+import Mypage from "./pages/mypage/mypage";
+import StoreMypage from "./pages/mypage/store-mypage";
 
 const routes: RouteObject[] = [
   {
@@ -87,6 +89,10 @@ const routes: RouteObject[] = [
       {
         path: "store/user-cart",
         element: <StoreUserCart />,
+      },
+      {
+        path: "store/mypage",
+        element: <StoreMypage />,
       },
     ],
   },

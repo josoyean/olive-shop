@@ -90,10 +90,7 @@ const ItemsContainer = styled(Center)`
         color: #181818;
       }
     }
-    .slick-list {
-      /* height: 180px !important; */
-    }
-    /* height: 400px; */
+
     span {
       padding: 8px 3px;
       box-sizing: border-box;

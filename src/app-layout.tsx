@@ -12,7 +12,8 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import SideBar from "./pages/sideBar";
 import TopButton from "./pages/TopButton";
 import FooterContainer from "./pages/footer";
-
+import { useCookies } from "react-cookie";
+import { deleteUserInfo } from "./redex/reducers/userInfo";
 interface NavTyle {
   name: string;
   path: string;
@@ -44,7 +45,7 @@ const memberNav: NavTyle[] = [
   },
   {
     name: "마이페이지",
-    path: "",
+    path: "/store/mypage?t_page=마이페이지",
   },
   {
     name: "주문배송",
@@ -329,6 +330,7 @@ const AppLayout: React.FC = () => {
   const dispatch = useDispatch();
   const userData = useSelector((state: RootState) => state?.user);
   const cartItems = useSelector((state: RootState) => state?.cartDate);
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
   const [menuBar, setMenuBar] = useState<boolean>(false);
   const componentRef = useRef<HTMLElement>(null);
   const [searchValue, setSearchValue] = useState<string>("");
@@ -378,12 +380,21 @@ const AppLayout: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    if (!cookies.token && userData.token) {
+      alert("로그인 세션이 만료 되었습니다. 다시 로그인해주새요");
+      dispatch(deleteUser());
+      dispatch(deleteUserInfo());
+      return;
+    }
   }, [location.pathname]);
+
   const handleSignedOut = async () => {
     await signOut(auth)
       .then(() => {
         navigate("/");
         dispatch(deleteUser());
+        dispatch(deleteUserInfo());
       })
       .catch((error) => {});
   };
@@ -515,7 +526,7 @@ const AppLayout: React.FC = () => {
                               );
                             }}
                           >
-                            {items.title.name} {" >"}
+                            {items.title.name} &gt;
                           </h3>
                           <ul>
                             {items.sub.map((item, index) => (

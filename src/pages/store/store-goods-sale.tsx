@@ -12,6 +12,7 @@ import {
 } from "../../compontents/card/card.type";
 import EmptyComponent from "../../compontents/EmptyComponent";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
+import ModalContainer from "../../compontents/ModalContainer";
 const StoreGoodsSale = () => {
   const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const [searchParams, setSearchParams] = useSearchParams();
@@ -21,15 +22,15 @@ const StoreGoodsSale = () => {
   const [selected, setSelected] = useState<string | undefined>(
     filteredSearch[0].type
   );
-
   const [objectsList, setObjectsList] = useState<CardImageType[]>([]);
+
   const handleLoadData = useCallback(async () => {
     let query = supabase.from("objects").select("*,saleItem(*)");
 
     if (menuType !== "전체") {
       query = query.eq("objectTypeMain", menuType);
     }
-    // 증정하나더
+
     if (tabsType === "핫인기세일") {
       query = query.is("saleItem.one_more", null);
     } else {
@@ -43,14 +44,15 @@ const StoreGoodsSale = () => {
     }
 
     const { data } = await query;
-
+    console.log(data?.filter((item) => item.saleItem) ?? []);
+    console.log(data);
     const filteredData = handleFilter(
       "popular",
       data?.filter((item) => item.saleItem) ?? []
     );
-
-    setObjectsList(filteredData);
-  }, [tabsType, menuType]);
+    console.log(filteredData);
+    setObjectsList(filteredData ?? []);
+  }, [tabsType, menuType, selected]);
 
   useEffect(() => {
     handleLoadData();
@@ -119,12 +121,12 @@ const StoreGoodsSale = () => {
                     onClick={(event) => {
                       event.preventDefault();
                       setSelected(item.type);
-                      const filteredData = handleFilter(
-                        item.type ?? "popular",
-                        objectsList ?? []
-                      );
+                      // const filteredData = handleFilter(
+                      //   item.type ?? "popular",
+                      //   objectsList ?? []
+                      // );
 
-                      setObjectsList(filteredData);
+                      // setObjectsList(filteredData);
                     }}
                   >
                     {item.name}
@@ -149,6 +151,8 @@ const StoreGoodsSale = () => {
           )}
         </div>
       </Center>
+
+      <ModalContainer>안녕</ModalContainer>
     </div>
   );
 };

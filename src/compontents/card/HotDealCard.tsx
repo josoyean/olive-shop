@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
 import { theme } from "../../../public/assets/styles/theme";
-import type { CardImageType, HotDealCardType } from "./card.type";
+import type { CardImageType } from "./card.type";
 import {
   handleCartCount,
   handlePrice,
   handlePriceTest,
+  handleSaleTF,
 } from "../../bin/common";
 import type { RootState } from "redex/store";
 import { useNavigate } from "react-router-dom";
@@ -22,7 +23,6 @@ const HotDealCard = ({ data }: { data: CardImageType }) => {
     <Container
       onClick={(event) => {
         event.preventDefault();
-        console.log(data.object_seq);
         navigate(`/store/goods-detail?getGoods=${data?.object_seq}`);
       }}
     >
@@ -51,9 +51,12 @@ const HotDealCard = ({ data }: { data: CardImageType }) => {
             event.stopPropagation();
 
             if (userData === "") {
-              alert("로그인후 이용해주세요");
-              navigate("/login");
-              return;
+              if (
+                window.confirm(`로그인후 이용해주세요\n로그인 하시겠습니까?`)
+              ) {
+                navigate("/login");
+                return;
+              }
             } else {
               if (data?.soldOut) {
                 alert("품절된 상품입니다.");
@@ -69,11 +72,13 @@ const HotDealCard = ({ data }: { data: CardImageType }) => {
             {handlePrice(data?.saleItem, data?.count)?.toLocaleString()}원
             {data?.option && "~"}
           </em>
-          {<span>{(data?.count ?? 0).toLocaleString()}원</span>}
+          {handleSaleTF(data?.saleItem) && (
+            <span>{(data?.count ?? 0).toLocaleString()}원</span>
+          )}
         </Count>
 
         <Tags>
-          <span className="sale">세일</span>
+          {handleSaleTF(data?.saleItem) && <span className="sale">세일</span>}
           {data?.coupon && <span className="coupon">쿠폰</span>}
           {data?.saleItem?.one_more && (
             <span className="oneMore">{data?.saleItem?.one_more}+1</span>

@@ -208,7 +208,7 @@ const FindId = () => {
 
             <div>
               <span>핸드폰번호</span>
-              <Buttom>
+              <Button>
                 <input
                   type="text"
                   placeholder="핸드폰번호를 입력해주세요"
@@ -241,7 +241,7 @@ const FindId = () => {
                 >
                   인증번호 전송
                 </button>
-              </Buttom>
+              </Button>
               <ErrorMessage
                 errors={errors}
                 name="phoneNumber"
@@ -252,7 +252,7 @@ const FindId = () => {
             </div>
             <div>
               <span>인증번호</span>
-              <Buttom>
+              <Button>
                 <input
                   type="text"
                   placeholder="인증번호를 입력해주세요"
@@ -288,7 +288,7 @@ const FindId = () => {
                 >
                   인증번호 확인
                 </button>
-              </Buttom>
+              </Button>
               <ErrorMessage
                 errors={errors}
                 name="code"
@@ -317,7 +317,7 @@ const FindId = () => {
 };
 export default FindId;
 
-const Buttom = styled.div`
+const Button = styled.div`
   display: flex;
   align-items: center;
   width: 400px;

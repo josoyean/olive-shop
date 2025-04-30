@@ -6,7 +6,7 @@ import type { RootState } from "../../redex/store";
 import type { CardProps } from "./card.type";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { handleCartCount, handlePrice } from "../../bin/common";
+import { handleCartCount, handlePrice, handleSaleTF } from "../../bin/common";
 import { addItemCart } from "../../pages/carts/addItemCart";
 const ObjectCardColumn: React.FC<CardProps> = (props) => {
   const { size, data } = props;
@@ -31,7 +31,7 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
 
       <div className="text-box">
         <Count>
-          {data?.saleItem !== null && (
+          {handleSaleTF(data?.saleItem) && (
             <span>{(data?.count ?? 0).toLocaleString()}원</span>
           )}
           <em>
@@ -47,9 +47,12 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
             event.stopPropagation();
 
             if (userData === "") {
-              alert("로그인후 이용해주세요");
-              navigate("/login");
-              return;
+              if (
+                window.confirm(`로그인후 이용해주세요\n로그인 하시겠습니까?`)
+              ) {
+                navigate("/login");
+                return;
+              }
             } else {
               if (data?.soldOut) {
                 alert("품절된 상품입니다.");
@@ -61,7 +64,9 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
         />
       </div>
       <TagWrapper className="tags">
-        {data?.saleItem !== null && <TagText className="sale">세일</TagText>}
+        {handleSaleTF(data?.saleItem) && (
+          <TagText className="sale">세일</TagText>
+        )}
         {data?.coupon && <TagText className="coupon">쿠폰</TagText>}
         {!data?.saleItem ||
           (data?.saleItem?.one_more && (
