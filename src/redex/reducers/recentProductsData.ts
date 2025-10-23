@@ -12,13 +12,13 @@ const recentProductsState = createSlice({
         action.payload,
         ...state.filter((id) => id?.object_seq !== action?.payload?.object_seq),
       ];
-      if (updatedProducts.length > 5) {
-        updatedProducts.length = 5;
-      }
+      // if (updatedProducts.length > 5) {
+      //   updatedProducts.length = 5;
+      // }
 
       return updatedProducts;
     },
-    clearProducts: (state, action: PayloadAction<CardImageType>) => {
+    clearProducts: (state) => {
       return []; // 상태 초기값
     },
   },

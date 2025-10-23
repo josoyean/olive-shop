@@ -2,33 +2,19 @@ import React, { useEffect, useState } from "react";
 import { Center, InputWrapper, Container } from "../../public/assets/style";
 import styled from "styled-components";
 import { useForm, FieldErrors } from "react-hook-form";
-import firebase from "firebase/app";
-import { auth, db } from "../firebase";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  setDoc,
-} from "firebase/firestore";
-// import { getFirestore, doc, setDoc } from "firebase/firestore";
+
 import "firebase/auth";
 import {
-  getAuth,
   signInWithPhoneNumber,
   RecaptchaVerifier,
   signInWithCredential,
   PhoneAuthProvider,
-  createUserWithEmailAndPassword,
-  fetchSignInMethodsForEmail,
 } from "firebase/auth";
-
 import { ErrorMessage } from "@hookform/error-message";
 import { formatPhoneNumber, numberOnly } from "../bin/common";
-import { Email, Tune } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import type { CheckedType } from "../types/userInfor";
+import { supabase } from "../supabase";
 interface DataType {
   id: string;
   password: string;
@@ -46,7 +32,7 @@ const SignUp = () => {
   const {
     register,
     handleSubmit,
-    // required,
+
     setFocus,
     setValue,
     reset,
@@ -54,7 +40,16 @@ const SignUp = () => {
     formState: { errors, touchedFields },
   } = useForm<DataType>({
     mode: "onChange",
-    defaultValues: {},
+    defaultValues: {
+      // id: "sykor1016",
+      // password: "@uw7905vf@",
+      // passwordAgain: "@uw7905vf@",
+      // name: "조소연",
+      // email: "dlfjswhtnals@naver.com",
+      // birthDy: "961016",
+      // phoneNumber: "01077337236",
+      // code: "000000",
+    },
   });
   const [verificationId, setVerificationId] = useState<string>("");
   const [checked, setChecked] = useState<CheckedType>({
@@ -89,65 +84,50 @@ const SignUp = () => {
       alert("인증번호 확인 완료해주세요");
       return;
     }
+    const { data: signData, error: signError } = await supabase.auth.signUp({
+      email: data.id + "@testemail.com",
+      password: data.password,
+    });
 
-    try {
-      const usersRef = collection(db, "users"); // users 컬렉션 참조
-      const name = query(usersRef, where("name", "==", data.name)); // 특정 이메일 찾기
-      const phone = query(
-        usersRef,
-        where("phoneNumber", "==", data.phoneNumber)
-      );
-
-      // 특정 이메일 찾기
-      const birthDay = query(usersRef, where("birthDy", "==", data.birthDy)); // 특정 이메일 찾기
-      const email = query(usersRef, where("email", "==", data.email)); // 특정 이메일 찾기
-      const nameSnapshot = await getDocs(name);
-      const phoneSnapshot = await getDocs(phone);
-      const birthDaySnapshot = await getDocs(birthDay);
-      const emailSnapshot = await getDocs(email);
-
+    if (signError?.code === "user_already_exists") {
       if (
-        !nameSnapshot.empty &&
-        !phoneSnapshot.empty &&
-        !emailSnapshot.empty &&
-        !birthDaySnapshot.empty
+        window.confirm(
+          "회원가입이 완료된 회원이 있습니다. 다시로그인 하겠습니까?"
+        )
       ) {
-        const data = nameSnapshot.docs[0].data();
-
-        if (data.name !== "") {
-          alert("이미 가입된 이메일입니다. 로그인해주세요!");
-          return;
-        }
+        navigate("/login");
       }
+      return;
+    }
 
-      const createdUser = await createUserWithEmailAndPassword(
-        auth,
-        data.email,
-        data.password
-      );
-      const user = createdUser.user;
-      await setDoc(doc(db, "users", user.uid), {
-        createdAt: new Date(),
-        birthDy: data.birthDy,
-        phoneNumber: data.phoneNumber,
-        name: data.name,
-        id: data.id,
-        email: data.email,
-        userId: user.uid,
-        addressMain: "",
-        addressSub: "",
-        postNumber: "",
-        deliveryPhone: "",
-        enterInfo: "",
-        deliveryName: "",
-        nickName: "",
-        profileImg: "",
-        infoText: "",
-      });
+    const userId = signData?.user?.id;
+    const { data: userInfoData, error: userInfoError } = await supabase
+      .from("userInfo")
+      .insert([
+        {
+          userId: data.id, // auth user id
+          addressMain: "",
+          addressSub: "",
+          birthDy: data.birthDy,
+          deliveryName: "",
+          deliveryPhone: "",
+          phoneNumber: data.phoneNumber,
+          email: data.email,
+          email_verified: false,
+          phone_verified: false,
+          enterInfo: "",
+          id: userId,
+          infoText: "",
+          name: data.name,
+          nickName: "",
+          postNumber: "",
+          profileImg: "",
+        },
+      ]);
+
+    if (!userInfoData) {
       alert("회원가입이 완료되었습니다.");
       navigate("/login");
-    } catch (error) {
-      console.log(error);
     }
   };
 
@@ -215,9 +195,13 @@ const SignUp = () => {
               <span>아이디</span>
               <input
                 type="text"
-                placeholder="OLIVE SHOP 아이디"
+                placeholder="OLIVE SHOP 아이디 (5자리 이상, 영문+숫자)"
                 {...register("id", {
                   required: "아이디를 입력하세요.",
+                  pattern: {
+                    value: /^(?=.*[a-zA-Z])(?=.*[0-9]).{5,}$/,
+                    message: "아이디는 5자리 이상 영문,숫자를 포함해야 합니다.",
+                  },
                   minLength: {
                     value: 5,
                     message: "아이디는 5자리 이상이어야 합니다.",

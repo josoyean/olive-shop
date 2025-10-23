@@ -20,6 +20,7 @@ import StoreEventDetail from "./pages/store/store-event-detail";
 import StoreUserCart from "./pages/carts/store-user-cart";
 import Mypage from "./pages/mypage/mypage";
 import StoreMypage from "./pages/mypage/store-mypage";
+import ChatbotContainer from "./pages/chatbot/Chatbot-Container";
 
 const routes: RouteObject[] = [
   {
@@ -87,7 +88,7 @@ const routes: RouteObject[] = [
         element: <StoreEventDetail />,
       },
       {
-        path: "store/user-cart",
+        path: "store/mypage/user-cart",
         element: <StoreUserCart />,
       },
       {
@@ -95,6 +96,10 @@ const routes: RouteObject[] = [
         element: <StoreMypage />,
       },
     ],
+  },
+  {
+    path: "/chatbot",
+    element: <ChatbotContainer />,
   },
 ];
 export { routes };

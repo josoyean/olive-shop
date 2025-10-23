@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const SideBar = () => {
-  const barRef = useRef<HTMLButtonElement>(null);
+  const barRef = useRef<HTMLButtonElement | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const productData = useSelector((state: RootState) => state?.recentProducts);

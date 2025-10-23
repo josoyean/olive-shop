@@ -6,6 +6,7 @@ import CategoryMenu from "../../compontents/CategoryMenu";
 import { supabase } from "../../supabase";
 import { handleFilter } from "../../bin/common";
 import { theme } from "../../../public/assets/styles/theme";
+import { Tabs } from "../../../public/assets/style";
 import {
   filteredSearch,
   type CardImageType,
@@ -44,8 +45,7 @@ const StoreGoodsSale = () => {
     }
 
     const { data } = await query;
-    console.log(data?.filter((item) => item.saleItem) ?? []);
-    console.log(data);
+
     const filteredData = handleFilter(
       "popular",
       data?.filter((item) => item.saleItem) ?? []
@@ -70,7 +70,7 @@ const StoreGoodsSale = () => {
       </MainLine>
       <Center>
         <div>
-          <Tabs>
+          <Tabs grid={2}>
             <div className={tabsType === "핫인기세일" ? "on" : ""}>
               <button
                 type="button"
@@ -102,7 +102,7 @@ const StoreGoodsSale = () => {
               </button>
             </div>
           </Tabs>
-          <CategoryMenu style={{}} />
+          <CategoryMenu />
           {objectsList && objectsList?.length > 0 ? (
             <Container>
               <h2>
@@ -151,8 +151,6 @@ const StoreGoodsSale = () => {
           )}
         </div>
       </Center>
-
-      <ModalContainer>안녕</ModalContainer>
     </div>
   );
 };
@@ -225,43 +223,6 @@ const MainLine = styled(MainTitle)`
       em,
       span {
         color: #000;
-      }
-    }
-  }
-`;
-const Tabs = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  margin: 30px 0 40px;
-  > div {
-    text-align: center;
-
-    position: relative;
-    button {
-      height: 50px;
-      line-height: 50px;
-      background: #f6f6f6;
-      color: #666;
-      font-size: 18px;
-      font-weight: 400;
-      width: 100%;
-    }
-
-    &.on {
-      button {
-        color: #fff;
-        background: #555;
-        &::after {
-          position: absolute;
-          content: "";
-          bottom: -5px;
-          left: 50%;
-          width: 12px;
-          height: 5px;
-          margin-left: -6px;
-          background: url(https://static.oliveyoung.co.kr/pc-static-root/image/comm/bg_tab_arrow.png)
-            no-repeat;
-        }
       }
     }
   }

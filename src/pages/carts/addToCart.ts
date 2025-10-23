@@ -47,7 +47,7 @@ export const addToCart = async ({
     } else {
       if (mode === "add") {
         if (window.confirm("장바구니 추가되었습니다. 확인하러가실건가요?")) {
-          window.location.href = "/store/user-cart?t_header_type=1";
+          window.location.href = "/store/mypage/user-cart?t_header_type=1";
         }
       }
     }
@@ -68,7 +68,7 @@ export const addToCart = async ({
     } else {
       if (mode === "add") {
         if (window.confirm("장바구니 추가되었습니다. 확인하러가실건가요?")) {
-          window.location.href = "/store/user-cart?t_header_type=1";
+          window.location.href = "/store/mypage/user-cart?t_header_type=1";
         }
       }
     }

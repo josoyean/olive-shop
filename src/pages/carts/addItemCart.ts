@@ -4,13 +4,15 @@ import { getAuth } from "firebase/auth";
 import type { AppDispatch } from "../../redex/store";
 import { setCartItems } from "../../redex/reducers/userCartData";
 import { handleCartItems } from "../../bin/common";
+
+interface CartType extends CardImageType {
+  addCount: number;
+}
 export const addItemCart = async ({
   objects,
-  addCount,
   dispatch,
 }: {
-  objects: CardImageType;
-  addCount: number;
+  objects: CartType;
   dispatch: AppDispatch;
 }) => {
   const auth = getAuth();
@@ -37,10 +39,10 @@ export const addItemCart = async ({
   if (!cartInfo || cartInfo?.length === 0) {
     // 장바구니 없음
 
-    const { saleItem, ...cleanedObject } = objects;
+    const { saleItem, addCount, ...cleanedObject } = objects;
     const { data: existingItem, error } = await supabase.from("carts").insert([
       {
-        object_count: addCount,
+        object_count: objects?.addCount,
         ...cleanedObject,
         created_at: new Date().toISOString(),
         userId: user?.uid, // 사용자 ID 추가
@@ -55,7 +57,7 @@ export const addItemCart = async ({
     }
   } else {
     // 장바구니 있음
-    const count: number = cartInfo?.object_count + addCount;
+    const count: number = cartInfo?.object_count + objects?.addCount;
 
     const { data: existingItem, error } = await supabase
       .from("carts")

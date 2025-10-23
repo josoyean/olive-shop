@@ -3,9 +3,9 @@ import styled from "styled-components";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { supabase } from "../../supabase";
 import type { CardImageType } from "compontents/card/card.type";
 import { useNavigate } from "react-router-dom";
+import { bannersData } from "../../api/axios-index";
 
 interface BannerType {
   object_seq: number;
@@ -30,30 +30,32 @@ const BannerContainer: React.FC = () => {
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 10000,
+    draggable: false,
     afterChange: () => {
       setUpdateCount(updateCount + 1);
       setIsDragging(false);
     },
-    beforeChange: (current, next: number) => {
+    beforeChange: (_: number, next: number) => {
       setSlideIndex(next);
       setIsDragging(true);
     },
   };
 
   useEffect(() => {
-    const bannersData = async () => {
-      const { data, error } = await supabase
-        .from("banners")
-        .select(`*,objects:object_seq(*)`);
-      setBanner(data ?? []);
-    };
-    bannersData();
+    bannersData()
+      .then((data) => {
+        setBanner(data ?? []);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }, []);
 
   const handleClick = (
-    event: React.MouseEvent<HTMLAnchorElement>,
+    event: React.MouseEvent<HTMLElement, MouseEvent>,
     seq: number
   ) => {
+    event.preventDefault();
     if (isDragging) return; // 드래그 중이면 클릭 이벤트 무시
 
     navigate(`/store/brand-detail?getBrand=${seq}`);
@@ -65,9 +67,10 @@ const BannerContainer: React.FC = () => {
           {banner?.map((item, index) => (
             <SliderBox
               key={index}
-              onClick={(event) => {
+              onClick={(event: React.MouseEvent<HTMLElement, MouseEvent>) => {
                 event.preventDefault();
-                handleClick(event, item?.objects?.brand_seq);
+                if (item?.objects?.brand_seq === undefined) return;
+                handleClick(event, item?.objects?.brand_seq ?? 0);
               }}
             >
               <img src={item.img} alt={item.item} />
@@ -90,7 +93,7 @@ const BannerWrapper = styled.div`
   max-width: 1920px;
   margin: 0 auto;
   position: relative;
-  z-index: 999;
+  z-index: 99;
   .slick-dots {
     bottom: 10px;
 

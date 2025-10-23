@@ -18,7 +18,11 @@ import FormControl from "@mui/material/FormControl";
 import { useDaumPostcodePopup } from "react-daum-postcode";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import moment from "moment";
-import type { CardImageType, CartType } from "compontents/card/card.type";
+import type {
+  CardImageType,
+  CartType,
+  PaymentObjectType,
+} from "compontents/card/card.type";
 import { theme } from "../../../public/assets/styles/theme";
 import {
   calculatePrice,
@@ -28,6 +32,7 @@ import {
   isEmptyObject,
 } from "../../bin/common";
 import { deleteCart } from "../../redex/reducers/userCartCount";
+import type { PriceType } from "./store-user-cart";
 const postcodeScriptUrl =
   "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
 interface CardType {
@@ -65,13 +70,16 @@ const koreanCardCompanyOptions: CardType[] = [
 ];
 const clientKey = "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq";
 const customerKey = "9MpfwKORMRh_XnuAnBYJP";
-const StoreUserPayment = () => {
+
+interface PropsType {
+  priceData: PriceType | undefined | null;
+}
+const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
   const locatiton = useLocation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const today = new Date().toISOString().split("T")[0];
   const product = locatiton.state.products;
-  const price = locatiton.state.price;
   const dispatch = useDispatch();
   const open = useDaumPostcodePopup(postcodeScriptUrl);
   const userToken = useSelector((state: RootState) => state?.user.token);
@@ -119,6 +127,7 @@ const StoreUserPayment = () => {
   //   } catch (error) {}
   // };
   useEffect(() => {
+    console.log(priceData);
     if (isEmptyObject(userInfoData)) return;
 
     setValue(
@@ -158,12 +167,12 @@ const StoreUserPayment = () => {
         enterMessage: data?.deliveryMessage ?? "",
       },
       paymentInfo: {
-        totalCount: price?.totalCount,
-        disCount: price?.disCount,
+        totalCount: priceData?.totalCount,
+        disCount: priceData?.disCount,
         totalPrice:
-          price?.totalPrice >= 20000
-            ? price?.totalPrice
-            : price?.totalPrice + 2500,
+          (priceData?.totalPrice ?? 0) >= 20000
+            ? priceData?.totalPrice
+            : (priceData?.totalPrice ?? 0) + 2500,
         countType:
           data?.paymentType === "C"
             ? "신용카드"
@@ -182,13 +191,13 @@ const StoreUserPayment = () => {
     };
 
     await supabase.from("payment").insert(insertDate);
-
-    // navigate("/store/user-cart?t_header_type=3", {
-    //   state: {
-    //     searchParams: { t_header_type: "3" },
-    //     orderId: orderId,
-    //   },
-    // });
+    alert("결제 왼료 테스트");
+    navigate("/store/mypage/user-cart?t_header_type=3", {
+      state: {
+        searchParams: { t_header_type: "3" },
+        orderId: orderId,
+      },
+    });
   };
   useEffect(() => {
     async function fetchPayment() {
@@ -220,6 +229,7 @@ const StoreUserPayment = () => {
       img: item?.objects?.img,
       name: item?.objects?.name,
       brand: item?.objects?.brand,
+      brand_seq: item?.objects?.brand_seq,
       count: item?.objects?.count,
       discount_rate: item?.objects?.saleItem?.discount_rate,
       one_more: item?.objects?.saleItem?.one_more,
@@ -229,8 +239,10 @@ const StoreUserPayment = () => {
         handlePrice(item?.objects?.saleItem, item?.objects?.count)
       ),
       payment_seq: moment().format("YYYYMMDDhhmmss") + item.object_seq,
+      object_seq: item.object_seq,
+      saleItem: !item?.objects?.saleItem ? false : true,
     };
-  });
+  }) as PaymentObjectType[];
   const onSubmit = async (data: DataType) => {
     test(data);
     //console.log(data);
@@ -249,9 +261,9 @@ const StoreUserPayment = () => {
       amount: {
         currency: "KRW",
         value:
-          price?.totalPrice >= 20000
-            ? price?.totalPrice
-            : price?.totalPrice + 2500,
+          (priceData?.totalPrice ?? 0) >= 20000
+            ? priceData?.totalPrice
+            : (priceData?.totalPrice ?? 0) + 2500,
         //100,
       },
       orderId: orderId, // 고유 주문번호
@@ -314,12 +326,12 @@ const StoreUserPayment = () => {
         enterMessage: data?.deliveryMessage ?? "",
       },
       paymentInfo: {
-        totalCount: price?.totalCount,
-        disCount: price?.disCount,
+        totalCount: priceData?.totalCount,
+        disCount: priceData?.disCount,
         totalPrice:
-          price?.totalPrice >= 20000
-            ? price?.totalPrice
-            : price?.totalPrice + 2500,
+          (priceData?.totalPrice ?? 0) >= 20000
+            ? priceData?.totalPrice
+            : (priceData?.totalPrice ?? 0) + 2500,
         countType:
           data?.paymentType === "C"
             ? "신용카드"
@@ -356,7 +368,7 @@ const StoreUserPayment = () => {
         enterInfo: data?.enter,
       });
       dispatch(deleteCart(selectObject.length));
-      navigate("/store/user-cart?t_header_type=3", {
+      navigate("/store/mypage/user-cart?t_header_type=3", {
         state: {
           searchParams: { t_header_type: "3" },
           orderId: orderId,
@@ -851,9 +863,10 @@ const StoreUserPayment = () => {
                               <Select
                                 {...field}
                                 disabled={
-                                  (price?.totalPrice >= 20000
-                                    ? price?.totalPrice
-                                    : price?.totalPrice + 2500) < 50000
+                                  ((priceData?.totalPrice ?? 0) >= 20000
+                                    ? priceData?.totalPrice ?? 0
+                                    : (priceData?.totalPrice ?? 0) + 2500) <
+                                  50000
                                 }
                                 sx={{ height: 30, fontSize: "12px" }}
                                 labelId="demo-simple-select-label"
@@ -897,30 +910,32 @@ const StoreUserPayment = () => {
               <ul>
                 <li>
                   <em>총 상품금액</em>
-                  <span>{price?.totalCount?.toLocaleString()}원</span>
+                  <span>{priceData?.totalCount?.toLocaleString()}원</span>
                 </li>
 
                 <li>
                   <em>쿠폰할인금액</em>
                   <span className="color">
-                    {price?.disCount === 0
+                    {priceData?.disCount === 0
                       ? "0"
-                      : "-" + price?.disCount?.toLocaleString()}
+                      : "-" + priceData?.disCount?.toLocaleString()}
                     원
                   </span>
                 </li>
                 <li>
                   <em>총 배송비</em>
-                  <span>{price?.totalPrice >= 20000 ? "0" : "2,500"}원</span>
+                  <span>
+                    {(priceData?.totalPrice ?? 0) >= 20000 ? "0" : "2,500"}원
+                  </span>
                 </li>
               </ul>
               <ul className="total">
                 <li>
                   <em>최종 결제금액</em>
                   <span className="color">
-                    {price?.totalPrice >= 20000
-                      ? price?.totalPrice?.toLocaleString()
-                      : (price?.totalPrice + 2500)?.toLocaleString()}
+                    {(priceData?.totalPrice ?? 0) >= 20000
+                      ? priceData?.totalPrice?.toLocaleString()
+                      : ((priceData?.totalPrice ?? 0) + 2500)?.toLocaleString()}
                     원
                   </span>
                 </li>

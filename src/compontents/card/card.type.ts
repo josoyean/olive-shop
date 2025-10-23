@@ -1,12 +1,4 @@
 export interface CardImageType {
-  [key: string]:
-    | string
-    | string[]
-    | boolean
-    | number
-    | undefined
-    | null
-    | object; // 동적으로 속성 추가 가능
   name?: string; // 동적으로 속성 키와 값을 추가
   img?: string; // 동적으로 속성 키와 값을 추가
   sale?: boolean;
@@ -30,9 +22,10 @@ export interface CardImageType {
   object_count?: number;
   one_more: number | null;
   saleItem?: SaleType | undefined | null;
+  sale_count?: number;
+  brands?: BrandType | undefined | null;
 }
 export interface BrandType {
-  [key: string]: string | string[] | boolean | number | undefined; // 동적으로 속성 추가 가능
   brandImg?: string;
   name: string; // 동적으로 속성 키와 값을 추가
   infoText: string; // 동적으로 속성 키와 값을 추가
@@ -41,6 +34,7 @@ export interface BrandType {
   videoText?: string;
   id: number;
   brand_seq: number;
+  object?: CardImageType[] | undefined;
 }
 export interface CardProps {
   size: string;
@@ -48,6 +42,7 @@ export interface CardProps {
   img?: string;
   imgSize?: string;
   data: CardImageType;
+
   onClick?: () => void | undefined;
 }
 
@@ -62,21 +57,6 @@ export const filteredSearch: menuType[] = [
   { name: "높은 가격순", type: "highPrice" },
   { name: "할인율순", type: "sale" },
 ];
-
-// export interface HotDealCardType {
-//   object_seq?: number | undefined;
-//   today_sale?: boolean | undefined;
-//   objects?: CardImageType;
-//   start_sale_date?: string;
-//   end_sale_date?: string;
-//   created_at?: string;
-//   today_sale_date?: string;
-//   count?: number;
-//   discount_rate?: number;
-//   id?: number;
-//   object_count?: number | undefined;
-//   one_more: number | null;
-// }
 
 export interface PlanShopType {
   brand_seq: number | undefined;
@@ -116,14 +96,6 @@ export interface SaleType {
 }
 
 export interface CartType {
-  [key: string]:
-    | string
-    | string[]
-    | boolean
-    | number
-    | undefined
-    | null
-    | object; // 동적으로 속성 추가 가능
   name?: string; // 동적으로 속성 키와 값을 추가
   img?: string; // 동적으로 속성 키와 값을 추가
   sale?: boolean;
@@ -147,7 +119,6 @@ export interface CartType {
   object_count?: number;
   one_more?: number | null;
   objects?: CardImageType | undefined | null;
-  payment_seq?: string;
 }
 
 export interface PaymentType {
@@ -165,36 +136,40 @@ export interface PaymentType {
 }
 
 export interface OrderType {
-  [key: string]:
-    | string
-    | string[]
-    | boolean
-    | number
-    | undefined
-    | null
-    | object;
+  id: string;
+  userId: string;
+  orderId: string;
+  delivered_at: string | null;
+  updated_at: string;
+  created_at: string;
+  deliveryStep: number;
+  paymentInfo: PaymentType;
+  objectsInfo: CardImageType[];
+  deliveryInfo: DeliveryInfoType;
+  paymentCancel?: boolean;
 }
-
+export interface DeliveryInfoType {
+  name: string;
+  phoneNumber: string;
+  address: string;
+  enterType: string;
+  enterText: string;
+}
 export interface ReviewType {
-  [key: string]:
-    | string
-    | string[]
-    | boolean
-    | number
-    | undefined
-    | null
-    | object;
   id?: string;
   created_at?: string;
-  reviewImg?: string[];
+  order_at?: string;
+  reviewImg?: string[] | null;
   reviewText?: string;
   userId?: string;
   likeUserId?: string[];
   score?: number;
-  object_seq?: number;
-  userInfo?: UserInfoType;
-  img?: string;
+  objectInfo?: CardImageType;
+  userInfo?: UserInfoType | null;
   index?: string;
+  img?: string;
+  orderId?: string;
+  payment_seq?: string;
 }
 
 export interface UserInfoType {
@@ -220,17 +195,28 @@ export interface UserInfoType {
   enterInfo?: string;
   deliveryName?: string;
   nickName?: string;
-  profileImg?: string;
+  profileImg?: string | null;
   infoText?: string;
 }
 
 export interface StringType {
-  [key: string]:
-    | string
-    | string[]
-    | boolean
-    | number
-    | undefined
-    | null
-    | object;
+  [key: string]: string;
+}
+
+export interface PaymentObjectType {
+  brand_seq?: number;
+  count?: number;
+  object_count?: number;
+  sale_count?: number;
+  one_more?: number | null;
+  object_seq?: number;
+  discount_rate?: number | undefined;
+  img?: string;
+  name?: string;
+  brand?: string;
+  payment_seq?: string;
+  created_at?: string | null;
+  delivered_at?: string | null;
+  saleItem?: boolean;
+  orderId?: string;
 }

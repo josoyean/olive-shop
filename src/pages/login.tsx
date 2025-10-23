@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Center, Container } from "../../public/assets/style";
+import { Center, Container, WhiteButton } from "../../public/assets/style";
 import styled from "styled-components";
 import { useForm, FieldErrors } from "react-hook-form";
 import { auth, db } from "../firebase";
@@ -19,11 +19,17 @@ import {
 import { useNavigate } from "react-router-dom";
 import { handleCartItems, getUserInfo } from "../bin/common";
 import { setUserInfo } from "../redex/reducers/userInfo";
+import {
+  loadCaptchaEnginge,
+  LoadCanvasTemplateNoReload,
+  validateCaptcha,
+} from "react-simple-captcha";
 
 interface DataType {
   id: string;
   password: string;
   saveId: boolean;
+  captcha: string;
 }
 const Login = () => {
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
@@ -35,7 +41,6 @@ const Login = () => {
   const {
     register,
     handleSubmit,
-    // required,
     setFocus,
     setValue,
     getValues,
@@ -73,6 +78,12 @@ const Login = () => {
   };
 
   const onSubmit = async (data: DataType) => {
+    if (!validateCaptcha(data.captcha)) {
+      alert("자동입력 방지문자를 확인해주세요.");
+      setValue("captcha", "");
+      return;
+    }
+
     try {
       const usersRef = collection(db, "users"); // users 컬렉션 참조
       const id = query(usersRef, where("id", "==", data.id)); // 특정 이메일 찾기
@@ -101,10 +112,17 @@ const Login = () => {
     if (user.saveId) {
       setValue("id", user.userId || "");
     }
+
+    loadCaptchaEnginge(6);
   }, []);
+
+  const loadCaptchaAgain = () => {
+    loadCaptchaEnginge(6);
+  };
+
   return (
     <Center>
-      <Container style={{ height: "calc(100vh - 311px)", minHeight: "515px" }}>
+      <Container style={{ height: "calc(100vh - 311px)", minHeight: "570px" }}>
         <h1>로그인</h1>
         <FormControl onSubmit={handleSubmit(onSubmit, onError)}>
           <InputWrapper className="input-wrapper">
@@ -125,6 +143,26 @@ const Login = () => {
               })}
             />
           </InputWrapper>
+          <CaptchaWrapper>
+            <div>
+              <LoadCanvasTemplateNoReload
+                reloadColor="red"
+                reloadText="reload"
+              />
+              <span onClick={() => loadCaptchaAgain()}>&#x21bb;</span>
+            </div>
+            <input
+              type="text"
+              placeholder="자동입력 방지문자를 입력해 주세요"
+              {...register("captcha", {
+                required: "자동입력 방지문자를 입력하세요.",
+              })}
+              onChange={(event) => {
+                setValue("captcha", event.target.value);
+              }}
+              maxLength={6}
+            />
+          </CaptchaWrapper>
           <LabelWrapper>
             <label htmlFor="">
               <input
@@ -173,6 +211,30 @@ const Login = () => {
 };
 export default Login;
 // height: calc(100vh - 308px);
+const CaptchaWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 25px;
+  row-gap: 10px;
+  > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    canvas {
+      width: 350px;
+      height: 40px;
+    }
+    span {
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 30px;
+      text-align: center;
+      line-height: 40px;
+    }
+  }
+`;
 const LabelWrapper = styled.div`
   display: flex;
   width: 400px;

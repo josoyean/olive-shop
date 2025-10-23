@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Center, Tags } from "../../../public/assets/style";
+import { Center, StarBox, Tags } from "../../../public/assets/style";
 import { theme } from "../../../public/assets/styles/theme";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "../../supabase";
@@ -63,17 +63,28 @@ const StoreGoodsDetail = () => {
   const [detailReviews, setDetailReviews] = useState<ReviewType>({});
 
   const [detailImgOpened, setDetailImgOpened] = useState<boolean>(false);
-  const [detailImgIndex, setDetailImgIndex] = useState<string>(0);
+  const [detailImgIndex, setDetailImgIndex] = useState<string>("0");
   const [imgOpened, setImgOpened] = useState<boolean>(false);
   const handleData = async (item: string) => {
     const { data: selectedData, error: cartError } = await supabase
       .from("objects")
       .select("*,saleItem(*)")
-      .eq("object_seq", item);
+      .eq("object_seq", item)
+      .single();
 
-    const selected = !selectedData ? {} : selectedData[0];
+    const selected = !selectedData ? {} : { ...selectedData };
+    const { data: brandsData, error: brandsError } = await supabase
+      .from("brands")
+      .select("*")
+      .eq("brand_seq", selected?.brand_seq)
+      .single();
 
-    setObjects(selected);
+    const data = {
+      ...selected,
+      brands: brandsData,
+    };
+
+    setObjects(data);
     dispatch(addProducts(selected));
 
     const { data: objectData, error } = await supabase
@@ -91,29 +102,31 @@ const StoreGoodsDetail = () => {
   const handleReviewData = async (item: string) => {
     const { data: reviewData, reviewError } = await supabase
       .from("reviews")
-      .select("*,objects(*)")
-      .eq("object_seq", item)
+      .select("*")
+      .eq("objectInfo", item)
       .order("created_at", { ascending: false });
 
     const totalScore = reviewData?.map((item) => item?.score);
     // const img = reviewData?.flatMap((item) => item?.reviewImg);
+
     setReviewSore(totalScore ?? []);
 
     const reviews = await handleReview(reviewData ?? []);
 
     setReviewItems(reviews ?? []);
     const img =
-      reviews?.flatMap((item) =>
+      (reviews?.flatMap((item) =>
         item?.reviewImg?.map((img, index) => {
-          return { ...item, img: img, index: index };
+          return { ...item, img: img, index: String(index) };
         })
-      ) ?? [];
+      ) as ReviewType[]) ?? [];
+
     setReviewImages(img ?? []);
   };
 
   const handleReview = async (data: ReviewType[]): Promise<ReviewType[]> => {
     const updatedData = await Promise.all(
-      data.map(async (item) => {
+      (data.map(async (item) => {
         try {
           const usersRef = collection(db, "users");
           const q = query(usersRef, where("userId", "==", item.userId));
@@ -131,7 +144,7 @@ const StoreGoodsDetail = () => {
           console.error("에러 발생:", error);
           return null;
         }
-      }) ?? []
+      }) as ReviewType[]) ?? []
     );
 
     return (updatedData ?? [])?.filter(Boolean);
@@ -197,7 +210,6 @@ const StoreGoodsDetail = () => {
   };
 
   const handleLike = async (id: string) => {
-    console.log(id);
     const { data, error } = await supabase
       .from("reviews")
       .select("*")
@@ -209,7 +221,7 @@ const StoreGoodsDetail = () => {
 
     if (data.likeUserId.includes(userData)) {
       // 좋아요 누름
-      newLikes = currentLikes.filter((id) => id !== userData);
+      newLikes = currentLikes.filter((id: string) => id !== userData);
     } else {
       // 종아요 안누름
       newLikes = [...currentLikes, userData];
@@ -260,11 +272,11 @@ const StoreGoodsDetail = () => {
                 onClick={(event) => {
                   event.preventDefault();
                   navigate(
-                    `/store/brand-detail?getBrand=${objects?.brand_seq}`
+                    `/store/brand-detail?getBrand=${objects?.brands?.brand_seq}`
                   );
                 }}
               >
-                {objects?.brand + " >"}{" "}
+                {objects?.brands?.name + " >"}{" "}
               </h3>
               <h2>{objects?.name}</h2>
 
@@ -395,8 +407,7 @@ const StoreGoodsDetail = () => {
                           if (!objects) return;
 
                           addItemCart({
-                            objects: objects,
-                            addCount: buyCount,
+                            objects: { ...objects, addCount: buyCount },
                             dispatch: dispatch,
                           });
                         }
@@ -440,7 +451,7 @@ const StoreGoodsDetail = () => {
                           handlePrice(objects?.saleItem, objects?.count)
                         );
 
-                        navigate("/store/user-cart?t_header_type=2", {
+                        navigate("/store/mypage/user-cart?t_header_type=2", {
                           state: {
                             products: [
                               {
@@ -595,7 +606,7 @@ const StoreGoodsDetail = () => {
                         </div>
                         <div className="reviews">
                           <div className="score-date">
-                            <ul className="star-box">
+                            <StarBox size="23px" className="star-box">
                               {[0, 1, 2, 3, 4].map((i) => (
                                 <li key={i}>
                                   <span
@@ -613,7 +624,7 @@ const StoreGoodsDetail = () => {
                                   />
                                 </li>
                               ))}
-                            </ul>
+                            </StarBox>
                             <em>
                               {moment(item?.created_at).format("YYYY.MM.DD")}
                             </em>
@@ -708,9 +719,10 @@ const StoreGoodsDetail = () => {
         <ModalContainer
           isOpen={imgOpened}
           onClose={() => setImgOpened(false)}
-          widthCheck={"850px"}
+          widthCheck={"800px"}
           header="사진목록"
           heightCheck="500px"
+          okText="취소"
         >
           {reviewImages?.length > 0 && (
             <ReviewImagesModal>
@@ -783,7 +795,7 @@ const StoreGoodsDetail = () => {
                       detailReviews?.userInfo?.name}
                   </em>
                 </div>
-                <ul className="star-box">
+                <StarBox className="star-box">
                   {[0, 1, 2, 3, 4].map((i) => (
                     <li key={i}>
                       <span
@@ -801,7 +813,7 @@ const StoreGoodsDetail = () => {
                       />
                     </li>
                   ))}
-                </ul>
+                </StarBox>
                 <em>
                   {moment(detailReviews?.created_at).format("YYYY.MM.DD")}
                 </em>
@@ -843,14 +855,19 @@ const DetailReview = styled.div`
   grid-template-columns: repeat(3, 1fr);
   column-gap: 20px;
   height: 100%;
+  padding: 30px 0;
   .img-wrap {
     grid-column: 1 / span 2;
     .main-img {
       width: 100%;
       height: calc(100% - 90px);
+      border: 1px solid ${({ theme }) => theme.lineColor.main};
     }
     .sub-img {
       margin-top: 10px;
+      img {
+        border: 1px solid ${({ theme }) => theme.lineColor.main};
+      }
     }
     img {
       width: 100%;
@@ -872,6 +889,7 @@ const DetailReview = styled.div`
       width: 50px;
       height: 50px;
       border-radius: 50%;
+      border: 1px solid ${({ theme }) => theme.lineColor.main};
       overflow: hidden;
       img {
         width: 100%;
@@ -963,6 +981,7 @@ const ReviewBox = styled.div`
       width: 60px;
       height: 60px;
       border-radius: 50%;
+      border: 1px solid ${({ theme }) => theme.lineColor.main};
       overflow: hidden;
       img {
         width: 100%;
@@ -989,32 +1008,6 @@ const ReviewBox = styled.div`
     em {
       color: #888;
       font-weight: 400;
-    }
-  }
-  .star-box {
-    display: flex;
-    column-gap: 7px;
-    li {
-      width: 23px;
-      height: 23px;
-      position: relative;
-    }
-    span {
-      position: absolute;
-      z-index: 4;
-      top: 0;
-      left: 0;
-      display: block;
-      width: 100%;
-      height: 23px;
-      background-color: #f27370;
-    }
-    img {
-      width: 23px;
-      height: 23px;
-      z-index: 9;
-      position: absolute;
-      overflow: hidden;
     }
   }
 
@@ -1070,6 +1063,9 @@ const ImgSliderContainer = styled.div`
   }
   .img {
     width: 148px !important;
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
+    overflow: hidden;
     //width: 165px !important;
     //padding-right: 10px;
     height: 148px;
@@ -1093,6 +1089,9 @@ const ImgSliderContainer = styled.div`
 const ReviewImg = styled.div<{ $last: string }>`
   width: 120px;
   height: 120px;
+  border: 1px solid ${({ theme }) => theme.lineColor.main};
+  border-radius: 5px;
+  overflow: hidden;
   cursor: pointer;
   position: relative;
   img {

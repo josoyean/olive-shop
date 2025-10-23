@@ -9,11 +9,13 @@ import type { RootState } from "./redex/store";
 import { deleteUser } from "./redex/reducers/userReducer";
 import { auth, db } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import SideBar from "./pages/sideBar";
 import TopButton from "./pages/TopButton";
 import FooterContainer from "./pages/footer";
 import { useCookies } from "react-cookie";
 import { deleteUserInfo } from "./redex/reducers/userInfo";
+import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
+import RecentProducts from "./pages/recentProducts";
+import ChatButton from "./pages/ChatButton.js";
 interface NavTyle {
   name: string;
   path: string;
@@ -33,7 +35,7 @@ const nav: NavTyle[] = [
     path: "/login",
   },
   {
-    name: "최근본상품",
+    name: "최근 본 상품",
     path: "",
   },
 ];
@@ -49,11 +51,15 @@ const memberNav: NavTyle[] = [
   },
   {
     name: "주문배송",
-    path: "",
+    path: "/store/mypage?t_page=주문배송",
   },
   {
     name: "장바구니",
-    path: "/store/user-cart?t_header_type=1",
+    path: "/store/mypage/user-cart?t_header_type=1",
+  },
+  {
+    name: "최근 본 상품",
+    path: "",
   },
 ];
 const GubNav: NavTyle[] = [
@@ -332,13 +338,17 @@ const AppLayout: React.FC = () => {
   const cartItems = useSelector((state: RootState) => state?.cartDate);
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
   const [menuBar, setMenuBar] = useState<boolean>(false);
-  const componentRef = useRef<HTMLElement>(null);
+  const [openedBox, setOpenedBox] = useState<boolean>(false);
+  const componentRef = useRef<HTMLDivElement | null>(null);
+  const gubRef = useRef<HTMLDivElement | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   useEffect(() => {
     function handleClickOutside(event: any) {
       if (
         componentRef.current &&
-        !componentRef.current.contains(event.target)
+        !componentRef.current.contains(event.target) &&
+        gubRef.current &&
+        !gubRef.current.contains(event.target)
       ) {
         // 여기서 원하는 작업을 수행
         setMenuBar(false);
@@ -385,6 +395,9 @@ const AppLayout: React.FC = () => {
       alert("로그인 세션이 만료 되었습니다. 다시 로그인해주새요");
       dispatch(deleteUser());
       dispatch(deleteUserInfo());
+      if (location.pathname.includes("/store/mypage")) {
+        navigate("/login");
+      }
       return;
     }
   }, [location.pathname]);
@@ -398,45 +411,103 @@ const AppLayout: React.FC = () => {
       })
       .catch((error) => {});
   };
-
+  const handleTooltipClose = () => {
+    setOpenedBox(false);
+  };
+  const handleTooltipOpen = () => {
+    setOpenedBox(true);
+  };
   return (
     <div>
-      <SideBar />
       <TopButton />
+      <ChatButton />
       <header style={{ paddingTop: "15px" }}>
-        <Center>
+        <Center style={{ position: "relative" }}>
           <HeaderWrapper>
             <div className="subNav">
               {userData.token !== ""
-                ? memberNav.map((item, index) => (
-                    <span
-                      key={index}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        if (item.path === "") {
-                          alert("준비중 입니다");
-                          return;
-                        }
+                ? memberNav.map((item, index) =>
+                    item?.name !== "최근 본 상품" ? (
+                      <span
+                        key={index}
+                        onClick={(event) => {
+                          event.preventDefault();
 
-                        if (item.name === "로그아웃") {
-                          handleSignedOut();
+                          if (item.path === "") {
+                            alert("준비중 입니다");
+                            return;
+                          }
+
+                          if (item.name === "로그아웃") {
+                            if (window.confirm("정말 로그아웃 하시겠습니까?")) {
+                              handleSignedOut();
+                            }
+                          }
+                          navigate(item.path);
+                        }}
+                      >
+                        {item.name}
+                        {item.name == "장바구니" && (
+                          <em style={{ color: "#116dff", marginLeft: "5px" }}>
+                            {"(" + cartItems?.length + ")"}
+                          </em>
+                        )}
+                      </span>
+                    ) : (
+                      <Tooltip
+                        key={index}
+                        placement="bottom-end"
+                        onClose={handleTooltipClose}
+                        open={openedBox}
+                        disableInteractive={false}
+                        disableFocusListener
+                        onClick={(event) => event.stopPropagation()}
+                        disableHoverListener
+                        disableTouchListener
+                        title={
+                          // <ClickAwayListener onClickAway={handleTooltipClose}>
+                          <RecentProducts
+                            onClickAway={handleTooltipClose}
+                            onClose={handleTooltipClose}
+                          ></RecentProducts>
+                          // </ClickAwayListener>
                         }
-                        navigate(item.path);
-                      }}
-                    >
-                      {item.name}
-                      {item.name == "장바구니" && (
-                        <em style={{ color: "#116dff", marginLeft: "5px" }}>
-                          {"(" + cartItems?.length + ")"}
-                        </em>
-                      )}
-                    </span>
-                  ))
+                        slotProps={{
+                          popper: {
+                            disablePortal: true,
+                            sx: {
+                              width: "1020px", // 원하는 넓이
+                              maxWidth: "none", // 디폴트 max-width 무시
+                            },
+                          },
+                          tooltip: {
+                            sx: {
+                              width: "1020px",
+                              minWidth: "1020px",
+                              maxWidth: "1020px",
+                              borderRadius: "0px",
+                              padding: "12px",
+                              border: ` 1px solid #ddd`,
+                              bgcolor: "white",
+                              color: "black",
+                            },
+                          },
+                        }}
+                      >
+                        <span className="none" onClick={handleTooltipOpen}>
+                          {item?.name}
+                        </span>
+                      </Tooltip>
+                    )
+                  )
                 : nav.map((item, index) => (
                     <span
                       key={index}
                       onClick={(event) => {
                         event.preventDefault();
+                        if (item.name === "최근 본 상품") {
+                          return;
+                        }
                         if (item.path === "") {
                           alert("준비중 입니다");
                           return;
@@ -469,9 +540,11 @@ const AppLayout: React.FC = () => {
         <GubWrapper>
           <Center>
             <div
+              ref={gubRef}
               className="gub-btn"
               onClick={(event) => {
                 event.preventDefault();
+                console.log("menuBar", menuBar);
                 setMenuBar(!menuBar);
               }}
             >
@@ -556,14 +629,38 @@ const AppLayout: React.FC = () => {
           </Center>
         </GubWrapper>
       </header>
+
       <div>{<Outlet></Outlet>}</div>
+
+      {/* <ChatbotContainer /> */}
+
       <FooterContainer />
     </div>
   );
 };
 
 export default AppLayout;
+const ItemsContainer = styled.div`
+  min-height: 400px;
 
+  .header {
+    padding: 3px 0 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid ${({ theme }) => theme.lineColor.main};
+    h2 {
+      em {
+        color: #116dff;
+      }
+    }
+    button {
+      padding: 3px 8px;
+      font-size: 14px;
+      border: 1px solid ${({ theme }) => theme.lineColor.main};
+    }
+  }
+`;
 const HeaderWrapper = styled.div`
   .subNav {
     display: flex;
@@ -572,7 +669,7 @@ const HeaderWrapper = styled.div`
     img {
       cursor: pointer;
     }
-    span {
+    > span {
       cursor: pointer;
       position: relative;
       display: block;
@@ -587,6 +684,9 @@ const HeaderWrapper = styled.div`
       }
       &:last-child::after {
         display: none;
+      }
+      &.none::after {
+        content: none;
       }
     }
   }
@@ -603,8 +703,8 @@ const GubWrapper = styled.div`
   border-bottom: 2px solid #555;
   height: 47px;
   margin-top: 30px;
-
   > div {
+    z-index: 900;
     display: flex;
     align-items: center;
     height: 100%;
@@ -641,6 +741,9 @@ const GubWrapper = styled.div`
       padding: 0 15px;
       span {
         position: relative;
+        &.none::after {
+          content: none;
+        }
       }
       span::after {
         display: block;
@@ -666,6 +769,9 @@ const GubWrapper = styled.div`
           color: ${({ theme }) => theme.color.main};
           &::after {
             width: 100%;
+          }
+          &.none::after {
+            content: none;
           }
         }
       }

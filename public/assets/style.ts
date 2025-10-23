@@ -240,7 +240,7 @@ export const WhiteButton = styled.button<{
 
 export const Textarea = styled.textarea<{
   width: string;
-  height: string | null | undefined;
+  height?: string | null | undefined;
 }>`
   width: ${({ width }) => width};
   height: ${({ height }) => height || "120px"};
@@ -257,5 +257,95 @@ export const Textarea = styled.textarea<{
   resize: none;
   &::placeholder {
     font-size: 13px;
+  }
+`;
+
+export const TableStyle = styled.div`
+  table {
+    width: 100%;
+    table-layout: fixed;
+    border-spacing: 0;
+  }
+  thead {
+    height: 40px;
+    th {
+      border-top: 2px solid #d6d6d6;
+      border-bottom: 1px solid #ccc;
+      background: #fafafa;
+      text-align: center;
+      padding: 5px;
+      color: #666;
+      font-size: 14px;
+    }
+  }
+
+  tbody {
+    td {
+      border-bottom: 1px solid #ccc;
+    }
+  }
+`;
+export const Tabs = styled.div<{ grid: number }>`
+  display: grid;
+  grid-template-columns: ${({ grid }) => `repeat(${grid}, 1fr)`};
+  margin: 30px 0 40px;
+  > div {
+    text-align: center;
+
+    position: relative;
+    button {
+      height: 50px;
+      line-height: 50px;
+      background: #f6f6f6;
+      color: #666;
+      font-size: 18px;
+      font-weight: 400;
+      width: 100%;
+    }
+
+    &.on {
+      button {
+        color: #fff;
+        background: #555;
+        &::after {
+          position: absolute;
+          content: "";
+          bottom: -5px;
+          left: 50%;
+          width: 12px;
+          height: 5px;
+          margin-left: -6px;
+          background: url(https://static.oliveyoung.co.kr/pc-static-root/image/comm/bg_tab_arrow.png)
+            no-repeat;
+        }
+      }
+    }
+  }
+`;
+
+export const StarBox = styled.ul<{ size?: string }>`
+  display: flex;
+  column-gap: 4px;
+  li {
+    width: ${({ size }) => size ?? "20px"};
+    height: ${({ size }) => size ?? "20px"};
+    position: relative;
+  }
+  span {
+    position: absolute;
+    z-index: 4;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: ${({ size }) => size ?? "20px"};
+    background-color: #f27370;
+  }
+  img {
+    width: ${({ size }) => size ?? "20px"};
+    height: ${({ size }) => size ?? "20px"};
+    z-index: 9;
+    position: absolute;
+    overflow: hidden;
   }
 `;

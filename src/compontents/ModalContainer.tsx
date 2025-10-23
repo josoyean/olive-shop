@@ -18,6 +18,7 @@ interface ModalContainerProps {
   footerText?: string | null;
   okText?: string | null;
   noCloseModal?: boolean | null;
+  formRef?: HTMLInputElement | HTMLFormElement | null;
 }
 
 const customStyles: ReactModal.Styles = {
@@ -34,7 +35,7 @@ const customStyles: ReactModal.Styles = {
     maxWidth: "90%",
     width: "60%",
     height: "fit-content",
-    // maxHeight: '982px',
+    // overflowY: "hidden",
     maxHeight: "90%",
     borderRadius: "6px",
     padding: 0,
@@ -54,7 +55,8 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
   buttons,
   footerText = null,
   closeModal,
-  okText,
+  formRef,
+  okText = "취소",
   noCloseModal,
 }) => {
   const { width } = useWindowSize();
@@ -80,7 +82,7 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
         content: {
           ...customStyles.content,
           width: widthCheck,
-          height: heightCheck,
+          // height: heightCheck,
           ...style,
           // ...((width ?? 0) < 992
           //   ? {
@@ -154,6 +156,11 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
               type="submit"
               style={{ color: "#fff", background: "#3279F5" }}
               onClick={(event) => {
+                if (formRef?.current) {
+                  formRef?.current.requestSubmit();
+                  if (noCloseModal !== true) closeModal?.();
+                  return;
+                }
                 handleOk?.(event);
                 if (noCloseModal !== true) closeModal?.();
               }}
@@ -199,16 +206,16 @@ export const ModalButton = styled.button`
 const Padding = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 16px 24px;
+  /* height: calc(100% - 62px - 62px); */
+  padding: 0px 24px;
 `;
 
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-
+  padding: 12px 0;
+  border-bottom: 2px solid #000;
   & > div {
     width: 33.3%;
 
@@ -225,8 +232,8 @@ const Header = styled.div`
 
 const Content = styled.div`
   height: 100%;
-  overflow-y: auto;
-  /* padding: 0 24px; */
+  /* overflow-y: auto; */
+  /* padding: 15px 0; */
 `;
 
 const ButtonGroup = styled.div`
@@ -239,6 +246,7 @@ const Footer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 12px 0;
   /* padding: 16px 24px; */
 `;
 

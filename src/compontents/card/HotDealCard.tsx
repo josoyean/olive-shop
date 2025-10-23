@@ -62,7 +62,10 @@ const HotDealCard = ({ data }: { data: CardImageType }) => {
                 alert("품절된 상품입니다.");
                 return;
               }
-              addItemCart({ objects: data, addCount: 1, dispatch: dispatch });
+              addItemCart({
+                objects: { ...data, addCount: 1 },
+                dispatch: dispatch,
+              });
             }
           }}
         />

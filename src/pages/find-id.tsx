@@ -4,8 +4,7 @@ import { useForm, FieldErrors } from "react-hook-form";
 import { Center, Container, InputWrapper } from "../../public/assets/style";
 import { ErrorMessage } from "@hookform/error-message";
 import { formatPhoneNumber, numberOnly } from "../bin/common";
-import { auth, db } from "../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { auth } from "../firebase";
 
 import {
   signInWithPhoneNumber,
@@ -14,6 +13,7 @@ import {
   PhoneAuthProvider,
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { getFindId } from "../api/axios-index";
 interface DataType {
   name: string;
   birthDy: string;
@@ -42,7 +42,12 @@ const FindId = () => {
     formState: { errors, touchedFields },
   } = useForm<DataType>({
     mode: "onChange",
-    defaultValues: {},
+    defaultValues: {
+      // name: "조소연",
+      // birthDy: "961016",
+      // phoneNumber: "01077337236",
+      // code: "000000",
+    },
   });
 
   const setupRecaptcha = () => {
@@ -79,36 +84,24 @@ const FindId = () => {
       return;
     }
 
-    try {
-      const usersRef = collection(db, "users"); // users 컬렉션 참조
-      const name = query(usersRef, where("name", "==", data.name)); // 특정 이메일 찾기
-      const phone = query(
-        usersRef,
-        where("phoneNumber", "==", data.phoneNumber)
-      );
-
-      // 특정 이메일 찾기
-      const birthDay = query(usersRef, where("birthDy", "==", data.birthDy)); // 특정 이메일 찾기
-      const nameSnapshot = await getDocs(name);
-      const phoneSnapshot = await getDocs(phone);
-      const birthDaySnapshot = await getDocs(birthDay);
-
-      if (
-        !nameSnapshot.empty &&
-        !phoneSnapshot.empty &&
-        !birthDaySnapshot.empty
-      ) {
-        const data = nameSnapshot.docs[0].data();
+    getFindId(data)
+      .then((data) => {
         alert(
-          `회원님의 아이디는 <${data.id}>입니다.\n로그인 페이지로 이동합니다.`
+          `회원님의 아이디는 <${data.userId}>입니다.\n로그인 페이지로 이동합니다.`
         );
         navigate("/login");
-        return nameSnapshot.docs[0].data(); // 첫 번째 결과 리턴
-      } else {
-        alert(`해당 정보를 가진 사용자가 없습니다. \n회원가입 해주세요`);
-        return null;
-      }
-    } catch (error) {}
+      })
+      .catch((error) => {
+        if (error.code === "PGRST116") {
+          if (
+            window.confirm(
+              "해당 정보를 가진 사용자가 없습니다. 회원가입 페이지로 이동하겠습니까?"
+            )
+          ) {
+            navigate("/signup");
+          }
+        }
+      });
   };
 
   // 타이머 설정

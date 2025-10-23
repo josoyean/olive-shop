@@ -3,8 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../redex/store";
-import { supabase } from "../../supabase";
-import { theme } from "../../../public/assets/styles/theme";
+import { paymentOrderData } from "../../api/axios-index";
 
 const StoreUserOrder = () => {
   const location = useLocation();
@@ -27,15 +26,14 @@ const StoreUserOrder = () => {
     enterMessage: "",
   });
   const handleData = async () => {
-    const { data, error: cartError } = await supabase
-      .from("payment")
-      .select("*")
-      .eq("userId", userToken)
-      .eq("orderId", location?.state?.orderId)
-      .single();
-
-    setPrice(data?.paymentInfo);
-    setUser(data?.deliveryInfo);
+    paymentOrderData(userToken, location?.state?.orderId)
+      .then((data) => {
+        setPrice(data?.paymentInfo);
+        setUser(data?.deliveryInfo);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   useEffect(() => {
@@ -146,7 +144,7 @@ const StoreUserOrder = () => {
             type="button"
             onClick={(event) => {
               event.preventDefault();
-              alert("준비중 입니다");
+              navigate("/store/mypage?t_page=주문배송");
             }}
             className="order"
           >

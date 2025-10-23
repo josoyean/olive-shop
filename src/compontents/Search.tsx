@@ -192,7 +192,7 @@ const SearchContainer = styled.div`
   position: absolute;
   left: 0;
   top: 45px;
-  z-index: 99;
+  z-index: 9999;
   width: 400px;
   border: 1px solid ${theme.color.main};
   background-color: #fff;

@@ -1,0 +1,34 @@
+import React, { useEffect, useCallback, useState } from "react";
+import styled from "styled-components";
+import { theme } from "../../public/assets/styles/theme";
+import { useLocation } from "react-router-dom";
+
+const ChatButton = () => {
+  return (
+    <Container
+      onClick={(event) => {
+        event.preventDefault();
+        window.open(
+          `${window.location.origin}/chatbot`,
+          "_blank",
+          "width=400,height=405,min-width=400,min-height=405,left=1000,top=100,toolbar=no,menubar=no,scrollbars=no,resizable=no"
+        );
+      }}
+    >
+      <img
+        src="/public/assets/images/icons/floating_open.png"
+        alt="floating_open"
+      />
+    </Container>
+  );
+};
+const Container = styled.div`
+  position: fixed;
+  right: calc((100vw - 1020px) / 2 - 210px); /* 왼쪽 여백 */
+  width: 55px;
+  height: 55px;
+  bottom: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+`;
+export default ChatButton;

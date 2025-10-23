@@ -8,35 +8,35 @@ import "slick-carousel/slick/slick-theme.css";
 import type { CardImageType } from "../../compontents/card/card.type";
 
 const HotObject: React.FC<{ data: CardImageType[] }> = ({ data }) => {
+  const sliderRef = useRef<Slider | null>(null);
+  const listRef = useRef<Slider | null>(null);
   const settings = {
-    infinite: true,
-    speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
-    vertical: true,
-    swipeToSlide: true,
-    autoplay: true,
-    autoplaySpeed: 5000,
+    arrows: false,
+    fade: true,
+    asNavFor: listRef?.current ?? undefined,
   };
   const listSettings = {
     infinite: true,
     speed: 600,
-    slidesToShow: 5,
-    slidesToScroll: 1,
     autoplay: true,
     vertical: true,
-    arrows: false,
-    centerMode: true,
-    centerPadding: "90px",
+    centerPadding: "10px",
     swipeToSlide: true,
     autoplaySpeed: 5000,
+    slidesToShow: 5,
+    slidesToScroll: 1,
+    asNavFor: sliderRef?.current ?? undefined,
+    centerMode: true,
+    focusOnSelect: true,
   };
 
   return (
     <ItemsContainer>
       <h2>조회 급상승, 인기템</h2>
       <Container>
-        <Slider className="slider-container" {...settings}>
+        <Slider className="slider-container" {...settings} ref={sliderRef}>
           {data &&
             data?.map((item, index) => (
               <ObjectCardRow
@@ -48,13 +48,11 @@ const HotObject: React.FC<{ data: CardImageType[] }> = ({ data }) => {
               ></ObjectCardRow>
             ))}
         </Slider>
-        <Slider className="list-container" {...listSettings}>
+        <Slider className="list-container" {...listSettings} ref={listRef}>
           {data &&
             data?.map((item, index) => (
               <span key={index}>
-                <em style={{ color: "#116dff", marginRight: "5px" }}>
-                  {index + 1}위
-                </em>
+                <em style={{ marginRight: "5px" }}>{index + 1}위</em>
                 {item.name}
               </span>
             ))}
@@ -79,15 +77,27 @@ const ItemsContainer = styled(Center)`
   .list-container {
     height: 200px;
     overflow: hidden;
-    .slick-slide span {
-      /* background-color: red; */
-      color: #a4a4a4;
+    .slick-slide {
+      span {
+        color: #a4a4a4;
+        font-weight: 400;
+      }
+      em {
+        /* background-color: red; */
+        font-weight: 400;
+        color: #95bcfa;
+      }
     }
     .slick-slide.slick-active.slick-current.slick-center {
       span {
         border-radius: 5px;
         border: 1px solid ${({ theme }) => theme.lineColor.main};
         color: #181818;
+        font-weight: 700;
+        em {
+          color: #116dff;
+          font-weight: 700;
+        }
       }
     }
 

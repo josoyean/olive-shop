@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useForm, FieldErrors } from "react-hook-form";
 import { Center, Container, InputWrapper } from "../../public/assets/style";
-import { auth, db } from "../firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { auth } from "../firebase";
 import { ErrorMessage } from "@hookform/error-message";
 import type { CheckedType } from "../types/userInfor";
 import { formatPhoneNumber, numberOnly, setupRecaptcha } from "../bin/common";
@@ -13,6 +12,9 @@ import {
   signInWithCredential,
   PhoneAuthProvider,
 } from "firebase/auth";
+import { getFindId } from "../api/axios-index";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabase";
 interface DataType {
   id: string;
   password: string;
@@ -26,9 +28,10 @@ interface DataType {
 }
 
 const FindPassword = () => {
+  const navigate = useNavigate();
   const [checked, setChecked] = useState<CheckedType>({
-    phone: false,
-    code: false,
+    phone: true,
+    code: true,
   });
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [verificationId, setVerificationId] = useState<string>("");
@@ -42,7 +45,14 @@ const FindPassword = () => {
     formState: { errors, touchedFields },
   } = useForm<DataType>({
     mode: "onChange",
-    defaultValues: {},
+    defaultValues: {
+      name: "조소연",
+      birthDy: "961016",
+      phoneNumber: "01077337236",
+      code: "000000",
+      id: "sykor1016",
+      email: "dlfjswhtnals@naver.com",
+    },
   });
 
   const onSubmit = async (data: DataType) => {
@@ -54,38 +64,52 @@ const FindPassword = () => {
       alert("인증번호 확인 완료해주세요");
       return;
     }
-
-    try {
-      const usersRef = collection(db, "users"); // users 컬렉션 참조
-      const name = query(usersRef, where("name", "==", data.name)); // 특정 이메일 찾기
-      const phone = query(
-        usersRef,
-        where("phoneNumber", "==", data.phoneNumber)
-      );
-
-      // 특정 이메일 찾기
-      const birthDay = query(usersRef, where("birthDy", "==", data.birthDy)); // 특정 이메일 찾기
-      const email = query(usersRef, where("email", "==", data.email)); // 특정 이메일 찾기
-      const nameSnapshot = await getDocs(name);
-      const phoneSnapshot = await getDocs(phone);
-      const birthDaySnapshot = await getDocs(birthDay);
-      const emailSnapshot = await getDocs(email);
-
-      if (
-        !nameSnapshot.empty &&
-        !phoneSnapshot.empty &&
-        !emailSnapshot.empty &&
-        !birthDaySnapshot.empty
-      ) {
-        const data = nameSnapshot.docs[0].data();
-
+    getFindId(data)
+      .then((data) => {
         handleChangedPassword(data.email);
-        return nameSnapshot.docs[0].data(); // 첫 번째 결과 리턴
-      } else {
-        alert(`해당 정보를 가진 사용자가 없습니다. \n회원가입 해주세요`);
-        return null;
-      }
-    } catch (error) {}
+      })
+      .catch((error) => {
+        if (error.code === "PGRST116") {
+          if (
+            window.confirm(
+              "해당 정보를 가진 사용자가 없습니다. 회원가입 페이지로 이동하겠습니까?"
+            )
+          ) {
+            navigate("/signup");
+          }
+        }
+      });
+    // try {
+    //   const usersRef = collection(db, "users"); // users 컬렉션 참조
+    //   const name = query(usersRef, where("name", "==", data.name)); // 특정 이메일 찾기
+    //   const phone = query(
+    //     usersRef,
+    //     where("phoneNumber", "==", data.phoneNumber)
+    //   );
+
+    //   // 특정 이메일 찾기
+    //   const birthDay = query(usersRef, where("birthDy", "==", data.birthDy)); // 특정 이메일 찾기
+    //   const email = query(usersRef, where("email", "==", data.email)); // 특정 이메일 찾기
+    //   const nameSnapshot = await getDocs(name);
+    //   const phoneSnapshot = await getDocs(phone);
+    //   const birthDaySnapshot = await getDocs(birthDay);
+    //   const emailSnapshot = await getDocs(email);
+
+    //   if (
+    //     !nameSnapshot.empty &&
+    //     !phoneSnapshot.empty &&
+    //     !emailSnapshot.empty &&
+    //     !birthDaySnapshot.empty
+    //   ) {
+    //     const data = nameSnapshot.docs[0].data();
+
+    //     handleChangedPassword(data.email);
+    //     return nameSnapshot.docs[0].data(); // 첫 번째 결과 리턴
+    //   } else {
+    //     alert(`해당 정보를 가진 사용자가 없습니다. \n회원가입 해주세요`);
+    //     return null;
+    //   }
+    // } catch (error) {}
   };
 
   const onError = (errors: FieldErrors<DataType>) => {
@@ -96,12 +120,15 @@ const FindPassword = () => {
   };
 
   const handleChangedPassword = async (email: string) => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-      alert("이메일 확인 후 비밀번호를 변경해주세요.");
-    } catch (error) {
-      console.log(error);
-    }
+    console.log(email);
+    supabase.auth
+      .resetPasswordForEmail(email)
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
   // 타이머 설정
   const timer = () => {

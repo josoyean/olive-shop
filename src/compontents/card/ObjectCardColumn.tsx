@@ -6,10 +6,11 @@ import type { RootState } from "../../redex/store";
 import type { CardProps } from "./card.type";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { handleCartCount, handlePrice, handleSaleTF } from "../../bin/common";
+import { handlePrice, handleSaleTF } from "../../bin/common";
 import { addItemCart } from "../../pages/carts/addItemCart";
+
 const ObjectCardColumn: React.FC<CardProps> = (props) => {
-  const { size, data } = props;
+  const { size, data, onClick } = props;
   const navigate = useNavigate();
   const userData = useSelector((state: RootState) => state?.user.token);
   const dispatch = useDispatch();
@@ -20,8 +21,9 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
       onClick={(event) => {
         event.preventDefault();
         navigate(`/store/goods-detail?getGoods=${data?.object_seq}`);
+        onClick?.();
       }}
-      $soldOut={data?.soldOut}
+      $soldOut={data?.soldOut ?? false}
     >
       <div className="img-box">
         <img src={data?.img} alt="" />
@@ -58,7 +60,10 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
                 alert("품절된 상품입니다.");
                 return;
               }
-              addItemCart({ objects: data, addCount: 1, dispatch: dispatch });
+              addItemCart({
+                objects: { ...data, addCount: 1 },
+                dispatch: dispatch,
+              });
             }
           }}
         />

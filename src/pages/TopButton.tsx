@@ -1,9 +1,11 @@
 import React, { useEffect, useCallback, useState } from "react";
 import styled from "styled-components";
 import { theme } from "../../public/assets/styles/theme";
+import { useLocation } from "react-router-dom";
 
 const TopButton = () => {
   const [block, setBlock] = useState<boolean>(false);
+  const location = useLocation();
   const handleScroll = useCallback(() => {
     if (window.pageYOffset > 180) {
       // 탑버튼 보이게
@@ -41,7 +43,7 @@ const Container = styled.div<{ $block: boolean }>`
   height: 55px;
   transition: opacity 500ms linear, visibility 500ms linear;
   color: #fff;
-  bottom: 30px;
+  bottom: 75px;
   text-align: center;
   cursor: pointer;
   line-height: 55px;

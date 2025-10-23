@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router-dom";
 const CategoryMenu = ({
   style,
 }: {
-  style: React.CSSProperties | undefined;
+  style?: React.CSSProperties | undefined;
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const menuType = searchParams.get("menuType");

@@ -1,0 +1,104 @@
+.react-chatbot-kit-chat-header {
+  display: none;
+}
+.react-chatbot-kit-chat-container {
+  width: 100%; /* 부모의 너비를 가득 채움 */
+  height: 100vh; /* 부모의 높이를 가득 채움 */
+  /* min-height: 400px !important; 최소 높이 설정 */
+  display: flex;
+  flex-direction: column; /* 필요에 따라 설정 */
+  position: relative; /*자식 요소의 절대 위치 기준점 */
+}
+
+.react-chatbot-kit-chat-inner-container {
+  height: 100% !important;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column; /* 세로로 쌓기 */
+  justify-content: space-between; /* 메시지 영역과 입력창을 위아래로 배치 */
+  position: relative; /* 상대 위치 설정 */
+}
+
+/* 메시지 영역 크기 조정 */
+.react-chatbot-kit-chat-bot-message-container {
+  display: flex;
+  align-items: flex-start; /* 메시지 박스를 왼쪽 정렬 */
+  width: fit-content;
+  margin: 10px 0; /* 위아래 여백 추가 */
+}
+.react-chatbot-kit-user-chat-message-container {
+  margin: 10px 0; /* 위아래 여백 추가 */
+}
+.react-chatbot-kit-chat-message-container {
+  flex: 1; /* 남은 공간을 모두 차지하도록 설정 */
+  min-height: 0; /* 최소 높이를 0으로 설정하여 스크롤이 정상 작동하도록 함 */
+  /* max-height: 400px; */
+  overflow-y: auto !important;
+  margin-bottom: 5px; /* 입력창과의 간격 */
+  padding: 10px 17.5px;
+}
+
+/* 입력창 컨테이너 크기 조정 */
+.react-chatbot-kit-chat-input-container {
+  width: 100%;
+  display: flex; /* Flexbox로 정렬 */
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  padding: 10px;
+  background-color: #f9f9f9; /* 배경색 추가 */
+  border-top: 1px solid #ccc; /* 상단 구분선 */
+  flex-shrink: 0; /* 크기가 줄어들지 않도록 설정 */
+  position: relative; /* 상대 위치 설정 */
+}
+
+.react-chatbot-kit-chat-input {
+  flex: 1;
+  max-width: 100%;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin-right: 10px;
+}
+
+.react-chatbot-kit-chat-input-form {
+  display: flex; /* Flexbox로 정렬 */
+  justify-content: center;
+}
+
+.react-chatbot-kit-chat-input::placeholder {
+  color: #aaa;
+  content: "원하는 내용을 입력해주세요!";
+}
+
+/* 전송 버튼 스타일링 */
+.react-chatbot-kit-chat-btn-send {
+  max-width: 70px;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  justify-content: center;
+}
+
+.react-chatbot-kit-chat-btn-send:hover {
+  background-color: #0056b3;
+}
+
+.react-chatbot-kit-chat-bot-message {
+  justify-content: left;
+  width: fit-content;
+  max-width: 340px;
+  white-space: pre-line; /* 줄바꿈 허용 */
+}
+.react-chatbot-kit-chat-bot-message span {
+  word-break: break-all; /* 긴 단어가 줄바꿈되도록 설정 */
+  white-space: pre-wrap; /* 줄바꿈과 공백을 유지 */
+  font-size: 13px;
+  color: #fff;
+}
+.react-chatbot-kit-chat-message-container {
+  overflow-x: hidden;
+  min-width: 400px;
+}

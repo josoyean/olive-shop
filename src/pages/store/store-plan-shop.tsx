@@ -79,7 +79,11 @@ const StorePlanShopList = () => {
                           );
                         }}
                       >
-                        <img src={object?.img} alt="" />
+                        <img
+                          src={object?.img}
+                          alt="이벤트 이미지"
+                          style={{ filter: "brightness(80%)" }}
+                        />
                         <p
                           dangerouslySetInnerHTML={{
                             __html: object?.main_text,

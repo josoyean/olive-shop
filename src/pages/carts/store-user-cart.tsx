@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Center, MainTitle, Tags } from "../../../public/assets/style";
+import {
+  Center,
+  MainTitle,
+  TableStyle,
+  Tags,
+} from "../../../public/assets/style";
 import styled from "styled-components";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "redex/store";
-import { supabase } from "../../supabase";
 import type { CardImageType, CartType } from "compontents/card/card.type";
-import { theme } from "../../../public/assets/styles/theme";
 import moment from "moment";
 import {
   calculatePrice,
-  handleCartCount,
   handleCartItems,
   handlePrice,
   handleSaleTF,
 } from "../../bin/common";
-import { deleteCart, modify } from "../../redex/reducers/userCartCount";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
@@ -23,7 +24,8 @@ import StoreUserPayment from "./store-user-cart-payment";
 import StoreUserOrder from "./store-user-order";
 import { modifyCartItems } from "./addItemCart";
 import EmptyComponent from "../../compontents/EmptyComponent";
-interface PriceType {
+import { cartDataDelete, userCartData } from "../../api/axios-index";
+export interface PriceType {
   [key: string]: number;
 }
 const StoreUserCart = () => {
@@ -31,26 +33,34 @@ const StoreUserCart = () => {
   const navigate = useNavigate();
   const locatiton = useLocation();
   const today = new Date().toISOString().split("T")[0];
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const headerType = searchParams.get("t_header_type");
-  const cartsCount = useSelector((state: RootState) => state?.cartCount);
+  // const cartsCount = useSelector((state: RootState) => state?.cartCount);
   const userToken = useSelector((state: RootState) => state?.user.token);
   const cartItems = useSelector((state: RootState) => state?.cartDate);
   const [products, setProducts] = useState<CartType[]>([]);
   const [checkedItems, setCheckedItem] = useState<number[]>();
   const [price, setPrice] = useState<PriceType | null>();
-  const handleLoadData = async (data: CartType[]) => {
-    console.log(data);
-    setProducts(data ?? []);
-    const items = (data ?? []).filter(
-      (product) => product.objects?.soldOut === false
-    );
-    const selected = items.map((item) => item.object_seq);
-    setCheckedItem(selected);
+  const handleLoadData = async () => {
+    // 리뷰 작성 가능한 데이터 (배송 완료)
+    userCartData(userToken)
+      .then((data) => {
+        setProducts(data ?? []);
+        const items = (data ?? []).filter(
+          (product) => product?.objects?.soldOut === false
+        );
+        const selected = items.map((item) => item.object_seq);
+        setCheckedItem(selected);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    // return;
   };
   useEffect(() => {
     if (headerType === "1") {
-      handleLoadData(cartItems);
+      handleLoadData();
     } else if (headerType === "2") {
       console.log("안녕", locatiton);
     } else if (headerType === "3") {
@@ -60,17 +70,17 @@ const StoreUserCart = () => {
 
   //장바구니 제품 삭제
   const handleDelete = async (seq: number[]) => {
-    const { data, error } = await supabase
-      .from("carts")
-      .delete()
-      .eq("userId", userToken)
-      .in("object_seq", seq);
-
-    if (!data) {
-      alert("제품 삭제가 되었습니다");
-      handleCartItems(userToken, dispatch);
-      return;
-    }
+    cartDataDelete(userToken, seq)
+      .then((data) => {
+        if (!data) {
+          alert("제품 삭제가 되었습니다");
+          handleCartItems(userToken, dispatch);
+          return;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const handleAllChecked = (event: boolean) => {
@@ -92,12 +102,20 @@ const StoreUserCart = () => {
             (item?.objects?.count ?? 0) * (item?.object_count ?? 0);
           disCount =
             disCount +
-            (item?.objects?.count ?? 0) *
-              (item?.object_count ?? 0) *
-              0.01 *
-              ((handleSaleTF(item?.objects?.saleItem)
-                ? item?.objects?.saleItem?.discount_rate
-                : 0) ?? 0);
+            (item?.objects?.saleItem?.one_more !== null
+              ? handlePrice(null, item?.objects?.count) *
+                  (item?.object_count ?? 0) -
+                (calculatePrice(
+                  item?.object_count ?? 0,
+                  item?.objects?.saleItem?.one_more,
+                  handlePrice(item?.objects?.saleItem, item?.objects?.count)
+                ) ?? 0)
+              : (item?.objects?.count ?? 0) *
+                (item?.object_count ?? 0) *
+                0.01 *
+                ((handleSaleTF(item?.objects?.saleItem)
+                  ? item?.objects?.saleItem?.discount_rate
+                  : 0) ?? 0));
         }
       });
     });
@@ -166,12 +184,10 @@ const StoreUserCart = () => {
                     style={{ marginRight: "10px" }}
                     onClick={(event) => {
                       event.preventDefault();
-
                       if (checkedItems?.length === 0) {
                         alert("삭제할 제품을 선택해주세요");
                         return;
                       }
-                      console.log(checkedItems);
                       handleDelete(checkedItems ?? []);
                     }}
                   >
@@ -353,7 +369,28 @@ const StoreUserCart = () => {
                           </FormControl>
                         </TableBody>
                         <TableBody className="discount">
-                          {handleSaleTF(product?.objects?.saleItem) ? (
+                          {product?.objects?.saleItem?.one_more !== null ? (
+                            <>
+                              <em>
+                                {(
+                                  handlePrice(null, product?.objects?.count) *
+                                  (product?.object_count ?? 0)
+                                )?.toLocaleString()}
+                                원
+                              </em>
+                              <p>
+                                {calculatePrice(
+                                  product?.object_count ?? 0,
+                                  product?.objects?.saleItem?.one_more,
+                                  handlePrice(
+                                    product?.objects?.saleItem,
+                                    product?.objects?.count
+                                  )
+                                )?.toLocaleString()}
+                                원
+                              </p>
+                            </>
+                          ) : handleSaleTF(product?.objects?.saleItem) ? (
                             <>
                               <em>
                                 {calculatePrice(
@@ -380,7 +417,7 @@ const StoreUserCart = () => {
                               product?.object_count ?? 0,
                               product?.objects?.saleItem?.one_more,
                               handlePrice(null, product?.objects?.count)
-                            )?.toLocaleString()
+                            )?.toLocaleString() + "원"
                           )}
                         </TableBody>
                         <TableBody className="delivery">
@@ -410,6 +447,75 @@ const StoreUserCart = () => {
                                   alert("품절된 상품입니다");
                                   return;
                                 }
+
+                                navigate(
+                                  "/store/mypage/user-cart?t_header_type=2",
+                                  {
+                                    state: {
+                                      products: [product],
+                                      searchParams: { t_header_type: "2" },
+                                      price: {
+                                        totalCount:
+                                          (product?.objects?.count ?? 0) *
+                                          (product?.object_count ?? 0),
+                                        disCount:
+                                          product?.objects?.saleItem
+                                            ?.one_more !== null
+                                            ? handlePrice(
+                                                null,
+                                                product?.objects?.count
+                                              ) *
+                                                (product?.object_count ?? 0) -
+                                              (calculatePrice(
+                                                product?.object_count ?? 0,
+                                                product?.objects?.saleItem
+                                                  ?.one_more,
+                                                handlePrice(
+                                                  product?.objects?.saleItem,
+                                                  product?.objects?.count
+                                                )
+                                              ) ?? 0)
+                                            : (product?.objects?.count ?? 0) *
+                                              (product?.object_count ?? 0) *
+                                              0.01 *
+                                              ((handleSaleTF(
+                                                product?.objects?.saleItem
+                                              )
+                                                ? product?.objects?.saleItem
+                                                    ?.discount_rate
+                                                : 0) ?? 0),
+                                        totalPrice:
+                                          (product?.objects?.count ?? 0) *
+                                            (product?.object_count ?? 0) -
+                                          (product?.objects?.saleItem
+                                            ?.one_more !== null
+                                            ? handlePrice(
+                                                null,
+                                                product?.objects?.count
+                                              ) *
+                                                (product?.object_count ?? 0) -
+                                              (calculatePrice(
+                                                product?.object_count ?? 0,
+                                                product?.objects?.saleItem
+                                                  ?.one_more,
+                                                handlePrice(
+                                                  product?.objects?.saleItem,
+                                                  product?.objects?.count
+                                                )
+                                              ) ?? 0)
+                                            : (product?.objects?.count ?? 0) *
+                                              (product?.object_count ?? 0) *
+                                              0.01 *
+                                              ((handleSaleTF(
+                                                product?.objects?.saleItem
+                                              )
+                                                ? product?.objects?.saleItem
+                                                    ?.discount_rate
+                                                : 0) ?? 0)),
+                                      },
+                                    },
+                                  }
+                                );
                               }}
                             >
                               바로구매
@@ -479,18 +585,16 @@ const StoreUserCart = () => {
                     style={{ marginRight: "10px" }}
                     onClick={(event) => {
                       event.preventDefault();
-
                       const selectedProduct = products?.filter((product) =>
                         checkedItems?.includes(
                           product?.objects?.object_seq ?? 0
                         )
                       );
 
-                      navigate("/store/user-cart?t_header_type=2", {
+                      navigate("/store/mypage/user-cart?t_header_type=2", {
                         state: {
                           products: selectedProduct,
                           searchParams: { t_header_type: "2" },
-                          price: price,
                         },
                       });
                     }}
@@ -501,13 +605,14 @@ const StoreUserCart = () => {
                     className="all-payment"
                     onClick={(event) => {
                       event.preventDefault();
-                      navigate("/store/user-cart?t_header_type=2", {
+
+                      console.log(products);
+                      navigate("/store/mypage/user-cart?t_header_type=2", {
                         state: {
                           products: products.filter(
                             (product) => product?.objects?.soldOut === false
                           ),
                           searchParams: { t_header_type: "2" },
-                          price: price,
                         },
                       });
                     }}
@@ -521,7 +626,7 @@ const StoreUserCart = () => {
         )}
 
         {/*  주문 결제 */}
-        {headerType === "2" && <StoreUserPayment />}
+        {headerType === "2" && <StoreUserPayment priceData={price} />}
 
         {/* 주문완료 */}
         {headerType === "3" && <StoreUserOrder />}
@@ -744,30 +849,8 @@ const Information = styled.div`
   }
 `;
 
-const ProductBox = styled.div`
-  table {
-    width: 100%;
-    table-layout: fixed;
-    border-spacing: 0;
-  }
-  thead {
-    height: 40px;
-    th {
-      border-top: 2px solid #d6d6d6;
-      border-bottom: 1px solid #ccc;
-      background: #fafafa;
-      text-align: center;
-      padding: 5px;
-      color: #666;
-      font-size: 14px;
-    }
-  }
-
+const ProductBox = styled(TableStyle)`
   tbody {
-    td {
-      border-bottom: 1px solid #ccc;
-    }
-
     tr.soldOut {
       .buy_btn {
         border: 1px solid #aaa;

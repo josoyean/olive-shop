@@ -11,9 +11,9 @@ import EmptyComponent from "../../compontents/EmptyComponent";
 import { handleFilter } from "../../bin/common";
 import CategoryMenu from "../../compontents/CategoryMenu";
 const StoreRankingList: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const menuType = searchParams.get("menuType");
-  const [selectedMenu, setSelectedMenu] = useState<string>("전체");
+
   const [objects, setObjects] = useState<CardImageType[]>([]);
 
   const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
