@@ -9,7 +9,7 @@ interface CardsType {
   gap?: string;
   style?: React.CSSProperties;
 }
-const Cards = ({ width, count, gridCount = 4, gap, style }: CardsType) => {
+const Cards = ({ width, count, gridCount = 4, style }: CardsType) => {
   return (
     <Wrapper
       style={{

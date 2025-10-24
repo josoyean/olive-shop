@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import ActionProvider from "./ActionProvider";
 import Chatbot from "react-chatbot-kit";
-import ReactDOM from "react-dom";
 import MessageParser from "./MessageParser";
 import "react-chatbot-kit/build/main.css";
 import "./chatbot.css";
@@ -11,19 +10,23 @@ import Papa from "papaparse";
 import { useDispatch } from "react-redux";
 import { chatbotAdd } from "../../redex/reducers/chatbotList.js";
 
+interface ChatbotItem {
+  question: string;
+  answer: string;
+}
 const ChatbotContainer: React.FC = () => {
   const dispatch = useDispatch();
   const loadQnA = async () => {
     const response = await fetch("/qna.csv");
     const text = await response.text();
-    const { data } = Papa.parse(text, { header: true });
-
-    dispatch(chatbotAdd(data));
+    const { data } = Papa.parse<ChatbotItem>(text, { header: true });
+    dispatch(chatbotAdd(data as ChatbotItem[]));
     return data;
   };
   useEffect(() => {
     loadQnA();
   }, []);
+
   return (
     <ChatbotWrapper>
       <Chatbot

@@ -1,14 +1,13 @@
-import { loadTossPayments, ANONYMOUS } from "@tosspayments/tosspayments-sdk";
+import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useForm, FieldErrors, Controller } from "react-hook-form";
-import { auth, db } from "../../firebase";
+import { db } from "../../firebase";
 import { supabase } from "../../supabase";
 import type { RootState } from "../../redex/store";
 import { doc, updateDoc } from "firebase/firestore";
 import MenuItem from "@mui/material/MenuItem";
-
 import { useDispatch, useSelector } from "react-redux";
 import { GreenBtn, Info, Tags } from "../../../public/assets/style";
 import Radio from "@mui/material/Radio";
@@ -16,17 +15,11 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import { useDaumPostcodePopup } from "react-daum-postcode";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
 import moment from "moment";
-import type {
-  CardImageType,
-  CartType,
-  PaymentObjectType,
-} from "compontents/card/card.type";
-import { theme } from "../../../public/assets/styles/theme";
+import type { CartType, PaymentObjectType } from "compontents/card/card.type";
 import {
   calculatePrice,
-  randomOrderId,
   handlePrice,
   getUserInfo,
   isEmptyObject,
@@ -56,6 +49,7 @@ interface DataType {
   cardType: string;
   installment: number;
 }
+
 const koreanCardCompanyOptions: CardType[] = [
   { label: "국민카드", value: "국민" },
   { label: "신한카드", value: "신한" },
@@ -77,26 +71,25 @@ interface PropsType {
 const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
   const locatiton = useLocation();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+
   const today = new Date().toISOString().split("T")[0];
   const product = locatiton.state.products;
   const dispatch = useDispatch();
   const open = useDaumPostcodePopup(postcodeScriptUrl);
   const userToken = useSelector((state: RootState) => state?.user.token);
   const userInfoData = useSelector((state: RootState) => state?.userInfo);
-  const [user, setUser] = useState<UserInfo>({});
-  const [payment, setPayment] = useState(null);
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [payment] = useState(null);
 
   const {
     register,
     handleSubmit,
     setFocus,
     setValue,
-    reset,
+
     control,
     watch,
     getValues,
-    formState: { errors, touchedFields },
   } = useForm<DataType>({
     mode: "onChange",
     defaultValues: {},
@@ -211,11 +204,11 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           );
         }
 
-        const payment = tossPayments.payment({
-          customerKey,
-        });
+        // const payment = tossPayments.payment({
+        //   customerKey,
+        // });
 
-        setPayment(payment);
+        // setPayment(payment);
       } catch (error) {
         console.error("Error fetching payment:", error);
       }
@@ -244,9 +237,9 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
     };
   }) as PaymentObjectType[];
   const onSubmit = async (data: DataType) => {
-    test(data);
+    // test(data);
     //console.log(data);
-    return;
+    // return;
     const orderId = moment().format("YYYYMMDDhhmmss");
 
     const PaymentMethod =
@@ -256,7 +249,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
         ? "TRANSFER"
         : "CARD";
 
-    await payment.requestPayment({
+    await payment?.requestPayment({
       method: PaymentMethod, // 카드 및 간편결제
       amount: {
         currency: "KRW",
@@ -352,7 +345,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
     const selectObject = product.map((item: CartType) => item.object_seq);
     await supabase.from("payment").insert(insertDate);
 
-    const { paymentsData } = await supabase
+    const { data: paymentsData } = await supabase
       .from("carts")
       .delete()
       .eq("userId", userToken)
@@ -380,11 +373,38 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
 
   const onError = (errors: FieldErrors<DataType>) => {
     const errorKeys = Object.keys(errors);
-    console.log(errorKeys);
-    if (errorKeys.length > 0) {
-      setFocus(errorKeys[0]);
+    const fieldsOrder: (keyof DataType)[] = [
+      "getName",
+      "phoneNumber",
+      "addressMain",
+      "addressSub",
+      "name",
+      "birthDy",
+      "code",
+      "email",
+      "postNumber",
+      "deliveryMessage",
+      "enter",
+      "enterText",
+      "paymentType",
+      "cardType",
+      "installment",
+    ];
+    if (errorKeys.length === 0) return;
+
+    const firstError = fieldsOrder.find((key) => errorKeys.includes(key));
+    if (!firstError) return;
+
+    const fieldError = errors[firstError]; // FieldError | undefined
+
+    if (!fieldError) return;
+
+    if (fieldError.type === "noSpaces") {
+      setValue(firstError, "");
     }
-    alert(errors[errorKeys[0]].message);
+
+    setFocus(firstError);
+    alert(fieldError.message || "Form validation error");
   };
 
   const handleComplete = (data) => {

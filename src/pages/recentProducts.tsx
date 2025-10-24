@@ -1,8 +1,6 @@
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redex/store";
 import styled from "styled-components";
-import { CardImageType } from "compontents/card/card.type";
 import { clearProducts } from "../redex/reducers/recentProductsData";
 import EmptyComponent from "../compontents/EmptyComponent";
 import ObjectCardColumn from "../compontents/card/ObjectCardColumn";

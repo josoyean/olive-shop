@@ -1,24 +1,17 @@
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import type { RootState } from "../../redex/store";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { supabase } from "../../supabase";
-import {
-  isEmptyObject,
-  isToday,
-  defaultProfile,
-  getUserInfo,
-} from "../../bin/common";
+import { isToday } from "../../bin/common";
 import moment from "moment";
 import {
   PaymentType,
   ReviewType,
   type CardImageType,
   type OrderType,
-  type PaymentObjectType,
-  type UserInfoType,
 } from "../../compontents/card/card.type";
-import { auth, db } from "../../firebase";
+
 import { useSearchParams } from "react-router-dom";
 
 interface OrderDataType {
@@ -26,9 +19,9 @@ interface OrderDataType {
 }
 
 const Mypage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   const userToken = useSelector((state: RootState) => state?.user.token);
-  const userInfo = useSelector((state: RootState) => state?.userInfo);
+
   const [orderData, setOrderData] = useState<OrderDataType>({
     1: [],
     2: [],
@@ -44,7 +37,7 @@ const Mypage = () => {
 
   const handleDataLoad = useCallback(
     async (token: string) => {
-      const { data: paymentData, error: cartError } = await supabase
+      const { data: paymentData } = await supabase
         .from("payment")
         .select("*")
         .eq("userId", token)
@@ -89,12 +82,8 @@ const Mypage = () => {
         ) || []
       );
 
-      const result = paymentsData?.flatMap((item) =>
-        item.objectsInfo.map((obj: PaymentObjectType) => obj.payment_seq)
-      );
-
       // 리뷰 작성 완료
-      const { data: myReviewData, error: myReviewError } = await supabase
+      const { data: myReviewData } = await supabase
         .from("reviews")
         .select("*,objectInfo(*)")
         .eq("userId", token);

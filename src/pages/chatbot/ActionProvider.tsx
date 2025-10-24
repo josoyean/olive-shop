@@ -1,10 +1,14 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 
 interface ActionProviderProps {
   createChatBotMessage: (message: string, options?: any) => any;
   setState: React.Dispatch<React.SetStateAction<any>>;
   children: React.ReactNode;
+}
+interface ChatbotType {
+  answer: string;
+  messages: string;
 }
 const ActionProvider: React.FC<ActionProviderProps> = ({
   createChatBotMessage,
@@ -14,7 +18,7 @@ const ActionProvider: React.FC<ActionProviderProps> = ({
   const chatbotData = useSelector((state: any) => state.chatbotData);
   const handleQA = (item: string) => {
     if (!item.trim()) {
-      setState((prev) => ({
+      setState((prev: any) => ({
         ...prev,
         messages: [
           ...prev.messages,
@@ -23,13 +27,13 @@ const ActionProvider: React.FC<ActionProviderProps> = ({
       }));
       return;
     }
-    const botMessage = chatbotData.find((data) => {
-      if (data?.question.includes(item)) {
+    const botMessage = chatbotData.find((data: ChatbotType) => {
+      if (data?.messages.includes(item)) {
         return data;
       }
     });
 
-    setState((prev) => ({
+    setState((prev: ChatbotType) => ({
       ...prev,
       messages: [
         ...prev.messages,
@@ -43,9 +47,13 @@ const ActionProvider: React.FC<ActionProviderProps> = ({
   return (
     <div>
       {React.Children.map(children, (child) => {
-        return React.cloneElement(child, {
-          actions: { handleQA },
-        });
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child as React.ReactElement<any>, {
+            handleQA,
+            setState,
+            children,
+          });
+        }
       })}
     </div>
   );

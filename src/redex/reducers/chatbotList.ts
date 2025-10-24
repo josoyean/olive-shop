@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { supabase } from "../../supabase";
+
 interface ChatbotType {
   answer: string;
   question: string;
@@ -10,10 +10,7 @@ const chatbotState = createSlice({
   name: "chatbotList",
   initialState: chatbotInfo,
   reducers: {
-    chatbotAdd: (
-      state: ChatbotType[],
-      action: PayloadAction<ChatbotType[]>
-    ) => {
+    chatbotAdd: (_, action: PayloadAction<ChatbotType[]>) => {
       return action.payload;
     },
   },

@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 import { Center } from "../../../public/assets/style";
 import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";

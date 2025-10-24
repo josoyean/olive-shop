@@ -1,17 +1,11 @@
 import type { PaymentObjectType, ReviewType } from "compontents/card/card.type";
-import React, {
-  forwardRef,
-  useEffect,
-  useRef,
-  useState,
-  type JSX,
-} from "react";
+import { forwardRef, useEffect, useRef, useState, type JSX } from "react";
 import styled from "styled-components";
 import { theme } from "../../../public/assets/styles/theme";
 import { Rating } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import { Textarea } from "../../../public/assets/style";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type FieldErrors } from "react-hook-form";
 import { useSelector } from "react-redux";
 import type { RootState } from "redex/store";
 import { supabase } from "../../supabase";
@@ -29,10 +23,9 @@ interface DataType {
   textValue: string;
 }
 
-const fieldsOrder = ["ratingValue", "textValue"];
 const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
   (props, ref): JSX.Element => {
-    const { selectReview, orders, handleWriteReview } = props.data || {};
+    const { selectReview, handleWriteReview } = props.data || {};
     const token = useSelector((state: RootState) => state?.user.token);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [reviewImages, setReviewImages] = useState<string[]>([]);
@@ -45,7 +38,6 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
       control,
       watch,
       getValues,
-      formState: { errors, touchedFields },
     } = useForm<DataType>({
       defaultValues: {
         ratingValue: 0,
@@ -63,8 +55,8 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
       setReviewImages(selectReview.reviewImg || []);
     }, [selectReview]);
 
-    const handleImageUpload = (e) => {
-      const file = e.target.files[0];
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e?.target?.files?.[0];
       if (!file) return;
 
       const reader = new FileReader();
@@ -95,19 +87,24 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
         handleWriteReview();
       }
     };
-    const onError = (errors: any) => {
+    const onError = (errors: FieldErrors<DataType>) => {
       const errorKeys = Object.keys(errors);
+      const fieldsOrder: (keyof DataType)[] = ["ratingValue", "textValue"];
+      if (errorKeys.length === 0) return;
 
-      if (errorKeys.length > 0) {
-        const firstError = fieldsOrder.find((key) => errorKeys.includes(key));
-        if (!firstError) return;
-        console.log("First Error:", firstError, errors[firstError]);
-        if (errors[firstError as string]?.type === "noSpaces") {
-          setValue(firstError, "");
-        }
-        setFocus(firstError);
-        alert(errors[firstError]?.message || "Form validation error");
+      const firstError = fieldsOrder.find((key) => errorKeys.includes(key));
+      if (!firstError) return;
+
+      const fieldError = errors[firstError]; // FieldError | undefined
+
+      if (!fieldError) return;
+
+      if (fieldError.type === "noSpaces") {
+        setValue(firstError, "");
       }
+
+      setFocus(firstError);
+      alert(fieldError.message || "Form validation error");
     };
     return (
       <form ref={ref} onSubmit={handleSubmit(onSubmit, onError)}>
@@ -134,7 +131,8 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
               <Rating
                 {...field}
                 precision={1}
-                onChange={(_, newValue: number) => {
+                onChange={(_, newValue: number | null) => {
+                  if (!newValue) return;
                   field.onChange(newValue); // 폼에 반영
                 }}
                 size="large"
@@ -216,7 +214,7 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
                     onClick={(event) => {
                       event.preventDefault();
                       setReviewImages(
-                        reviewImages.filter((item, idx) => idx !== index)
+                        reviewImages.filter((_, idx) => idx !== index)
                       );
                     }}
                   >

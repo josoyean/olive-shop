@@ -1,7 +1,4 @@
-import React, { useEffect, useCallback, useState } from "react";
 import styled from "styled-components";
-import { theme } from "../../public/assets/styles/theme";
-import { useLocation } from "react-router-dom";
 
 const ChatButton = () => {
   return (

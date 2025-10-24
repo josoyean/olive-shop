@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Center } from "../../../public/assets/style";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -12,7 +12,6 @@ import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
 import { handleFilter } from "../../bin/common";
 
 const SearchMain = () => {
-  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const searchValue = searchParams.get("getSearchValue");
@@ -22,7 +21,7 @@ const SearchMain = () => {
   );
   const [objects, setObjects] = useState<CardImageType[]>([]);
   const [objectsList, setObjectsList] = useState<CardImageType[]>([]);
-  const [brandInfo, setBrandInfo] = useState<BrandType>({});
+  const [brandInfo, setBrandInfo] = useState<BrandType | null>(null);
   const handleData = async (value: string) => {
     const { data: brandData } = await supabase
       .from("brands")

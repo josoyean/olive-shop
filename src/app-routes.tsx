@@ -1,13 +1,11 @@
 import { RouteObject } from "react-router-dom";
 import AppLayout from "./app-layout";
-import React, { useEffect } from "react";
 import MainPage from "./pages/main";
 import Login from "./pages/login";
 import SignUp from "./pages/signup";
 import FindId from "./pages/find-id";
 import FindPassword from "./pages/find-password";
 import StoreList from "./pages/store/store-list";
-import { useParams } from "react-router-dom";
 import StoreGoodsDetail from "./pages/store/store-goods-detail";
 import SearchMain from "./pages/store/search-main";
 import StoreBrandDetail from "./pages/store/store-brand-detail";
@@ -18,7 +16,6 @@ import StoreGoodsSale from "./pages/store/store-goods-sale";
 import StoreEvents from "./pages/store/store-events";
 import StoreEventDetail from "./pages/store/store-event-detail";
 import StoreUserCart from "./pages/carts/store-user-cart";
-import Mypage from "./pages/mypage/mypage";
 import StoreMypage from "./pages/mypage/store-mypage";
 import ChatbotContainer from "./pages/chatbot/Chatbot-Container";
 

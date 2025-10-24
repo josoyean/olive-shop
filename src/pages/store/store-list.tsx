@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Center } from "../../../public/assets/style";
-import { data, useLocation, useNavigate } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import { GubMenu } from "../../app-layout";
@@ -40,7 +39,7 @@ const StoreList = () => {
         .eq("objectTypeMain", searchItem)
         .eq("objectTypeSub", searchTitle);
     }
-    const { data: objectsData, error } = await query;
+    const { data: objectsData } = await query;
     setObjects(objectsData ?? []);
     const filteredData = handleFilter("popular", objectsData ?? []);
     setObjectsList(filteredData);
@@ -49,7 +48,7 @@ const StoreList = () => {
     handleData(searchTitle);
     if (searchTitle !== "") return;
     const searchMenuFilter = GubMenu.filter(
-      (menu, index) => menu.title.name === searchMenu
+      (menu) => menu.title.name === searchMenu
     )[0].main;
     const searchItemFilter = searchMenuFilter?.filter(
       (item) => item.title.name === searchItem

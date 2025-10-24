@@ -1,4 +1,4 @@
-import React, { Children, useEffect, useState, type ReactNode } from "react";
+import React, { useEffect, type ReactNode } from "react";
 import ReactModal from "react-modal";
 import Modal from "react-modal";
 import styled from "@emotion/styled";
@@ -18,7 +18,7 @@ interface ModalContainerProps {
   footerText?: string | null;
   okText?: string | null;
   noCloseModal?: boolean | null;
-  formRef?: HTMLInputElement | HTMLFormElement | null;
+  formRef?: React.RefObject<HTMLInputElement | HTMLFormElement | null>;
 }
 
 const customStyles: ReactModal.Styles = {
@@ -48,7 +48,6 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
   onClose,
   overlayStyle,
   widthCheck,
-  heightCheck,
   header,
   style,
   handleOk,

@@ -16,9 +16,9 @@ export interface CardImageType {
   detailImg?: string;
   objectTypeMain?: string;
   objectTypeSub?: string;
-  brand_seq: number;
-  brand: string;
-  object_seq: number;
+  brand_seq?: number;
+  brand?: string;
+  object_seq?: number;
   object_count?: number;
   one_more: number | null;
   saleItem?: SaleType | undefined | null;
@@ -28,11 +28,12 @@ export interface CardImageType {
 export interface BrandType {
   brandImg?: string;
   name: string; // 동적으로 속성 키와 값을 추가
-  infoText: string; // 동적으로 속성 키와 값을 추가
+  infoText?: string; // 동적으로 속성 키와 값을 추가
   created_at?: string;
   videoLink?: string;
   videoText?: string;
   id: number;
+  infoMainText?: string;
   brand_seq: number;
   object?: CardImageType[] | undefined;
 }
@@ -41,7 +42,7 @@ export interface CardProps {
   option?: boolean;
   img?: string;
   imgSize?: string;
-  data: CardImageType;
+  data?: CardImageType | undefined;
 
   onClick?: () => void | undefined;
 }
@@ -114,7 +115,7 @@ export interface CartType {
   objectTypeMain?: string;
   objectTypeSub?: string;
   brand?: string;
-  object_seq: number;
+  object_seq?: number;
   brand_seq?: number;
   object_count?: number;
   one_more?: number | null;
@@ -219,4 +220,8 @@ export interface PaymentObjectType {
   delivered_at?: string | null;
   saleItem?: boolean;
   orderId?: string;
+}
+export interface FormValues {
+  ratingValue: number;
+  textValue: string;
 }

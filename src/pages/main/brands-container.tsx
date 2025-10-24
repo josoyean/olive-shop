@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { Center } from "../../../public/assets/style";
 import type { BrandType } from "compontents/card/card.type";
-import Slider from "react-slick";
+import Slider, { type CustomArrowProps } from "react-slick";
 import ObjectCardRow from "../../compontents/card/ObjectCardRow";
 import { useNavigate } from "react-router-dom";
 
@@ -30,11 +30,9 @@ const BrandsContainer: React.FC<BrandsContainerProps> = (props) => {
     nextArrow: <SampleNextArrow className="next" />,
     prevArrow: <SamplePrevArrow className="prev" />,
   };
-  const handleLoadData = useCallback(async () => {
-    console.log(data);
-  }, []);
+  const handleLoadData = useCallback(async () => {}, []);
 
-  function SampleNextArrow(props) {
+  function SampleNextArrow(props: CustomArrowProps) {
     const { className, style, onClick } = props;
     return (
       <div
@@ -45,7 +43,7 @@ const BrandsContainer: React.FC<BrandsContainerProps> = (props) => {
     );
   }
 
-  function SamplePrevArrow(props) {
+  function SamplePrevArrow(props: CustomArrowProps) {
     const { className, style, onClick } = props;
     return (
       <div
@@ -95,14 +93,14 @@ const BrandsContainer: React.FC<BrandsContainerProps> = (props) => {
                   size={`${(50 / 100) * 100}%`}
                   option={false}
                   imgSize="100px"
-                  data={item?.object[0]}
+                  data={item?.object?.[0]}
                 ></ObjectCardRow>
 
                 <ObjectCardRow
                   size={`${(50 / 100) * 100}%`}
                   option={false}
                   imgSize="100px"
-                  data={item?.object[1]}
+                  data={item?.object?.[1]}
                 ></ObjectCardRow>
               </ObjectWrapper>
             </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Center, StarBox, Tags } from "../../../public/assets/style";
 import { theme } from "../../../public/assets/styles/theme";
@@ -6,49 +6,33 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "../../supabase";
 import { useNavigate } from "react-router-dom";
 import type { CardImageType, ReviewType } from "compontents/card/card.type";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
-import { auth, db } from "../../firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
 import type { RootState } from "redex/store";
 import Slider from "react-slick";
 import {
   calculatePrice,
   calculatePriceNY,
   handlePrice,
-  handleCartCount,
   handleSaleTF,
   defaultProfile,
 } from "../../bin/common";
 import { useSelector, useDispatch } from "react-redux";
-import { modify } from "../../redex/reducers/userCartCount";
 import ObjectCardRow from "../../compontents/card/ObjectCardRow";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import {
-  addProducts,
-  clearProducts,
-} from "../../redex/reducers/recentProductsData";
+import { addProducts } from "../../redex/reducers/recentProductsData";
 import { addItemCart } from "../../pages/carts/addItemCart";
 import EmptyComponent from "../../compontents/EmptyComponent";
-import { dividerClasses } from "@mui/material";
 import moment from "moment";
 import ModalContainer from "../../compontents/ModalContainer";
-interface Test {
-  [key: string]: number;
-}
+
 const StoreGoodsDetail = () => {
   const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
-  const productData = useSelector((state: RootState) => state?.recentProducts);
   const userData = useSelector((state: RootState) => state?.user.token);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const [objects, setObjects] = useState<CardImageType>();
   const [objectItems, setObjectItems] = useState<CardImageType[]>([]);
@@ -66,14 +50,14 @@ const StoreGoodsDetail = () => {
   const [detailImgIndex, setDetailImgIndex] = useState<string>("0");
   const [imgOpened, setImgOpened] = useState<boolean>(false);
   const handleData = async (item: string) => {
-    const { data: selectedData, error: cartError } = await supabase
+    const { data: selectedData } = await supabase
       .from("objects")
       .select("*,saleItem(*)")
       .eq("object_seq", item)
       .single();
 
     const selected = !selectedData ? {} : { ...selectedData };
-    const { data: brandsData, error: brandsError } = await supabase
+    const { data: brandsData } = await supabase
       .from("brands")
       .select("*")
       .eq("brand_seq", selected?.brand_seq)
@@ -87,7 +71,7 @@ const StoreGoodsDetail = () => {
     setObjects(data);
     dispatch(addProducts(selected));
 
-    const { data: objectData, error } = await supabase
+    const { data: objectData } = await supabase
       .from("objects")
       .select("*,saleItem(*)");
     setObjectItems(
@@ -100,7 +84,7 @@ const StoreGoodsDetail = () => {
   };
 
   const handleReviewData = async (item: string) => {
-    const { data: reviewData, reviewError } = await supabase
+    const { data: reviewData } = await supabase
       .from("reviews")
       .select("*")
       .eq("objectInfo", item)
@@ -210,7 +194,7 @@ const StoreGoodsDetail = () => {
   };
 
   const handleLike = async (id: string) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("reviews")
       .select("*")
       .eq("id", id)

@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { Center, InputWrapper, Container } from "../../public/assets/style";
 import styled from "styled-components";
 import { useForm, FieldErrors } from "react-hook-form";
-
 import "firebase/auth";
 import {
   signInWithPhoneNumber,
-  RecaptchaVerifier,
   signInWithCredential,
   PhoneAuthProvider,
 } from "firebase/auth";
 import { ErrorMessage } from "@hookform/error-message";
-import { formatPhoneNumber, numberOnly } from "../bin/common";
+import { formatPhoneNumber, numberOnly, setupRecaptcha } from "../bin/common";
 import { useNavigate } from "react-router-dom";
 import type { CheckedType } from "../types/userInfor";
 import { supabase } from "../supabase";
+import { auth } from "../firebase";
 interface DataType {
   id: string;
   password: string;
@@ -59,22 +58,6 @@ const SignUp = () => {
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const setupRecaptcha = () => {
-    if (window.recaptchaVerifier) {
-      return;
-    }
-    window.recaptchaVerifier = new RecaptchaVerifier(
-      auth,
-      "recaptcha-container",
-      {
-        size: "invisible", // reCAPTCHA v2 (보이지 않는) 방식
-        callback: (response: any) => {
-          console.log("reCAPTCHA solved", response);
-        },
-        "expired-callback": () => console.log("reCAPTCHA 만료됨"),
-      }
-    );
-  };
   const onSubmit = async (data: DataType) => {
     if (!checked.phone) {
       alert("인증번호 전송해주세요");
@@ -101,29 +84,27 @@ const SignUp = () => {
     }
 
     const userId = signData?.user?.id;
-    const { data: userInfoData, error: userInfoError } = await supabase
-      .from("userInfo")
-      .insert([
-        {
-          userId: data.id, // auth user id
-          addressMain: "",
-          addressSub: "",
-          birthDy: data.birthDy,
-          deliveryName: "",
-          deliveryPhone: "",
-          phoneNumber: data.phoneNumber,
-          email: data.email,
-          email_verified: false,
-          phone_verified: false,
-          enterInfo: "",
-          id: userId,
-          infoText: "",
-          name: data.name,
-          nickName: "",
-          postNumber: "",
-          profileImg: "",
-        },
-      ]);
+    const { data: userInfoData } = await supabase.from("userInfo").insert([
+      {
+        userId: data.id, // auth user id
+        addressMain: "",
+        addressSub: "",
+        birthDy: data.birthDy,
+        deliveryName: "",
+        deliveryPhone: "",
+        phoneNumber: data.phoneNumber,
+        email: data.email,
+        email_verified: false,
+        phone_verified: false,
+        enterInfo: "",
+        id: userId,
+        infoText: "",
+        name: data.name,
+        nickName: "",
+        postNumber: "",
+        profileImg: "",
+      },
+    ]);
 
     if (!userInfoData) {
       alert("회원가입이 완료되었습니다.");
@@ -133,9 +114,33 @@ const SignUp = () => {
 
   const onError = (errors: FieldErrors<DataType>) => {
     const errorKeys = Object.keys(errors);
-    if (errorKeys.length > 0) {
-      setFocus(errorKeys[0]);
+    const fieldsOrder: (keyof DataType)[] = [
+      "id",
+      "password",
+      "passwordAgain",
+      "saveId",
+      "name",
+      "birthDy",
+      "phoneNumber",
+      "code",
+      "email",
+      "postNumber",
+    ];
+    if (errorKeys.length === 0) return;
+
+    const firstError = fieldsOrder.find((key) => errorKeys.includes(key));
+    if (!firstError) return;
+
+    const fieldError = errors[firstError]; // FieldError | undefined
+
+    if (!fieldError) return;
+
+    if (fieldError.type === "noSpaces") {
+      setValue(firstError, "");
     }
+
+    setFocus(firstError);
+    alert(fieldError.message || "Form validation error");
   };
 
   // 타이머 설정
@@ -461,41 +466,6 @@ const SignUp = () => {
   );
 };
 export default SignUp;
-const LabelWrapper = styled.div`
-  display: flex;
-  width: 400px;
-  align-items: center;
-  justify-content: space-between;
-  margin: 15px 0 30px;
-  label {
-    font-size: ${({ theme }) => theme.fontSize.middle};
-    color: ${({ theme }) => theme.fontColor.sub};
-    display: flex;
-    align-items: center;
-    input[type="checkbox"] {
-      margin-right: 05px;
-    }
-  }
-  span {
-    cursor: pointer;
-    position: relative;
-    display: block;
-    float: left;
-    margin-left: 15px;
-    font-size: ${({ theme }) => theme.fontSize.small};
-    color: ${({ theme }) => theme.fontColor.sub};
-    &::after {
-      display: block;
-      right: -8px;
-      top: 0;
-      position: absolute;
-      content: " | ";
-    }
-    &:last-child::after {
-      display: none;
-    }
-  }
-`;
 
 const Buttom = styled.div`
   display: flex;

@@ -1,24 +1,16 @@
-import React, { useEffect } from "react";
-import { Center, Container, WhiteButton } from "../../public/assets/style";
+import { useEffect } from "react";
+import { Center, Container } from "../../public/assets/style";
 import styled from "styled-components";
 import { useForm, FieldErrors } from "react-hook-form";
-import { auth, db } from "../firebase";
+import { db } from "../firebase";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../redex/store";
 import { useCookies } from "react-cookie";
-import { add, type UserInfoType } from "../redex/reducers/userReducer";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  setDoc,
-} from "firebase/firestore";
+import { add } from "../redex/reducers/userReducer";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { handleCartItems, getUserInfo } from "../bin/common";
-import { setUserInfo } from "../redex/reducers/userInfo";
 import {
   loadCaptchaEnginge,
   LoadCanvasTemplateNoReload,
@@ -32,20 +24,12 @@ interface DataType {
   captcha: string;
 }
 const Login = () => {
-  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const [, setCookie] = useCookies(["token"]);
   const auth = getAuth();
-  const currentUser = auth.currentUser;
   const user = useSelector((state: RootState) => state?.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {
-    register,
-    handleSubmit,
-    setFocus,
-    setValue,
-    getValues,
-    formState: { errors },
-  } = useForm<DataType>({
+  const { register, handleSubmit, setFocus, setValue } = useForm<DataType>({
     defaultValues: { saveId: user.saveId },
   });
 
@@ -55,7 +39,7 @@ const Login = () => {
         const token = userCredential.user.uid;
 
         getUserInfo(token, dispatch)
-          .then((info) => {
+          .then(() => {
             dispatch(
               add({
                 token: token,
@@ -68,10 +52,12 @@ const Login = () => {
             navigate(-1);
           })
           .catch((error) => {
+            console.log(error);
             return;
           });
       })
       .catch((error) => {
+        console.log(error);
         alert("일치한 회원정보가 없습니다.");
         return;
       });
@@ -101,12 +87,28 @@ const Login = () => {
 
   const onError = (errors: FieldErrors<DataType>) => {
     const errorKeys = Object.keys(errors);
-    if (errorKeys.length > 0) {
-      setFocus(errorKeys[0]);
-      alert(errors[errorKeys[0]]?.message || "Form validation error");
-    }
-  };
+    const fieldsOrder: (keyof DataType)[] = [
+      "id",
+      "password",
+      "saveId",
+      "captcha",
+    ];
+    if (errorKeys.length === 0) return;
 
+    const firstError = fieldsOrder.find((key) => errorKeys.includes(key));
+    if (!firstError) return;
+
+    const fieldError = errors[firstError]; // FieldError | undefined
+
+    if (!fieldError) return;
+
+    if (fieldError.type === "noSpaces") {
+      setValue(firstError, "");
+    }
+
+    setFocus(firstError);
+    alert(fieldError.message || "Form validation error");
+  };
   useEffect(() => {
     setValue("saveId", user.saveId);
     if (user.saveId) {

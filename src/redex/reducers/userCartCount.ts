@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { supabase } from "../../supabase";
+
 const cartInfo: number = 0;
 
 const cartState = createSlice({
   name: "cartCount",
   initialState: cartInfo,
   reducers: {
-    modify: (state: number, action: PayloadAction<number>) => {
+    modify: (__, action: PayloadAction<number>) => {
       return action.payload;
     },
     deleteCart: (state: number, action: PayloadAction<number>) => {

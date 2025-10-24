@@ -7,13 +7,12 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "./redex/store";
 import { deleteUser } from "./redex/reducers/userReducer";
-import { auth, db } from "./firebase";
+import { auth } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import TopButton from "./pages/TopButton";
 import FooterContainer from "./pages/footer";
 import { useCookies } from "react-cookie";
-import { deleteUserInfo } from "./redex/reducers/userInfo";
-import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
+// import { deleteUserInfo } from "./redex/reducers/userInfo";
 import RecentProducts from "./pages/recentProducts";
 import ChatButton from "./pages/ChatButton.js";
 interface NavTyle {
@@ -336,14 +335,14 @@ const AppLayout: React.FC = () => {
   const dispatch = useDispatch();
   const userData = useSelector((state: RootState) => state?.user);
   const cartItems = useSelector((state: RootState) => state?.cartDate);
-  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const [cookies] = useCookies(["token"]);
   const [menuBar, setMenuBar] = useState<boolean>(false);
   const [openedBox, setOpenedBox] = useState<boolean>(false);
   const componentRef = useRef<HTMLDivElement | null>(null);
   const gubRef = useRef<HTMLDivElement | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   useEffect(() => {
-    function handleClickOutside(event: any) {
+    function handleClickOutside(event: React.MouseEvent<HTMLDivElement>) {
       if (
         componentRef.current &&
         !componentRef.current.contains(event.target) &&
@@ -394,7 +393,7 @@ const AppLayout: React.FC = () => {
     if (!cookies.token && userData.token) {
       alert("로그인 세션이 만료 되었습니다. 다시 로그인해주새요");
       dispatch(deleteUser());
-      dispatch(deleteUserInfo());
+      // dispatch(deleteUserInfo());
       if (location.pathname.includes("/store/mypage")) {
         navigate("/login");
       }
@@ -407,9 +406,11 @@ const AppLayout: React.FC = () => {
       .then(() => {
         navigate("/");
         dispatch(deleteUser());
-        dispatch(deleteUserInfo());
+        // dispatch(deleteUserInfo());
       })
-      .catch((error) => {});
+      .catch((error) => {
+        console.error(error);
+      });
   };
   const handleTooltipClose = () => {
     setOpenedBox(false);
@@ -461,7 +462,9 @@ const AppLayout: React.FC = () => {
                         open={openedBox}
                         disableInteractive={false}
                         disableFocusListener
-                        onClick={(event) => event.stopPropagation()}
+                        onClick={(event: React.MouseEvent) =>
+                          event.stopPropagation()
+                        }
                         disableHoverListener
                         disableTouchListener
                         title={
@@ -640,27 +643,7 @@ const AppLayout: React.FC = () => {
 };
 
 export default AppLayout;
-const ItemsContainer = styled.div`
-  min-height: 400px;
 
-  .header {
-    padding: 3px 0 10px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid ${({ theme }) => theme.lineColor.main};
-    h2 {
-      em {
-        color: #116dff;
-      }
-    }
-    button {
-      padding: 3px 8px;
-      font-size: 14px;
-      border: 1px solid ${({ theme }) => theme.lineColor.main};
-    }
-  }
-`;
 const HeaderWrapper = styled.div`
   .subNav {
     display: flex;

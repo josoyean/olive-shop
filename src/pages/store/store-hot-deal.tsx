@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Center, MainTitle } from "../../../public/assets/style";
 import styled from "styled-components";
 import { supabase } from "../../supabase";
@@ -51,7 +51,7 @@ const StoreHotDeal = () => {
         <div className="title">
           <h2>오늘의 특가</h2>
           <Countdown
-            date={moment(todays).add(1, "day")}
+            date={moment(todays).add(1, "day").toDate()}
             renderer={renderer}
           ></Countdown>
         </div>

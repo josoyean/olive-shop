@@ -1,14 +1,13 @@
 import React, { useState, ReactNode, useEffect } from "react";
-import styled from "styled-components";
+
 import BannerContainer from "./main/banner-container";
 import CommendObject from "./main/commend-object";
 import { Center } from "../../public/assets/style";
 import EventContainer from "./main/event-container";
 import HotObject from "./main/hot-object";
-import { getProjects, supabase } from "../supabase";
 import type { BrandType, CardImageType } from "compontents/card/card.type";
 import BrandsContainer from "./main/brands-container";
-import supabaseAxios, {
+import {
   attentionData,
   brandsData,
   newData,

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Center, ObjectsBox } from "../../../public/assets/style";
 import styled from "styled-components";
 import { useSearchParams } from "react-router-dom";
@@ -16,10 +16,9 @@ const StoreBrandDetail = () => {
   const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const [searchParams] = useSearchParams();
   const searchParam = searchParams.get("getBrand");
-
   const [objects, setObjects] = useState<CardImageType[]>([]);
   const [objectsList, setObjectsList] = useState<CardImageType[]>([]);
-  const [brandInfo, setBrandInfo] = useState<BrandType>({});
+  const [brandInfo, setBrandInfo] = useState<BrandType | null>(null);
   const [selected, setSelected] = useState<string | undefined>(
     filteredSearch[0].type
   );
@@ -27,14 +26,14 @@ const StoreBrandDetail = () => {
   const [selectedType, setSelectedType] = useState<string>("전체");
   const handleData = async (value: string) => {
     // api 요청 - 브랜드 종류
-    const { data: brandData, error: cartError } = await supabase
+    const { data: brandData } = await supabase
       .from("brands")
       .select("*")
       .eq("brand_seq", value)
       .single();
     setBrandInfo(brandData);
 
-    const { data: nameData, error: nameError } = await supabase
+    const { data: nameData } = await supabase
       .from("objects")
       .select("*,saleItem(*)")
       .eq("brand_seq", value)
@@ -93,7 +92,7 @@ const StoreBrandDetail = () => {
         <TitleContainer>{brandInfo?.name}</TitleContainer>
         <InfoContainer>
           <div className="img-box">
-            <img src={brandInfo.brandImg} alt="브랜드 소개 이미지" />
+            <img src={brandInfo?.brandImg} alt="브랜드 소개 이미지" />
             <span>{brandInfo?.infoMainText}</span>
           </div>
           <span
@@ -102,7 +101,7 @@ const StoreBrandDetail = () => {
           <div className="video-box">
             <h2>{brandInfo?.videoText}</h2>
             <YouTube
-              videoId={brandInfo.videoLink}
+              videoId={brandInfo?.videoLink}
               opts={opts}
               onEnd={(e) => {
                 e.target.stopVideo(0);

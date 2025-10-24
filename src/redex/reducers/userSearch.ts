@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { CardImageType } from "compontents/card/card.type";
 
 interface searchStateType {
   save: boolean;
@@ -44,7 +43,7 @@ const userSearchState = createSlice({
 
       return updatedProducts;
     },
-    allDeleteSearchText: (state, action: PayloadAction<searchType>) => {
+    allDeleteSearchText: (_, action: PayloadAction<searchType>) => {
       const updatedProducts = {
         save: action.payload.save,
         searchValue: [],

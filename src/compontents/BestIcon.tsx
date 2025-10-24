@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 const BestIcon = () => {
   return <Icon className="best-icon">베스트</Icon>;

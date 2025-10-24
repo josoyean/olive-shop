@@ -1,9 +1,5 @@
-import type {
-  PaymentObjectType,
-  PaymentType,
-  ReviewType,
-} from "compontents/card/card.type";
-import React, { forwardRef, useEffect } from "react";
+import type { ReviewType } from "compontents/card/card.type";
+import { forwardRef } from "react";
 import styled from "styled-components";
 import { theme } from "../../../public/assets/styles/theme";
 import { getStarWidth } from "../../bin/common";
@@ -13,62 +9,63 @@ interface ReviewProps {
     viewReview: ReviewType | null; // 타입 명확하면 any 대신 string, number 등으로 바꿔줘요!
   };
 }
-const ReviewViewContainer = forwardRef<HTMLFormElement, ReviewProps>(
-  (props, ref) => {
-    const { viewReview } = props?.data || {};
+const ReviewViewContainer = forwardRef<
+  HTMLFormElement | HTMLInputElement,
+  ReviewProps
+>((props) => {
+  const { viewReview } = props?.data || {};
 
-    return (
-      <div>
-        <ObjectBox>
-          <img src={viewReview?.objectInfo?.img} alt="상품" />
+  return (
+    <div>
+      <ObjectBox>
+        <img src={viewReview?.objectInfo?.img} alt="상품" />
+        <div>
+          <strong>{viewReview?.objectInfo?.brand}</strong>
+          <em>{viewReview?.objectInfo?.name}</em>
+        </div>
+      </ObjectBox>
+      <RatingBox>
+        <strong>상품 평점</strong>
+        <StarBox size="25px">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <li key={i}>
+              <span
+                className="rating"
+                style={{
+                  width: getStarWidth(i, viewReview?.score ?? 0),
+                }}
+              />
+              <img
+                src="/public/assets/images/icons/bg_rating_star.png"
+                alt="bg_rating_star"
+              />
+            </li>
+          ))}
+        </StarBox>
+      </RatingBox>
+      <ReviewBox>
+        <strong>상품 리뷰</strong>
+        <div>
+          <span
+            dangerouslySetInnerHTML={{
+              __html: viewReview?.reviewText?.replace(/\n/g, "<br />") ?? "",
+            }}
+          ></span>
+        </div>
+      </ReviewBox>
+      {(viewReview?.reviewImg || [])?.length > 0 && (
+        <ReviewImgBox>
+          <strong>포토</strong>
           <div>
-            <strong>{viewReview?.objectInfo?.brand}</strong>
-            <em>{viewReview?.objectInfo?.name}</em>
-          </div>
-        </ObjectBox>
-        <RatingBox>
-          <strong>상품 평점</strong>
-          <StarBox size="25px">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <li key={i}>
-                <span
-                  className="rating"
-                  style={{
-                    width: getStarWidth(i, viewReview?.score ?? 0),
-                  }}
-                />
-                <img
-                  src="/public/assets/images/icons/bg_rating_star.png"
-                  alt="bg_rating_star"
-                />
-              </li>
+            {viewReview?.reviewImg?.map((img, index) => (
+              <img key={index} src={img} alt="포토" />
             ))}
-          </StarBox>
-        </RatingBox>
-        <ReviewBox>
-          <strong>상품 리뷰</strong>
-          <div>
-            <span
-              dangerouslySetInnerHTML={{
-                __html: viewReview?.reviewText?.replace(/\n/g, "<br />") ?? "",
-              }}
-            ></span>
           </div>
-        </ReviewBox>
-        {(viewReview?.reviewImg || [])?.length > 0 && (
-          <ReviewImgBox>
-            <strong>포토</strong>
-            <div>
-              {viewReview?.reviewImg?.map((img, index) => (
-                <img key={index} src={img} alt="포토" />
-              ))}
-            </div>
-          </ReviewImgBox>
-        )}
-      </div>
-    );
-  }
-);
+        </ReviewImgBox>
+      )}
+    </div>
+  );
+});
 export const StarBox = styled.ul<{ size?: string }>`
   display: flex;
   column-gap: 4px;

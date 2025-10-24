@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { useForm, FieldErrors } from "react-hook-form";
 import { Center, Container, InputWrapper } from "../../public/assets/style";
@@ -59,7 +59,7 @@ const FindId = () => {
       "recaptcha-container",
       {
         size: "invisible", // reCAPTCHA v2 (보이지 않는) 방식
-        callback: (response) => {
+        callback: (response: string) => {
           console.log("reCAPTCHA solved", response);
         },
         "expired-callback": () => console.log("reCAPTCHA 만료됨"),
@@ -69,9 +69,27 @@ const FindId = () => {
 
   const onError = (errors: FieldErrors<DataType>) => {
     const errorKeys = Object.keys(errors);
-    if (errorKeys.length > 0) {
-      setFocus(errorKeys[0]);
+    const fieldsOrder: (keyof DataType)[] = [
+      "name",
+      "birthDy",
+      "phoneNumber",
+      "code",
+    ];
+    if (errorKeys.length === 0) return;
+
+    const firstError = fieldsOrder.find((key) => errorKeys.includes(key));
+    if (!firstError) return;
+
+    const fieldError = errors[firstError]; // FieldError | undefined
+
+    if (!fieldError) return;
+
+    if (fieldError.type === "noSpaces") {
+      setValue(firstError, "");
     }
+
+    setFocus(firstError);
+    alert(fieldError.message || "Form validation error");
   };
 
   const onSubmit = async (data: DataType) => {
@@ -92,7 +110,7 @@ const FindId = () => {
         navigate("/login");
       })
       .catch((error) => {
-        if (error.code === "PGRST116") {
+        if (error.code === "parts116") {
           if (
             window.confirm(
               "해당 정보를 가진 사용자가 없습니다. 회원가입 페이지로 이동하겠습니까?"

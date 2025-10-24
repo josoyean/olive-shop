@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 const TodaySaleIcon = () => {
   return <Icon className="best-icon">오특</Icon>;

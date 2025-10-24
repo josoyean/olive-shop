@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { routes } from "./app-routes";
 import "./App.css";

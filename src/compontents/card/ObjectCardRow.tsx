@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { theme } from "../../../public/assets/styles/theme";
 import BestIcon from "../BestIcon";
-import type { CardImageType, CardProps } from "./card.type";
+import type { CardProps } from "./card.type";
 import { useNavigate } from "react-router-dom";
 import { handlePrice, handleSaleTF } from "../../bin/common";
 
@@ -13,7 +13,7 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
   return (
     <CardWapper
       $size={size}
-      onClick={(event) => {
+      onClick={(event: React.MouseEvent) => {
         event.preventDefault();
         navigate(`/store/goods-detail?getGoods=${data?.object_seq}`);
         onClick?.();
@@ -22,17 +22,17 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
       $soldOut={data?.soldOut}
     >
       <div className="img-box">
-        <img src={data.img} alt="" />
+        <img src={data?.img} alt="" />
         <em>품절</em>
       </div>
 
       <div className="text-box">
-        <h5>{data.name}</h5>
+        <h5>{data?.name}</h5>
 
         <div>
           <Count>
             {handleSaleTF(data?.saleItem) && (
-              <span>{(data.count ?? 0).toLocaleString()}원</span>
+              <span>{(data?.count ?? 0).toLocaleString()}원</span>
             )}
             <em>
               {handlePrice(data?.saleItem, data?.count).toLocaleString()}원
@@ -55,7 +55,7 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
             <TagText className="free">무배</TagText>
           )}
         </TagWrapper>
-        {data.best && <BestIcon />}
+        {data?.best && <BestIcon />}
       </div>
     </CardWapper>
   );
@@ -64,9 +64,9 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
 export default ObjectCardRow;
 
 const CardWapper = styled.div<{
-  $size: string;
-  $imgSize: string;
-  $soldOut: boolean;
+  $size?: string;
+  $imgSize?: string;
+  $soldOut?: boolean;
 }>`
   width: ${({ $size }) => $size};
   display: flex;

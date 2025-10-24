@@ -15,7 +15,7 @@ export const addToCart = async ({
   const user = auth.currentUser;
   if (!user) return;
 
-  const { data: objectInfo, error: objectError } = await supabase
+  const { data: objectInfo } = await supabase
     .from("objects")
     .select("soldOut")
     .eq("object_seq", dataInfo.object_seq)
@@ -25,7 +25,7 @@ export const addToCart = async ({
     return false;
   }
 
-  const { data: cartInfo, error: cartError } = await supabase
+  const { data: cartInfo } = await supabase
     .from("carts")
     .select("*")
     .eq("userId", user?.uid)
@@ -35,7 +35,7 @@ export const addToCart = async ({
     const count: number =
       mode === "add" ? cartInfo[0]?.object_count + addCount : addCount;
 
-    const { data: existingItem, error } = await supabase
+    const { error } = await supabase
       .from("carts")
       .update({
         object_count: count,
@@ -53,7 +53,7 @@ export const addToCart = async ({
     }
   } else {
     const { saleItem, ...cleanedObject } = dataInfo;
-    const { data: existingItem, error } = await supabase.from("carts").insert([
+    const { error } = await supabase.from("carts").insert([
       {
         object_count: addCount,
         ...cleanedObject,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { useForm, FieldErrors } from "react-hook-form";
 import { Center, Container, InputWrapper } from "../../public/assets/style";
@@ -8,13 +8,13 @@ import type { CheckedType } from "../types/userInfor";
 import { formatPhoneNumber, numberOnly, setupRecaptcha } from "../bin/common";
 import {
   signInWithPhoneNumber,
-  sendPasswordreset1Email,
   signInWithCredential,
   PhoneAuthProvider,
 } from "firebase/auth";
 import { getFindId } from "../api/axios-index";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabase";
+
 interface DataType1 {
   id: string;
   saveId: boolean;
@@ -60,7 +60,8 @@ const FindPassword = () => {
   const {
     register: register2,
     handleSubmit: handleSubmit2,
-
+    setFocus: setFocus2,
+    setValue: setValue2,
     formState: { errors: errors2, touchedFields: touchedFields2 },
   } = useForm<DataType2>({
     mode: "onChange",
@@ -96,7 +97,7 @@ const FindPassword = () => {
       });
   };
   const onSubmit2 = async (data: DataType2) => {
-    const { data: update, error } = await supabase.auth.updateUser({
+    const { data: update } = await supabase.auth.updateUser({
       password: data.password,
     });
 
@@ -107,16 +108,48 @@ const FindPassword = () => {
   };
   const onError1 = (errors: FieldErrors<DataType1>) => {
     const errorKeys = Object.keys(errors);
-    if (errorKeys.length > 0) {
-      setFocus1(errorKeys[0]);
-    }
-  };
+    const fieldsOrder: (keyof DataType1)[] = [
+      "name",
+      "birthDy",
+      "phoneNumber",
+      "code",
+      "id",
+      "email",
+    ];
+    if (errorKeys.length === 0) return;
 
+    const firstError = fieldsOrder.find((key) => errorKeys.includes(key));
+    if (!firstError) return;
+
+    const fieldError = errors[firstError]; // FieldError | undefined
+
+    if (!fieldError) return;
+
+    if (fieldError.type === "noSpaces") {
+      setValue1(firstError, "");
+    }
+
+    setFocus1(firstError);
+    alert(fieldError.message || "Form validation error");
+  };
   const onError2 = (errors: FieldErrors<DataType2>) => {
     const errorKeys = Object.keys(errors);
-    if (errorKeys.length > 0) {
-      setFocus1(errorKeys[0]);
+    const fieldsOrder: (keyof DataType2)[] = ["password", "passwordAgain"];
+    if (errorKeys.length === 0) return;
+
+    const firstError = fieldsOrder.find((key) => errorKeys.includes(key));
+    if (!firstError) return;
+
+    const fieldError = errors[firstError]; // FieldError | undefined
+
+    if (!fieldError) return;
+
+    if (fieldError.type === "noSpaces") {
+      setValue2(firstError, "");
     }
+
+    setFocus2(firstError);
+    alert(fieldError.message || "Form validation error");
   };
 
   // 타이머 설정
@@ -347,7 +380,7 @@ const FindPassword = () => {
               </div>
               <div>
                 <span>핸드폰번호</span>
-                <Buttom>
+                <button>
                   <input
                     type="text"
                     placeholder="핸드폰번호를 입력해주세요"
@@ -380,7 +413,8 @@ const FindPassword = () => {
                   >
                     인증번호 전송
                   </button>
-                </Buttom>
+                </button>
+
                 <ErrorMessage
                   errors={errors1}
                   name="phoneNumber"

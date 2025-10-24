@@ -1,9 +1,8 @@
-import React, { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState } from "react";
 import styled from "styled-components";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Center, MainTitle } from "../../../public/assets/style";
 import { supabase } from "../../supabase";
-import { handleFilter } from "../../bin/common";
 import type { EventType } from "../../compontents/card/card.type";
 import moment from "moment";
 import EmptyComponent from "../../compontents/EmptyComponent";

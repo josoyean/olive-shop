@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { theme } from "../../../public/assets/styles/theme";
 import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
 import { useInterval } from "usehooks-ts";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
 import type { CardImageType } from "../../compontents/card/card.type";
-import { supabase } from "../../supabase";
+
 interface CommendObjectProps {
   title: string;
   style?: React.CSSProperties;

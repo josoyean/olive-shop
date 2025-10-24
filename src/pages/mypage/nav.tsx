@@ -1,9 +1,8 @@
-import React from "react";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 const Nav = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const pageType = searchParams.get("t_page");
   return (
     <NavContainer>

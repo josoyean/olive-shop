@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { supabase } from "../../supabase";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -8,15 +8,12 @@ import type { PlanShopType } from "compontents/card/card.type";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
 import EmptyComponent from "../../compontents/EmptyComponent";
 const StorePlanShopList = () => {
-  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const menuType = searchParams.get("menuType");
   const [objects, setObjects] = useState<PlanShopType[]>([]);
   const handleData = useCallback(async () => {
-    const { data: planData, error: planError } = await supabase
-      .from("planObject")
-      .select("*");
+    const { data: planData } = await supabase.from("planObject").select("*");
     const brandSeqList = planData?.map((item) => item.brand_seq);
     if (brandSeqList?.length === 0) {
       setObjects([]);
@@ -33,7 +30,7 @@ const StorePlanShopList = () => {
       query = query.eq("objectTypeMain", menuType);
     }
     query.in("brand_seq", brandSeqList ?? []);
-    const { data: objectsData, error: objectsError } = await query;
+    const { data: objectsData } = await query;
 
     const grouped = (brandSeqList ?? []).map((brand_seq) => ({
       ...planData?.find((item) => item.brand_seq === brand_seq),

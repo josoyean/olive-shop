@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import {
   StarBox,
@@ -7,7 +7,6 @@ import {
   WhiteButton,
 } from "../../../public/assets/style";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { theme } from "../../../public/assets/styles/theme";
 import type { RootState } from "redex/store";
 import { useSelector } from "react-redux";
 import { supabase } from "../../supabase";
@@ -18,9 +17,8 @@ import type {
   PaymentObjectType,
   ReviewType,
 } from "../../compontents/card/card.type";
-import { set } from "react-hook-form";
 import EmptyComponent from "../../compontents/EmptyComponent";
-import { getStarWidth, handleObjects } from "../../bin/common";
+import { getStarWidth } from "../../bin/common";
 import ModalContainer from "../../compontents/ModalContainer";
 import ReviewWriteContainer from "./review-write-container";
 import ReviewViewContainer from "./review-view-container";
@@ -30,7 +28,6 @@ const MypageReviews = () => {
   const formRef = useRef<HTMLFormElement | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const token = useSelector((state: RootState) => state?.user.token);
-  const page = searchParams.get("t_page");
   const type = searchParams.get("t_type");
 
   const [writeReview, setWriteReview] = useState<PaymentObjectType[]>([]);
@@ -80,17 +77,11 @@ const MypageReviews = () => {
         }))
       ) || []
     );
-    console.log(paymentsData);
-
-    const result = paymentsData?.flatMap((item) =>
-      item.objectsInfo.map((obj) => obj.payment_seq)
-    );
 
     const { data: reviewData } = await supabase
       .from("reviews")
       .select("*,objectInfo(*)")
       .eq("userId", token);
-    // .in("payment_seq", result || []);
 
     setMyReview(reviewData || []);
   };
@@ -425,6 +416,8 @@ const MypageReviews = () => {
             orders: orders,
             handleWriteReview: handleWriteReview,
           }}
+          // formRef={formRef}
+          // inputRef={inputRef}
           ref={formRef}
         />
       </ModalContainer>

@@ -1,12 +1,11 @@
-import type { CardImageType, SaleType } from "compontents/card/card.type";
+import type { CardImageType } from "compontents/card/card.type";
 import { supabase } from "../../supabase";
 import { getAuth } from "firebase/auth";
 import type { AppDispatch } from "../../redex/store";
-import { setCartItems } from "../../redex/reducers/userCartData";
 import { handleCartItems } from "../../bin/common";
 
 interface CartType extends CardImageType {
-  addCount: number;
+  addCount: number | undefined;
 }
 export const addItemCart = async ({
   objects,
@@ -19,7 +18,7 @@ export const addItemCart = async ({
   const user = auth.currentUser;
   if (!user) return;
 
-  const { data: objectInfo, error: objectError } = await supabase
+  const { data: objectInfo } = await supabase
     .from("objects")
     .select("soldOut")
     .eq("object_seq", objects?.object_seq)
@@ -29,7 +28,7 @@ export const addItemCart = async ({
     return;
   }
 
-  const { data: cartInfo, error: cartError } = await supabase
+  const { data: cartInfo } = await supabase
     .from("carts")
     .select("*")
     .eq("userId", user?.uid)
@@ -40,7 +39,10 @@ export const addItemCart = async ({
     // 장바구니 없음
 
     const { saleItem, addCount, ...cleanedObject } = objects;
-    const { data: existingItem, error } = await supabase.from("carts").insert([
+    if (!addCount || !saleItem) {
+      return;
+    }
+    const { error } = await supabase.from("carts").insert([
       {
         object_count: objects?.addCount,
         ...cleanedObject,
@@ -59,7 +61,7 @@ export const addItemCart = async ({
     // 장바구니 있음
     const count: number = cartInfo?.object_count + objects?.addCount;
 
-    const { data: existingItem, error } = await supabase
+    const { error } = await supabase
       .from("carts")
       .update({
         object_count: count,
@@ -89,7 +91,7 @@ export const modifyCartItems = async ({
   const user = auth.currentUser;
   if (!user) return;
 
-  const { data: existingItem, error } = await supabase
+  const { error } = await supabase
     .from("carts")
     .update({
       object_count: count,

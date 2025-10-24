@@ -18,7 +18,7 @@ const recentProductsState = createSlice({
 
       return updatedProducts;
     },
-    clearProducts: (state) => {
+    clearProducts: () => {
       return []; // 상태 초기값
     },
   },

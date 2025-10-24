@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Center } from "../../../public/assets/style";
 import Nav from "./nav";
 import { useSearchParams } from "react-router-dom";
@@ -6,20 +6,10 @@ import type { RootState } from "../../redex/store";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import Mypage from "./mypage";
-import {
-  isEmptyObject,
-  isToday,
-  defaultProfile,
-  getUserInfo,
-} from "../../bin/common";
+import { isEmptyObject, defaultProfile, getUserInfo } from "../../bin/common";
 import ModalContainer from "../../compontents/ModalContainer";
-import {
-  BlueButton,
-  InputBox,
-  Textarea,
-  WhiteButton,
-} from "../../../public/assets/style";
-import type { StringType, UserInfoType } from "compontents/card/card.type";
+import { InputBox, Textarea, WhiteButton } from "../../../public/assets/style";
+import type { UserInfoType } from "compontents/card/card.type";
 import {
   collection,
   query,
@@ -28,11 +18,11 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
-import { auth, db } from "../../firebase";
+import { db } from "../../firebase";
 import StoreOrderDelivery from "./store-order-delivery";
 import MypageReviews from "../../pages/review/mypage-reviews";
 const StoreMypage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const pageType = searchParams.get("t_page");
   const dispatch = useDispatch();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -40,20 +30,17 @@ const StoreMypage = () => {
   const userToken = useSelector((state: RootState) => state?.user.token);
   const [openedMyInfo, setOpenedMyInfo] = useState<boolean>(false);
   const [myInfoData, setMyInfoData] = useState<UserInfoType>({});
-  const handleDataLoad = useCallback(
-    async (token: string) => {
-      // 프로필 변경 데이터 넣기
-      if (isEmptyObject(userInfo)) return;
-      const info = {
-        ...userInfo,
-        nickNameCheck: false,
-      };
-      setMyInfoData(info);
-    },
-    [userToken, userInfo]
-  );
+  const handleDataLoad = useCallback(async () => {
+    // 프로필 변경 데이터 넣기
+    if (isEmptyObject(userInfo)) return;
+    const info = {
+      ...userInfo,
+      nickNameCheck: false,
+    };
+    setMyInfoData(info);
+  }, [userToken, userInfo]);
   useEffect(() => {
-    handleDataLoad(userToken);
+    handleDataLoad();
   }, [handleDataLoad]);
 
   const handleChangeProfile = async (data: UserInfoType) => {
@@ -72,7 +59,7 @@ const StoreMypage = () => {
       infoText: data.infoText || "",
     });
     getUserInfo(userToken, dispatch);
-    handleDataLoad(userToken);
+    handleDataLoad();
     setOpenedMyInfo(false);
   };
 
@@ -102,11 +89,13 @@ const StoreMypage = () => {
         }));
         alert("사용이 가능한 닉네임 입니다.");
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e?.target?.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();

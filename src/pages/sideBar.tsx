@@ -1,11 +1,11 @@
 import type { RootState } from "redex/store";
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const SideBar = () => {
-  const barRef = useRef<HTMLButtonElement | null>(null);
+  const barRef = useRef<HTMLDivElement | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const productData = useSelector((state: RootState) => state?.recentProducts);
@@ -26,8 +26,6 @@ const SideBar = () => {
   useEffect(() => {
     if (!barRef?.current) return;
     if (location.pathname !== "/") {
-      const barHeight = barRef?.current?.clientHeight ?? 0;
-      const boxCenter = (window.innerHeight - barHeight) * 0.5;
       setStartScrollY(200);
       setBarPosition(200);
     } else {
@@ -64,7 +62,7 @@ const SideBar = () => {
                       );
                     }}
                   >
-                    <img src={data.img} alt={data.item} />
+                    <img src={data?.img} alt={data?.name} />
                     {data.soldOut && <span>품절</span>}
                   </ProductBox>
                 )

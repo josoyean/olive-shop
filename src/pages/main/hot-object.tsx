@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef } from "react";
 import styled from "styled-components";
 import { Center } from "../../../public/assets/style";
 import ObjectCardRow from "../../compontents/card/ObjectCardRow";
@@ -122,9 +122,4 @@ const Container = styled.div`
   padding: 15px;
   box-sizing: border-box;
   display: flex;
-`;
-const List = styled.div`
-  width: 50%;
-  height: 100%;
-  background-color: red;
 `;

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Center, MainTitle } from "../../../public/assets/style";
 import styled from "styled-components";
 import { useSearchParams } from "react-router-dom";
@@ -13,7 +13,7 @@ import {
 } from "../../compontents/card/card.type";
 import EmptyComponent from "../../compontents/EmptyComponent";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
-import ModalContainer from "../../compontents/ModalContainer";
+
 const StoreGoodsSale = () => {
   const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const [searchParams, setSearchParams] = useSearchParams();

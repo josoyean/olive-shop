@@ -376,7 +376,7 @@ const StoreOrderDelivery = () => {
                         setSelectedMonth(0);
                       }}
                     >
-                      {Array.from({ length: 3 }).map((item, index) => (
+                      {Array.from({ length: 3 }).map((_, index) => (
                         <MenuItem
                           value={Number(moment.utc().format("YYYY")) - index}
                           style={{ height: "25px" }}
@@ -409,7 +409,7 @@ const StoreOrderDelivery = () => {
                         setSelectedMonth(0);
                       }}
                     >
-                      {Array.from({ length: 12 }).map((day, index) => (
+                      {Array.from({ length: 12 }).map((_, index) => (
                         <MenuItem
                           key={index}
                           value={String(index + 1).padStart(2, "0")}
@@ -438,7 +438,7 @@ const StoreOrderDelivery = () => {
                       }}
                     >
                       {Array.from({ length: Number(startDate?.dayCount) }).map(
-                        (day, index) => (
+                        (_, index) => (
                           <MenuItem
                             key={index}
                             value={String(index + 1).padStart(2, "0")}
@@ -476,7 +476,7 @@ const StoreOrderDelivery = () => {
                         setSelectedMonth(0);
                       }}
                     >
-                      {Array.from({ length: 3 }).map((item, index) => (
+                      {Array.from({ length: 3 }).map((_, index) => (
                         <MenuItem
                           value={Number(moment.utc().format("YYYY")) - index}
                           style={{ height: "25px" }}
@@ -509,7 +509,7 @@ const StoreOrderDelivery = () => {
                         setSelectedMonth(0);
                       }}
                     >
-                      {Array.from({ length: 12 }).map((day, index) => (
+                      {Array.from({ length: 12 }).map((_, index) => (
                         <MenuItem
                           key={index}
                           value={String(index + 1).padStart(2, "0")}
@@ -538,7 +538,7 @@ const StoreOrderDelivery = () => {
                       }}
                     >
                       {Array.from({ length: Number(endDate?.dayCount) }).map(
-                        (day, index) => (
+                        (_, index) => (
                           <MenuItem
                             key={index}
                             value={String(index + 1).padStart(2, "0")}

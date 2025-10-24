@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { Center, MainTitle } from "../../../public/assets/style";
-import { GubMenu } from "../../app-layout";
 import { supabase } from "../../supabase";
 import type { CardImageType } from "compontents/card/card.type";
 import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
@@ -16,16 +15,13 @@ const StoreRankingList: React.FC = () => {
 
   const [objects, setObjects] = useState<CardImageType[]>([]);
 
-  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const handleData = useCallback(async () => {
     let query = supabase.from("objects").select("*,saleItem(*)");
     if (menuType !== "전체") {
       query = query.eq("objectTypeMain", menuType);
     }
-    // query = query
-    //   .filter("saleItem.start_sale_date", "lte", today)
-    //   .filter("saleItem.end_sale_date", "gte", today);
-    const { data, error } = await query;
+
+    const { data } = await query;
     const filteredData = handleFilter("popular", data ?? []);
     setObjects(filteredData ?? []);
   }, [menuType]);
@@ -69,32 +65,6 @@ const StoreRankingList: React.FC = () => {
 };
 
 export default StoreRankingList;
-const CommonMenu = styled.div`
-  margin: 35px 0;
-  ul {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    li {
-      position: relative;
-      padding: 0 12px;
-      height: 40px;
-      font-weight: 700;
-      color: #888;
-      border: 1px solid #ddd;
-      line-height: 40px;
-      font-size: 14px;
-      margin: -1px 0 0 -1px;
-      &.action {
-        background: #f65c60;
-        color: #fff;
-      }
-      cursor: pointer;
-      &.none {
-        cursor: auto;
-      }
-    }
-  }
-`;
 
 const Container = styled.div`
   display: grid;

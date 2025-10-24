@@ -1,13 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { supabase } from "../../supabase";
-import type { CartType } from "compontents/card/card.type";
 const cartInfo: number[] = [];
 
 const cartDataState = createSlice({
   name: "userCartDataState",
   initialState: cartInfo,
   reducers: {
-    setCartItems: (state: number[], action: PayloadAction<number[]>) => {
+    setCartItems: (_, action: PayloadAction<number[]>) => {
       return action.payload;
     },
   },

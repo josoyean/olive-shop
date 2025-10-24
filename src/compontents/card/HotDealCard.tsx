@@ -1,13 +1,6 @@
-import React, { useEffect } from "react";
 import styled from "styled-components";
-import { theme } from "../../../public/assets/styles/theme";
 import type { CardImageType } from "./card.type";
-import {
-  handleCartCount,
-  handlePrice,
-  handlePriceTest,
-  handleSaleTF,
-} from "../../bin/common";
+import { handlePrice, handleSaleTF } from "../../bin/common";
 import type { RootState } from "redex/store";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";

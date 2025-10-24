@@ -1,4 +1,3 @@
-import React from "react";
 import { Center } from "../../../public/assets/style";
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";

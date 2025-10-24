@@ -1,16 +1,8 @@
-import react, { useEffect, useRef } from "react";
-import { auth, db } from "../firebase";
+import { useEffect, useRef } from "react";
 import { RecaptchaVerifier } from "firebase/auth";
 import { supabase } from "../supabase";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  setDoc,
-} from "firebase/firestore";
+
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import type { CardImageType, SaleType } from "compontents/card/card.type";
 import moment from "moment";
@@ -44,7 +36,11 @@ export const formatPhoneNumber = (phone: string) => {
 };
 
 // reCAPTCHA 적용
-
+declare global {
+  interface Window {
+    recaptchaVerifier: RecaptchaVerifier;
+  }
+}
 export const setupRecaptcha = () => {
   if (window.recaptchaVerifier) {
     return;
@@ -55,7 +51,7 @@ export const setupRecaptcha = () => {
     "recaptcha-container",
     {
       size: "invisible", // reCAPTCHA v2 (보이지 않는) 방식
-      callback: (response) => {
+      callback: (response: string) => {
         console.log("reCAPTCHA solved", response);
       },
       "expired-callback": () => console.log("reCAPTCHA 만료됨"),
@@ -64,7 +60,7 @@ export const setupRecaptcha = () => {
 };
 
 // 장바구니 갯수 구하기
-export const handleCartCount = async (token: string, dispatch: AppDispatch) => {
+export const handleCartCount = async (token: string) => {
   if (token === "") return 0;
 
   const { data: cartInfo, error: cartError } = await supabase
@@ -218,7 +214,9 @@ export const getUserInfo = async (token: string, dispatch: AppDispatch) => {
       dispatch(setUserInfo(data));
       return data;
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
 };
 
 export const isEmptyObject = (object: object) => {

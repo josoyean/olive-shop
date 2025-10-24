@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Center,
   MainTitle,
@@ -85,7 +85,7 @@ const StoreUserCart = () => {
 
   const handleAllChecked = (event: boolean) => {
     if (event) {
-      setCheckedItem(products.map((item) => item.object_seq));
+      setCheckedItem(products.map((item) => item.object_seq ?? 0));
     } else {
       setCheckedItem([]);
     }
@@ -200,13 +200,15 @@ const StoreUserCart = () => {
                       const items = products.filter(
                         (product) => product.objects?.soldOut
                       );
-                      const selected = items.map((item) => item.object_seq);
+                      const selected = items.map(
+                        (item) => item.object_seq ?? 0
+                      );
 
                       if (selected?.length === 0) {
                         alert("품절된 제품이 없습니다");
                         return;
                       }
-                      handleDelete(selected ?? []);
+                      handleDelete(selected || []);
                     }}
                   >
                     품절상품 삭제
@@ -272,15 +274,18 @@ const StoreUserCart = () => {
                             checked={
                               product?.objects?.soldOut
                                 ? false
-                                : checkedItems?.includes(product?.object_seq)
+                                : checkedItems?.includes(
+                                    product?.object_seq || 0
+                                  )
                             }
-                            onChange={(event) => {
+                            onChange={() => {
                               setCheckedItem((prev) =>
-                                (prev ?? []).includes(product?.object_seq)
+                                (prev ?? []).includes(product?.object_seq ?? 0)
                                   ? (prev ?? []).filter(
-                                      (item) => item !== product?.object_seq
+                                      (item) =>
+                                        item !== (product?.object_seq ?? 0)
                                     )
-                                  : [...(prev ?? []), product?.object_seq]
+                                  : [...(prev ?? []), product?.object_seq ?? 0]
                               );
                             }}
                           />
@@ -524,7 +529,7 @@ const StoreUserCart = () => {
                               className="delete_btn gray_btn"
                               onClick={(event) => {
                                 event.preventDefault();
-                                handleDelete([product.object_seq]);
+                                handleDelete([product?.object_seq || 0]);
                               }}
                             >
                               삭제
