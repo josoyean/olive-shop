@@ -37,7 +37,7 @@ const HotDealCard = ({ data }: { data: CardImageType }) => {
       </div>
       <div className="text_box">
         <img
-          src="/public/assets/images/icons/shopping.png"
+          src="https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/sign/images/shopping.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8zYTBjYzg1NC1jMWE5LTQ2MTktYTBiNy1iMTdmMGE2ZGE3MWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvc2hvcHBpbmcucG5nIiwiaWF0IjoxNzYxNTQ5NjIxLCJleHAiOjE3OTMwODU2MjF9.oQy-e0T_PPu_HfDoEaqJx3kVKnLzyeQTS5MuOI8VwqY"
           alt="shopping"
           onClick={async (event) => {
             event.preventDefault();

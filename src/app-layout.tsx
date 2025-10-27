@@ -525,7 +525,7 @@ const AppLayout: React.FC = () => {
             </div>
             <div className="nav">
               <img
-                src="/public/assets/images/logo.jpeg"
+                src="https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/sign/images/logo.jpeg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8zYTBjYzg1NC1jMWE5LTQ2MTktYTBiNy1iMTdmMGE2ZGE3MWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvbG9nby5qcGVnIiwiaWF0IjoxNzYxNTQ5NzkwLCJleHAiOjE3OTMwODU3OTB9.M88LPsG-ohG78jriZTdPelEdyHVsX_oj0lrW_Kd_ndM"
                 alt="main-log"
                 className="main-log"
                 onClick={() => {
