@@ -120,7 +120,7 @@ const ObjectContainer = styled.div`
   .imgBox {
     width: 500px;
     height: 330px;
-    background-color: red;
+
     position: relative;
     cursor: pointer;
     img {

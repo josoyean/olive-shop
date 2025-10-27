@@ -12,11 +12,11 @@ interface ReviewProps {
 const ReviewViewContainer = forwardRef<
   HTMLFormElement | HTMLInputElement,
   ReviewProps
->((props) => {
+>((props, ref) => {
   const { viewReview } = props?.data || {};
 
   return (
-    <div>
+    <div ref={ref}>
       <ObjectBox>
         <img src={viewReview?.objectInfo?.img} alt="상품" />
         <div>

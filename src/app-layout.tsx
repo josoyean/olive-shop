@@ -12,9 +12,13 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import TopButton from "./pages/TopButton";
 import FooterContainer from "./pages/footer";
 import { useCookies } from "react-cookie";
+import { Tooltip } from "react-tooltip";
+
 // import { deleteUserInfo } from "./redex/reducers/userInfo";
+import "react-tooltip/dist/react-tooltip.css";
 import RecentProducts from "./pages/recentProducts";
 import ChatButton from "./pages/ChatButton.js";
+
 interface NavTyle {
   name: string;
   path: string;
@@ -457,8 +461,8 @@ const AppLayout: React.FC = () => {
                     ) : (
                       <Tooltip
                         key={index}
-                        placement="bottom-end"
-                        onClose={handleTooltipClose}
+                        place="bottom-end"
+                        closeEvents={handleTooltipClose}
                         open={openedBox}
                         disableInteractive={false}
                         disableFocusListener
@@ -508,10 +512,11 @@ const AppLayout: React.FC = () => {
                       key={index}
                       onClick={(event) => {
                         event.preventDefault();
-                        if (item.name === "최근 본 상품") {
+                        if (item.name === "장바구니") {
+                          alert("로그인후 사용 가능 합니다");
                           return;
                         }
-                        if (item.path === "") {
+                        if (item.name === "최근 본 상품" || item.path === "") {
                           alert("준비중 입니다");
                           return;
                         }
