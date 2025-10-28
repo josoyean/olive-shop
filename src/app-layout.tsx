@@ -13,12 +13,9 @@ import TopButton from "./pages/TopButton";
 import FooterContainer from "./pages/footer";
 import { useCookies } from "react-cookie";
 import { Tooltip } from "react-tooltip";
-
-// import { deleteUserInfo } from "./redex/reducers/userInfo";
 import "react-tooltip/dist/react-tooltip.css";
 import RecentProducts from "./pages/recentProducts";
 import ChatButton from "./pages/ChatButton.js";
-import { set } from "react-hook-form";
 
 interface NavTyle {
   name: string;
