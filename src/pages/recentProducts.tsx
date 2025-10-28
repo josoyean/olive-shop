@@ -25,7 +25,8 @@ const RecentProducts = ({
           </h2>
           <button
             onClick={(event) => {
-              event.preventDefault();
+              // event.preventDefault();
+              console.log("안녕");
               dispatch(clearProducts());
             }}
           >
@@ -59,27 +60,37 @@ const RecentProducts = ({
 };
 const ItemsContainer = styled.div`
   min-height: 400px;
-
-  .header {
-    padding: 3px 0 10px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid ${({ theme }) => theme.lineColor.main};
-    h2 {
-      em {
-        color: #116dff;
-      }
-    }
-    button {
-      padding: 3px 8px;
-      font-size: 14px;
-      border: 1px solid ${({ theme }) => theme.lineColor.main};
+  width: 1020px;
+  min-width: 1020px;
+  max-width: 1020px;
+  border-radius: 0px;
+  border: 1px solid #ddd;
+  background-color: white;
+  color: black;
+  gap: 25px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid ${({ theme }) => theme.lineColor.main};
+  h2 {
+    em {
+      color: #116dff;
     }
   }
-
+  button {
+    padding: 3px 8px;
+    font-size: 14px;
+    border: 1px solid ${({ theme }) => theme.lineColor.main};
+  }
+  .header {
+    gap: 15px;
+    display: flex;
+    align-items: center;
+  }
   .wrapper {
-    /* background-color: red; */
+    width: 100%;
   }
 `;
 const Container = styled.div`
@@ -87,7 +98,7 @@ const Container = styled.div`
   grid-template-columns: repeat(5, 180px);
   justify-content: space-around;
   row-gap: 30px;
-  padding: 20px 0;
+  /* padding: 20px; */
   .object_box {
     position: relative;
     > span {

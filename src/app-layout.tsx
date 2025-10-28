@@ -18,6 +18,7 @@ import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import RecentProducts from "./pages/recentProducts";
 import ChatButton from "./pages/ChatButton.js";
+import { set } from "react-hook-form";
 
 interface NavTyle {
   name: string;
@@ -431,84 +432,39 @@ const AppLayout: React.FC = () => {
           <HeaderWrapper>
             <div className="subNav">
               {userData.token !== ""
-                ? memberNav.map((item, index) =>
-                    item?.name !== "최근 본 상품" ? (
-                      <span
-                        key={index}
-                        onClick={(event) => {
-                          event.preventDefault();
+                ? memberNav.map((item, index) => (
+                    <span
+                      className={index === 4 ? "" : "subNavBtn"}
+                      data-tooltip-id="my-tooltip-click"
+                      key={index}
+                      onClick={(event) => {
+                        event.preventDefault();
 
-                          if (item.path === "") {
-                            alert("준비중 입니다");
-                            return;
-                          }
+                        if (item.path === "") {
+                          alert("준비중 입니다");
+                          return;
+                        }
 
-                          if (item.name === "로그아웃") {
-                            if (window.confirm("정말 로그아웃 하시겠습니까?")) {
-                              handleSignedOut();
-                            }
+                        if (item.name === "로그아웃") {
+                          if (window.confirm("정말 로그아웃 하시겠습니까?")) {
+                            handleSignedOut();
                           }
-                          navigate(item.path);
-                        }}
-                      >
-                        {item.name}
-                        {item.name == "장바구니" && (
-                          <em style={{ color: "#116dff", marginLeft: "5px" }}>
-                            {"(" + cartItems?.length + ")"}
-                          </em>
-                        )}
-                      </span>
-                    ) : (
-                      <Tooltip
-                        key={index}
-                        place="bottom-end"
-                        closeEvents={handleTooltipClose}
-                        open={openedBox}
-                        disableInteractive={false}
-                        disableFocusListener
-                        onClick={(event: React.MouseEvent) =>
-                          event.stopPropagation()
                         }
-                        disableHoverListener
-                        disableTouchListener
-                        title={
-                          // <ClickAwayListener onClickAway={handleTooltipClose}>
-                          <RecentProducts
-                            onClickAway={handleTooltipClose}
-                            onClose={handleTooltipClose}
-                          ></RecentProducts>
-                          // </ClickAwayListener>
-                        }
-                        slotProps={{
-                          popper: {
-                            disablePortal: true,
-                            sx: {
-                              width: "1020px", // 원하는 넓이
-                              maxWidth: "none", // 디폴트 max-width 무시
-                            },
-                          },
-                          tooltip: {
-                            sx: {
-                              width: "1020px",
-                              minWidth: "1020px",
-                              maxWidth: "1020px",
-                              borderRadius: "0px",
-                              padding: "12px",
-                              border: ` 1px solid #ddd`,
-                              bgcolor: "white",
-                              color: "black",
-                            },
-                          },
-                        }}
-                      >
-                        <span className="none" onClick={handleTooltipOpen}>
-                          {item?.name}
-                        </span>
-                      </Tooltip>
-                    )
-                  )
+                        navigate(item.path);
+                      }}
+                    >
+                      {item.name}
+                      {item.name == "장바구니" && (
+                        <em style={{ color: "#116dff", marginLeft: "5px" }}>
+                          {"(" + cartItems?.length + ")"}
+                        </em>
+                      )}
+                    </span>
+                  ))
                 : nav.map((item, index) => (
                     <span
+                      className={index === 3 ? "" : "subNavBtn"}
+                      data-tooltip-id="my-tooltip-click"
                       key={index}
                       onClick={(event) => {
                         event.preventDefault();
@@ -516,8 +472,8 @@ const AppLayout: React.FC = () => {
                           alert("로그인후 사용 가능 합니다");
                           return;
                         }
-                        if (item.name === "최근 본 상품" || item.path === "") {
-                          alert("준비중 입니다");
+                        if (item.name === "최근 본 상품") {
+                          handleTooltipOpen();
                           return;
                         }
 
@@ -527,6 +483,28 @@ const AppLayout: React.FC = () => {
                       {item.name}
                     </span>
                   ))}
+              <Tooltip
+                id="my-tooltip-click"
+                place="bottom"
+                // isOpen={openedBox}
+                style={{
+                  backgroundColor: "white",
+                  zIndex: "999",
+                  padding: "0px",
+                }}
+                // openOnClick={true}
+                globalCloseEvents={{
+                  escape: true,
+                  scroll: true,
+                  resize: true,
+                  clickOutsideAnchor: true,
+                }}
+              >
+                <RecentProducts
+                  onClickAway={handleTooltipClose}
+                  onClose={handleTooltipClose}
+                ></RecentProducts>
+              </Tooltip>
             </div>
             <div className="nav">
               <img
@@ -663,19 +641,19 @@ const HeaderWrapper = styled.div`
       display: block;
       font-size: ${({ theme }) => theme.fontSize.small};
       color: ${({ theme }) => theme.fontColor.sub};
-      &::after {
+      &.subNavBtn::after {
         display: block;
         right: -8px;
         top: 0;
         position: absolute;
         content: " | ";
       }
-      &:last-child::after {
+      /* &:not(.subNavBtn)::after {
         display: none;
       }
       &.none::after {
         content: none;
-      }
+      } */
     }
   }
 
@@ -684,6 +662,12 @@ const HeaderWrapper = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+  }
+
+  #my-tooltip-click {
+    top: 20px !important;
+    opacity: 1 !important;
+    left: 0 !important;
   }
 `;
 const GubWrapper = styled.div`
