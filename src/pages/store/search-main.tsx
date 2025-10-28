@@ -65,7 +65,10 @@ const SearchMain = () => {
         <h1>'{searchValue || " "}'에 대한 검색결과</h1>
         {!searchValue || objects?.length === 0 ? (
           <NoData>
-            <img src="/public/assets/images/icons/no_data.svg" alt="no_data" />
+            <img
+              src="https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/public/images/shopping.png"
+              alt="no_data"
+            />
             <p>검색 결과가 없어요</p>
             <span>
               철자를 확인하거나 <br />

@@ -8,7 +8,10 @@ const EmptyComponent = ({
 }) => {
   return (
     <Component>
-      <img src="/public/assets/images/icons/no_data.svg" alt="no_data" />
+      <img
+        src="https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/public/images/shopping.png"
+        alt="no_data"
+      />
       <div>
         <p>{mainText}</p>
         <span dangerouslySetInnerHTML={{ __html: subText ?? "" }}></span>
