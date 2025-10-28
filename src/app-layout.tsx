@@ -331,6 +331,7 @@ export const GubMenu: GubMenuType[] = [
     grid: "7/8",
   },
 ];
+
 const AppLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -432,7 +433,8 @@ const AppLayout: React.FC = () => {
                 ? memberNav.map((item, index) => (
                     <span
                       className={index === 4 ? "" : "subNavBtn"}
-                      data-tooltip-id="my-tooltip-click"
+                      // .key.(index === 4 ?{ data-tooltip-id="my-tooltip-click"} : "")
+                      data-tooltip-id={index === 4 ? "my-tooltip-click" : ""}
                       key={index}
                       onClick={(event) => {
                         event.preventDefault();
@@ -447,6 +449,11 @@ const AppLayout: React.FC = () => {
                             handleSignedOut();
                           }
                         }
+
+                        if (item.name === "최근 본 상품") {
+                          handleTooltipOpen();
+                          return;
+                        }
                         navigate(item.path);
                       }}
                     >
@@ -460,8 +467,8 @@ const AppLayout: React.FC = () => {
                   ))
                 : nav.map((item, index) => (
                     <span
+                      data-tooltip-id={index === 3 ? "my-tooltip-click" : ""}
                       className={index === 3 ? "" : "subNavBtn"}
-                      data-tooltip-id="my-tooltip-click"
                       key={index}
                       onClick={(event) => {
                         event.preventDefault();
@@ -483,24 +490,27 @@ const AppLayout: React.FC = () => {
               <Tooltip
                 id="my-tooltip-click"
                 place="bottom"
-                // isOpen={openedBox}
                 style={{
                   backgroundColor: "white",
-                  zIndex: "999",
+                  zIndex: "9999",
                   padding: "0px",
                 }}
-                // openOnClick={true}
+                openOnClick={true}
+                clickable={true}
+                isOpen={openedBox}
                 globalCloseEvents={{
                   escape: true,
                   scroll: true,
-                  resize: true,
+                  // resize: true,
                   clickOutsideAnchor: true,
                 }}
               >
-                <RecentProducts
-                  onClickAway={handleTooltipClose}
-                  onClose={handleTooltipClose}
-                ></RecentProducts>
+                {openedBox && (
+                  <RecentProducts
+                    onClickAway={handleTooltipClose}
+                    onClose={handleTooltipClose}
+                  ></RecentProducts>
+                )}
               </Tooltip>
             </div>
             <div className="nav">

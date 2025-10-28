@@ -21,6 +21,7 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
       onClick={(event) => {
         event.preventDefault();
         navigate(`/store/goods-detail?getGoods=${data?.object_seq}`);
+
         onClick?.();
       }}
       $soldOut={data?.soldOut ?? false}

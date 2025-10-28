@@ -25,8 +25,7 @@ const RecentProducts = ({
           </h2>
           <button
             onClick={(event) => {
-              // event.preventDefault();
-              console.log("안녕");
+              event.preventDefault();
               dispatch(clearProducts());
             }}
           >
@@ -38,7 +37,7 @@ const RecentProducts = ({
             <Container>
               {productData?.map((item, index) => (
                 <ObjectCardColumn
-                  size="180px"
+                  size="230px"
                   key={index}
                   data={item}
                   onClick={() => {
@@ -95,9 +94,9 @@ const ItemsContainer = styled.div`
 `;
 const Container = styled.div`
   display: grid;
-  grid-template-columns: repeat(5, 180px);
+  grid-template-columns: repeat(4, 1fr);
   justify-content: space-around;
-  row-gap: 30px;
+  gap: 30px 20px;
   /* padding: 20px; */
   .object_box {
     position: relative;
