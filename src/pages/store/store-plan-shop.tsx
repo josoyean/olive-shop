@@ -23,8 +23,6 @@ const StorePlanShopList = () => {
       .from("objects")
       .select("*,saleItem(*)")
       .eq("soldOut", "False");
-    // .filter("saleItem.start_sale_date", "lte", today)
-    // .filter("saleItem.end_sale_date", "gte", today);
 
     if (menuType !== "전체") {
       query = query.eq("objectTypeMain", menuType);
@@ -37,12 +35,10 @@ const StorePlanShopList = () => {
       objects: objectsData?.filter((obj) => obj.brand_seq === brand_seq),
     }));
 
-    const groupedFilter = grouped.every((item) => item.objects.length >= 2);
-    if (!groupedFilter) {
-      setObjects([]);
-      return;
-    }
-    setObjects(grouped ?? []);
+    // const groupedFilter = grouped.some((item) => item.objects.length >= 2);
+    const groupedFilter = grouped.filter((item) => item.objects.length >= 2);
+
+    setObjects(groupedFilter ?? []);
   }, [menuType]);
   useEffect(() => {
     handleData();

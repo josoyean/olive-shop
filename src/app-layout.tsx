@@ -107,7 +107,7 @@ export const GubMenu: GubMenuType[] = [
         title: { name: "스킨케어", path: "001" },
         sub: [
           { name: "스킨/토너", path: "001" },
-          { name: "에센스/세람/앰플", path: "002" },
+          { name: "에센스/세럼/앰플", path: "002" },
           { name: "크림", path: "003" },
           { name: "미스트/오일", path: "004" },
           { name: "스킨케어세트", path: "005" },
