@@ -17,7 +17,8 @@ const StoreHotDeal = () => {
       .from("objects")
       .select("*, saleItem(*)")
       .not("saleItem", "is", null)
-      .eq("saleItem.today_sale_date", today);
+      .filter("saleItem.start_today_sale_date", "lte", today)
+      .filter("saleItem.end_today_sale_date", "gte", today);
 
     if (!data) return;
     setObjects(data ?? []);

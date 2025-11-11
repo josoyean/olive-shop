@@ -5,6 +5,7 @@ import BestIcon from "../BestIcon";
 import type { CardProps } from "./card.type";
 import { useNavigate } from "react-router-dom";
 import { handlePrice, handleSaleTF } from "../../bin/common";
+import moment from "moment";
 
 const ObjectCardRow: React.FC<CardProps> = (props) => {
   const { size, imgSize, data, onClick } = props;
@@ -55,7 +56,21 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
             <TagText className="free">무배</TagText>
           )}
         </TagWrapper>
-        {data?.best && <BestIcon />}
+        {
+          <BestIcon
+            best={data?.best || false}
+            today={
+              moment().isBetween(
+                data?.saleItem?.start_today_sale_date,
+                data?.saleItem?.end_today_sale_date
+              ) || false
+            }
+          />
+        }
+        {/* {moment().isBetween(
+          data?.saleItem?.start_today_sale_date,
+          data?.saleItem?.end_today_sale_date
+        ) && <TodaySaleIcon />} */}
       </div>
     </CardWapper>
   );

@@ -19,7 +19,7 @@ const Icon = styled.span`
   color: #6fcff7;
 
   position: absolute;
-  top: 7px;
+  top: 30px;
   left: 10px;
   line-height: 44px !important;
   border-color: #6fcff7;

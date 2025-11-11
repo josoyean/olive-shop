@@ -93,7 +93,8 @@ export interface SaleType {
   start_sale_date: string | undefined;
   end_sale_date: string | undefined;
   one_more: number | null;
-  today_sale_date: string | undefined;
+  start_today_sale_date: string | undefined;
+  end_today_sale_date: string | undefined;
 }
 
 export interface CartType {

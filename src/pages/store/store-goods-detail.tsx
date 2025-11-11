@@ -28,7 +28,6 @@ import moment from "moment";
 import ModalContainer from "../../compontents/ModalContainer";
 
 const StoreGoodsDetail = () => {
-  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const userData = useSelector((state: RootState) => state?.user.token);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -290,9 +289,10 @@ const StoreGoodsDetail = () => {
                 {handlePrice(objects?.saleItem, objects?.count) >= 20000 && (
                   <span className="free">무배</span>
                 )}
-                {today === objects?.saleItem?.today_sale_date && (
-                  <span className="today_sale">오특</span>
-                )}
+                {moment().isBetween(
+                  objects?.saleItem?.start_today_sale_date,
+                  objects?.saleItem?.end_today_sale_date
+                ) && <span className="today_sale">오특</span>}
               </TagWrapper>
             </div>
             <div>

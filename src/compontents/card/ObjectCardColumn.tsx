@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { handlePrice, handleSaleTF } from "../../bin/common";
 import { addItemCart } from "../../pages/carts/addItemCart";
+import moment from "moment";
 
 const ObjectCardColumn: React.FC<CardProps> = (props) => {
   const { size, data, onClick } = props;
@@ -82,7 +83,17 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
           <TagText className="free">무배</TagText>
         )}
       </TagWrapper>
-      {data?.best && <BestIcon />}
+      {data && (
+        <BestIcon
+          best={data?.best || false}
+          today={
+            moment().isBetween(
+              data?.saleItem?.start_today_sale_date,
+              data?.saleItem?.end_today_sale_date
+            ) || false
+          }
+        />
+      )}
     </CardWapper>
   );
 };

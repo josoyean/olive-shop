@@ -72,7 +72,6 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
   const locatiton = useLocation();
   const navigate = useNavigate();
 
-  const today = new Date().toISOString().split("T")[0];
   const product = locatiton.state.products;
   const dispatch = useDispatch();
   const open = useDaumPostcodePopup(postcodeScriptUrl);
@@ -120,7 +119,6 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
   //   } catch (error) {}
   // };
   useEffect(() => {
-    console.log(priceData);
     if (isEmptyObject(userInfoData)) return;
 
     setValue(
@@ -683,10 +681,10 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                               {item?.objects?.saleItem?.one_more}+1
                             </span>
                           )}
-                          {today ===
-                            product?.objects?.saleItem?.today_sale_date && (
-                            <span className="today_sale">오특</span>
-                          )}
+                          {moment().isBetween(
+                            item?.objects?.saleItem?.start_today_sale_date,
+                            item?.objects?.saleItem?.end_today_sale_date
+                          ) && <span className="today_sale">오특</span>}
                         </Tags>
                       </div>
                     </Information>

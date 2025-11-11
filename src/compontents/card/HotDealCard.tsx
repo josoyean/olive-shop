@@ -5,11 +5,12 @@ import type { RootState } from "redex/store";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { addItemCart } from "../../pages/carts/addItemCart";
+import moment from "moment";
 
 const HotDealCard = ({ data }: { data: CardImageType }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const today = new Date().toISOString().split("T")[0];
+
   const userData = useSelector((state: RootState) => state?.user.token);
 
   return (
@@ -82,9 +83,10 @@ const HotDealCard = ({ data }: { data: CardImageType }) => {
           {handlePrice(data?.saleItem, data?.count) >= 20000 && (
             <span className="free">무배</span>
           )}
-          {today === data?.saleItem?.today_sale_date && (
-            <span className="today_sale">오특</span>
-          )}
+          {moment().isBetween(
+            data?.saleItem?.start_today_sale_date,
+            data?.saleItem?.end_today_sale_date
+          ) && <span className="today_sale">오특</span>}
         </Tags>
       </div>
     </Container>

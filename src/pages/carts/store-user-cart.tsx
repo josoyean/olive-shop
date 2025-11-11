@@ -32,7 +32,7 @@ const StoreUserCart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const locatiton = useLocation();
-  const today = new Date().toISOString().split("T")[0];
+
   const [searchParams] = useSearchParams();
   const headerType = searchParams.get("t_header_type");
   // const cartsCount = useSelector((state: RootState) => state?.cartCount);
@@ -335,11 +335,12 @@ const StoreUserCart = () => {
                                     {product?.objects?.saleItem?.one_more}+1
                                   </span>
                                 )}
-                                {today ===
+                                {moment().isBetween(
                                   product?.objects?.saleItem
-                                    ?.today_sale_date && (
-                                  <span className="today_sale">오특</span>
-                                )}
+                                    ?.start_today_sale_date,
+                                  product?.objects?.saleItem
+                                    ?.end_today_sale_date
+                                ) && <span className="today_sale">오특</span>}
                               </Tags>
                             </div>
                           </Information>

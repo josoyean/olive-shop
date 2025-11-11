@@ -50,7 +50,7 @@ const StoreGoodsSale = () => {
       "popular",
       data?.filter((item) => item.saleItem) ?? []
     );
-    console.log(filteredData);
+
     setObjectsList(filteredData ?? []);
   }, [tabsType, menuType, selected]);
 
