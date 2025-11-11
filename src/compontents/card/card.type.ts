@@ -30,7 +30,7 @@ export interface BrandType {
   name: string; // 동적으로 속성 키와 값을 추가
   infoText?: string; // 동적으로 속성 키와 값을 추가
   created_at?: string;
-  videoLink?: string;
+  videoLink?: string | null;
   videoText?: string;
   id: number;
   infoMainText?: string;

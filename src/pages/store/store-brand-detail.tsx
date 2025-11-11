@@ -98,16 +98,18 @@ const StoreBrandDetail = () => {
           <span
             dangerouslySetInnerHTML={{ __html: brandInfo?.infoText ?? "" }}
           ></span>
-          <div className="video-box">
-            <h2>{brandInfo?.videoText}</h2>
-            <YouTube
-              videoId={brandInfo?.videoLink}
-              opts={opts}
-              onEnd={(e) => {
-                e.target.stopVideo(0);
-              }}
-            />
-          </div>
+          {brandInfo?.videoLink && (
+            <div className="video-box">
+              <h2>{brandInfo?.videoText}</h2>
+              <YouTube
+                videoId={brandInfo?.videoLink}
+                opts={opts}
+                onEnd={(e) => {
+                  e.target.stopVideo(0);
+                }}
+              />
+            </div>
+          )}
         </InfoContainer>
         <ObjectsBox style={{ borderBottom: "none" }}>
           <div className="tBox">

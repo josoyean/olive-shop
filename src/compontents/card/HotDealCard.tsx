@@ -168,8 +168,8 @@ const Container = styled.div`
       left: 10px;
       z-index: 9;
       height: 60px;
-      background: url("/public/assets/images/icons/pc_flag.png") 0 0 / 60px 60px
-        no-repeat;
+      background: url("https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/public/images/pc_flag.png")
+        0 0 / 60px 60px no-repeat;
       z-index: 1;
       display: block;
       > span {
