@@ -327,8 +327,4 @@ if (!validateCaptcha(data.captcha)) {
 
 [https://github.com/josoyean/olive-shop](https://github.com/josoyean/olive-shop)
 
- [GitHub - josoyean/olive-shop
 
-Contribute to josoyean/olive-shop development by creating an account on GitHub.
-
-github.com](https://github.com/josoyean/olive-shop)
