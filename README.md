@@ -16,23 +16,19 @@ lang - react, styled-components , typesjavascript, react-query, redex
 
 ## **구현 기능**
 
-\- Supabase API를 활용해 데이터 조회 및 관리 기능 구현
+\- Supabase API를 활용해 데이터 조회 및 관리 기능 구현,로그인, 아이디·비밀번호 찾기 기능 연동
 
- - Supabase 인증 기능을 이용해 로그인, 아이디·비밀번호 찾기 기능 연동
+\- Toss Payments 결제 모듈 연동 및 결제 프로세스 구현, 장바구니 추가·삭제 기능을 통해 사용자의 구매 흐름을 완성
 
-\- Toss Payments 결제 모듈 연동 및 결제 프로세스 구현
+\- 카테고리별 상품 분류 및 필터링 기능을 적용해 사용자가 원하는 상품을 효율적으로 탐색할 수 있도록 개선했습니다.또한 브랜드 관련 유튜브 영상을 연동해 콘텐츠 다양성을 확보
 
-\- 장바구니 추가 및 삭제 기능 구현으로 사용자 편의성 강화
+\-  사용자 프로필 사진 변경 기능을 구현해 개인화된 사용자 경험을 제공
 
-\- 브랜드 관련 유튜브 영상 연동으로 콘텐츠 다양화
+\- 사용자가 구매한 제품에 대해 리뷰 작성·수정·삭제 기능을 구현하여, 서비스 내 사용자 참여 요소를 강화
 
-\-  사용자 프로필 사진 변경 기능 구현
+\- react-simple-captcha를 적용해 로그인 시 보안 요소를 강화
 
-\- 사용자가 구입한 제품에 대한 리뷰 작성, 수정 기능 개발
-
-\- react-simple-captcha를 활용해 로그인시 보안 강화
-
-#### 1) Supabase API를 활용해 데이터 조회 및 관리 기능 구현
+#### 1) Supabase API를 활용해 데이터 조회 및 관리 기능 구현,로그인, 아이디·비밀번호 찾기 기능 연동
 
 ```
  await supabase.from("payment").insert(insertDate);
@@ -48,8 +44,6 @@ Supabase API 장바구니 관련 데이터를 삭제하는 슈퍼베이스 api �
 
 검색(select),업데이트(update),삭제(delete) 이용해서 api 호출,수정,삭제를 했습니다
 
-#### 2) Supabase 인증 기능을 이용해 로그인, 아이디·비밀번호 찾기 기능 연동
-
 ```
   const { data: update } = await supabase.auth.updateUser({
       password: data.password,
@@ -58,7 +52,7 @@ Supabase API 장바구니 관련 데이터를 삭제하는 슈퍼베이스 api �
 
 Supabase.auth.updateUser 이용해서 슈퍼베이스에 저장되어있는 사용자 정보(비밀번호)을 수정했습니다
 
-#### 3) Toss Payments 결제 모듈 연동 및 결제 프로세스 구현
+#### 2) Toss Payments 결제 모듈 연동 및 결제 프로세스 구현, 장바구니 추가·삭제 기능을 통해 사용자의 구매 흐름을 완성
 
 ```
  const orderId = moment().format("YYYYMMDDhhmmss");
@@ -124,7 +118,7 @@ Supabase.auth.updateUser 이용해서 슈퍼베이스에 저장되어있는 사�
 
 테스트 버전이라 결제해도 시간 지나면 자동으로 취소가 되고 결제수단이 다양할수록 간편하게 결제를 해서 사용자가 많이 질거라 예상하고 할수있는만큼 작업을 했습니다
 
-#### 4) 장바구니 추가 및 삭제 기능 구현으로 사용자 편의성 강화
+#### 3) 카테고리별 상품 분류 및 필터링 기능을 적용해 사용자가 원하는 상품을 효율적으로 탐색할 수 있도록 개선했습니다.또한 브랜드 관련 유튜브 영상을 연동해 콘텐츠 다양성을 확보
 
 ```
   const { data: cartInfo } = await supabase
@@ -193,8 +187,6 @@ Supabase.auth.updateUser 이용해서 슈퍼베이스에 저장되어있는 사�
 
 장바구니 삭제는 슈퍼베이스에 있는 데이터를 전부 삭제했습니다.
 
-#### 5) 브랜드 관련 유튜브 영상 연동으로 콘텐츠 다양화
-
 ```
 import YouTube, { YouTubeProps } from "react-youtube";
   const opts: YouTubeProps["opts"] = {
@@ -215,7 +207,7 @@ import YouTube, { YouTubeProps } from "react-youtube";
 
 react-youtube 이용해서 제품에 맞는 유튜브 광고를 보게했고 옵션에 크기와 재생시작 위치,반복 다양한 옵션을 이용해서 사용자가 광보를 보고 제품을 구입하게끔 적용했습니다.
 
-#### 6) 사용자 프로필 사진 변경 기능 구현
+#### 4) 사용자 프로필 사진 변경 기능을 구현해 개인화된 사용자 경험을 제공
 
 ```
 <input
@@ -252,9 +244,9 @@ react-youtube 이용해서 제품에 맞는 유튜브 광고를 보게했고 옵
 ```
 
 파일 선택을 하면 선택한 사진url로 변환하고 나서 화면에 보이게 했습니다.   
-반대로 사진 프로필이 마음에 안들면 삭제도 가능하게 만들었습니다  
+반대로 사진 프로필이 마음에 안들면 삭제도 가능하게 만들었습니다
 
-#### 7) 사용자가 구입한 제품에 대한 리뷰 작성, 수정 기능 개발
+#### 5) 사용자가 구매한 제품에 대해 리뷰 작성·수정·삭제 기능을 구현하여, 서비스 내 사용자 참여 요소를 강화
 
 ```
  // 리뷰 작성
@@ -306,7 +298,7 @@ react-youtube 이용해서 제품에 맞는 유튜브 광고를 보게했고 옵
 
 리뷰 추가는 insert,수정은 update 이용해서 구매하고 배송 완료된 상품은 리뷰를 추가 또는 수정하게끔 헸습니다.
 
-#### 8)react-simple-captcha를 활용해 로그인시 보안 강화
+#### 6) react-simple-captcha를 적용해 로그인 시 보안 요소를 강화
 
 ```
    <LoadCanvasTemplateNoReload reloadColor="red" reloadText="reload"/>
@@ -327,4 +319,8 @@ if (!validateCaptcha(data.captcha)) {
 
 [https://github.com/josoyean/olive-shop](https://github.com/josoyean/olive-shop)
 
+ [GitHub - josoyean/olive-shop
 
+Contribute to josoyean/olive-shop development by creating an account on GitHub.
+
+github.com](https://github.com/josoyean/olive-shop)
