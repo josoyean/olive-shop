@@ -61,7 +61,7 @@ const SearchMain = () => {
 
   return (
     <Center>
-      <Container>
+      <Container role="region" aria-label="검색 결과">
         <h1>'{searchValue || " "}'에 대한 검색결과</h1>
         {!searchValue || objects?.length === 0 ? (
           <NoData>
@@ -123,7 +123,7 @@ const SearchMain = () => {
                   ))}
                 </div>
               </div>
-              <div className="bBox">
+              <div className="bBox" role="list" aria-label="검색된 상품">
                 {objectsList &&
                   objectsList?.map((list, index) => (
                     <ObjectCardColumn

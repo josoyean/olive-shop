@@ -173,7 +173,7 @@ const FindId = () => {
       <div id="recaptcha-container"></div>
       <Container>
         <h1>아이디 찾기</h1>
-        <FormControl onSubmit={handleSubmit(onSubmit, onError)}>
+        <FormControl onSubmit={handleSubmit(onSubmit, onError)} role="form" aria-label="아이디 찾기 폼">
           <InputWrapper className="input-wrapper">
             <div>
               <span>이름</span>

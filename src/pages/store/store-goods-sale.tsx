@@ -59,7 +59,7 @@ const StoreGoodsSale = () => {
   }, [handleLoadData]);
 
   return (
-    <div>
+    <section role="region" aria-label="세일">
       <MainLine>
         <Center>
           <div>
@@ -70,8 +70,8 @@ const StoreGoodsSale = () => {
       </MainLine>
       <Center>
         <div>
-          <Tabs grid={2}>
-            <div className={tabsType === "핫인기세일" ? "on" : ""}>
+          <Tabs grid={2} role="tablist" aria-label="세일 필터">
+            <div className={tabsType === "핫인기세일" ? "on" : ""} role="tab" aria-selected={tabsType === "핫인기세일"}>
               <button
                 type="button"
                 onClick={(event) => {
@@ -86,7 +86,7 @@ const StoreGoodsSale = () => {
                 핫인기 세일
               </button>
             </div>
-            <div className={tabsType === "증정하나더" ? "on" : ""}>
+            <div className={tabsType === "증정하나더" ? "on" : ""} role="tab" aria-selected={tabsType === "증정하나더"}>
               <button
                 type="button"
                 onClick={(event) => {
@@ -151,7 +151,7 @@ const StoreGoodsSale = () => {
           )}
         </div>
       </Center>
-    </div>
+    </section>
   );
 };
 

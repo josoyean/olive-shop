@@ -112,14 +112,14 @@ const StoreMypage = () => {
   };
 
   return (
-    <div>
+    <div role="main">
       <Center style={{ display: "flex" }}>
         <Nav></Nav>
         <Container>
           {/* 나의 프로필 */}
-          <InfoUser>
-            <div className="top-box">
-              <em>
+          <InfoUser role="region" aria-label="User Profile">
+            <div className="top-box" role="group">
+              <em role="heading" aria-level={2}>
                 {`${userInfo?.name?.slice(0, 1)}*${userInfo?.name?.slice(
                   userInfo?.name?.length - 1,
                   userInfo?.name?.length
@@ -127,6 +127,7 @@ const StoreMypage = () => {
                 님 반갑습니다.
               </em>
               <span
+                role="button"
                 onClick={(event) => {
                   event.preventDefault();
                   setOpenedMyInfo(true);
@@ -135,22 +136,23 @@ const StoreMypage = () => {
                 나의 프로필 변경 &gt;
               </span>
             </div>
-            <div className="bottom-box">
-              <ul>
-                <li>
+            <div className="bottom-box" role="group">
+              <ul role="list">
+                <li role="listitem">
                   <span>프로필 사진</span>
                   <em>
                     <img
+                      role="img"
                       src={userInfo.profileImg || defaultProfile}
                       alt="프로필"
                     />
                   </em>
                 </li>
-                <li>
+                <li role="listitem">
                   <span>닉네임</span>
                   <em>{userInfo?.nickName || "저장된 닉네임이 없습니다."}</em>
                 </li>
-                <li>
+                <li role="listitem">
                   <span>소개</span>
                   <em
                     dangerouslySetInnerHTML={{
@@ -179,12 +181,13 @@ const StoreMypage = () => {
           handleChangeProfile(myInfoData);
         }}
       >
-        <ModalMyInfo>
-          <ul>
-            <li>
+        <ModalMyInfo role="form" aria-label="Profile Edit Form">
+          <ul role="list">
+            <li role="listitem">
               <em>프로필 이미지</em>
-              <div className="profile">
+              <div className="profile" role="group">
                 <img
+                  role="img"
                   src={myInfoData.profileImg || defaultProfile}
                   alt="프로필 미리보기"
                   style={{
@@ -195,7 +198,7 @@ const StoreMypage = () => {
                   }}
                 />
 
-                <div className="review-preview-img__btns">
+                <div className="review-preview-img__btns" role="group">
                   <input
                     type="file"
                     accept="image/*"
@@ -204,6 +207,7 @@ const StoreMypage = () => {
                     ref={fileInputRef}
                   />
                   <span
+                    role="button"
                     className="thumbnailFile"
                     onClick={(event) => {
                       event.preventDefault();
@@ -216,6 +220,7 @@ const StoreMypage = () => {
                     />
                   </span>
                   <span
+                    role="button"
                     className="thumbnailClearBtn"
                     onClick={(event) => {
                       event.preventDefault();
@@ -233,9 +238,9 @@ const StoreMypage = () => {
                 </div>
               </div>
             </li>
-            <li style={{ marginTop: "20px" }}>
+            <li role="listitem" style={{ marginTop: "20px" }}>
               <em>닉네임</em>
-              <div className="nickname">
+              <div className="nickname" role="group">
                 <InputBox
                   width="100%"
                   height="35px"
@@ -250,6 +255,7 @@ const StoreMypage = () => {
                   placeholder="닉네임을 설정해 주세요"
                 />
                 <WhiteButton
+                  role="button"
                   width="fit-content"
                   height="35px"
                   style={{ padding: "0 5px" }}
@@ -264,9 +270,9 @@ const StoreMypage = () => {
                 <em className="info">이름보다는 별명을 적어주세요</em>
               </div>
             </li>
-            <li style={{ marginTop: "50px" }}>
+            <li role="listitem" style={{ marginTop: "50px" }}>
               <em>소개</em>
-              <div className="information">
+              <div className="information" role="group">
                 <Textarea
                   width="100%"
                   maxLength={100}

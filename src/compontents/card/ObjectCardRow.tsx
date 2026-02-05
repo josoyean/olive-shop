@@ -13,6 +13,7 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
 
   return (
     <CardWapper
+      role="article"
       $size={size}
       onClick={(event: React.MouseEvent) => {
         event.preventDefault();
@@ -22,16 +23,16 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
       $imgSize={imgSize}
       $soldOut={data?.soldOut}
     >
-      <div className="img-box">
-        <img src={data?.img} alt="" />
+      <div className="img-box" role="group">
+        <img role="img" src={data?.img} alt={data?.name || "상품 이미지"} />
         <em>품절</em>
       </div>
 
-      <div className="text-box">
-        <h5>{data?.name}</h5>
+      <div className="text-box" role="group">
+        <h5 role="heading" aria-level={3}>{data?.name}</h5>
 
         <div>
-          <Count>
+          <Count role="group">
             {handleSaleTF(data?.saleItem) && (
               <span>{(data?.count ?? 0).toLocaleString()}원</span>
             )}
@@ -41,7 +42,7 @@ const ObjectCardRow: React.FC<CardProps> = (props) => {
             </em>
           </Count>
         </div>
-        <TagWrapper>
+        <TagWrapper role="group">
           {handleSaleTF(data?.saleItem) && (
             <TagText className="sale">세일</TagText>
           )}

@@ -32,7 +32,9 @@ const Container = styled.div`
     font-size: 14px;
   }
 `;
-const Footer = styled.footer`
+const Footer = styled.footer.attrs({
+  role: "contentinfo",
+})`
   width: 100vw;
   border-top: 1px solid #aaa;
   background-color: #f3f3f3;

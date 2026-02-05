@@ -33,7 +33,7 @@ const HotObject: React.FC<{ data: CardImageType[] }> = ({ data }) => {
   };
 
   return (
-    <ItemsContainer>
+    <ItemsContainer role="region" aria-label="조회 급상승, 인기템">
       <h2>조회 급상승, 인기템</h2>
       <Container>
         <Slider className="slider-container" {...settings} ref={sliderRef}>

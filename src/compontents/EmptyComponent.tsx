@@ -7,12 +7,13 @@ const EmptyComponent = ({
   subText: string;
 }) => {
   return (
-    <Component>
+    <Component role="status" aria-label="Empty State">
       <img
+        role="img"
         src="https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/public/images/shopping.png"
         alt="no_data"
       />
-      <div>
+      <div role="group">
         <p>{mainText}</p>
         <span dangerouslySetInnerHTML={{ __html: subText ?? "" }}></span>
       </div>

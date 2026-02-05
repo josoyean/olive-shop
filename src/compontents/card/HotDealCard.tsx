@@ -15,13 +15,14 @@ const HotDealCard = ({ data }: { data: CardImageType }) => {
 
   return (
     <Container
+      role="article"
       onClick={(event) => {
         event.preventDefault();
         navigate(`/store/goods-detail?getGoods=${data?.object_seq}`);
       }}
     >
-      <div className="img_box">
-        <img src={data?.img} className="img" alt="" />
+      <div className="img_box" role="group">
+        <img role="img" src={data?.img} className="img" alt={data?.name || "상품 이미지"} />
         <span>
           <span>
             {(data?.saleItem?.discount_rate || 0) +
@@ -36,10 +37,12 @@ const HotDealCard = ({ data }: { data: CardImageType }) => {
           </div>
         )}
       </div>
-      <div className="text_box">
+      <div className="text_box" role="group">
         <img
+          role="button"
           src="https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/sign/images/shopping.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8zYTBjYzg1NC1jMWE5LTQ2MTktYTBiNy1iMTdmMGE2ZGE3MWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvc2hvcHBpbmcucG5nIiwiaWF0IjoxNzYxNTQ5NjIxLCJleHAiOjE3OTMwODU2MjF9.oQy-e0T_PPu_HfDoEaqJx3kVKnLzyeQTS5MuOI8VwqY"
           alt="shopping"
+          aria-label="장바구니 추가"
           onClick={async (event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -63,8 +66,8 @@ const HotDealCard = ({ data }: { data: CardImageType }) => {
             }
           }}
         />
-        <em>{data?.name}</em>
-        <Count>
+        <em role="heading" aria-level={3}>{data?.name}</em>
+        <Count role="group">
           <em>
             {handlePrice(data?.saleItem, data?.count)?.toLocaleString()}원
             {data?.option && "~"}
@@ -74,7 +77,7 @@ const HotDealCard = ({ data }: { data: CardImageType }) => {
           )}
         </Count>
 
-        <Tags>
+        <Tags role="group">
           {handleSaleTF(data?.saleItem) && <span className="sale">세일</span>}
           {data?.coupon && <span className="coupon">쿠폰</span>}
           {data?.saleItem?.one_more && (

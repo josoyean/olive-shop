@@ -220,7 +220,7 @@ const StoreGoodsDetail = () => {
   };
   return (
     <Center>
-      <div>
+      <article role="article" aria-label="상품 상세 정보">
         <BoxContainer>
           <div className="img_box">
             <img
@@ -463,8 +463,10 @@ const StoreGoodsDetail = () => {
           </div>
         </BoxContainer>
         <TabContainer>
-          <div className="tabs">
+          <div className="tabs" role="tablist" aria-label="상품 정보 탭">
             <span
+              role="tab"
+              aria-selected={openedTabs === 1}
               className={`${openedTabs === 1 && "active"}`}
               onClick={(event) => {
                 event.preventDefault();
@@ -475,6 +477,8 @@ const StoreGoodsDetail = () => {
               상세보기
             </span>
             <span
+              role="tab"
+              aria-selected={openedTabs === 2}
               className={`${openedTabs === 2 && "active"}`}
               onClick={(event) => {
                 event.preventDefault();
@@ -808,7 +812,7 @@ const StoreGoodsDetail = () => {
             </div>
           </DetailReview>
         </ModalContainer>
-      </div>
+      </article>
     </Center>
   );
 };

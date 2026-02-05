@@ -271,39 +271,39 @@ const StoreOrderDelivery = () => {
   };
 
   return (
-    <div>
+    <section role="region" aria-label="주문/배송 조회">
       <OrderBox>
         <div className="text-box">
           <div>
             <h2>주문/배송 조회</h2>
           </div>
         </div>
-        <ul className="order-box">
-          <li>
+        <ul className="order-box" role="list" aria-label="배송 상태">
+          <li role="listitem">
             <em className={`${orderData[1]?.length > 0 && "on"}`}>
               {orderData[1]?.length || 0}
             </em>
             <span>주문접수</span>
           </li>
-          <li>
+          <li role="listitem">
             <em className={`${orderData[2]?.length > 0 && "on"}`}>
               {orderData[2]?.length || 0}
             </em>
             <span>결제완료</span>
           </li>
-          <li>
+          <li role="listitem">
             <em className={`${orderData[3]?.length > 0 && "on"}`}>
               {orderData[3]?.length || 0}
             </em>
             <span>배송준비중</span>
           </li>
-          <li>
+          <li role="listitem">
             <em className={`${orderData[4]?.length > 0 && "on"}`}>
               {orderData[4]?.length || 0}
             </em>
             <span>배송중</span>
           </li>
-          <li>
+          <li role="listitem">
             <em className={`${orderData[5]?.length > 0 && "on"}`}>
               {orderData[5]?.length || 0}
             </em>
@@ -742,7 +742,7 @@ const StoreOrderDelivery = () => {
           </tbody>
         </table>
       </Table>
-    </div>
+    </section>
   );
 };
 const Table = styled(TableStyle)`

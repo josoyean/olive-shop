@@ -12,9 +12,9 @@ const EventContainer: React.FC<EventTypes> = (props) => {
   const { title, images } = props;
   const navigate = useNavigate();
   return (
-    <Container>
+    <Container role="region" aria-label={title}>
       <h2>{title}</h2>
-      <ImagesContainer grid={images?.length}>
+      <ImagesContainer grid={images?.length} role="list" aria-label="이벤트 목록">
         {images?.map((image, index) => (
           <div
             key={index}

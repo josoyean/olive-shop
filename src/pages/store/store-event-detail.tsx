@@ -8,7 +8,7 @@ const StoreEventDetail = () => {
 
   return (
     <Center>
-      <Container>
+      <Container role="article" aria-label="이벤트 상세">
         <div>
           <div>
             {(information?.off_line || information?.on_line) && (

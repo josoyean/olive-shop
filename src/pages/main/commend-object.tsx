@@ -23,6 +23,8 @@ const CommendObject: React.FC<CommendObjectProps> = (props) => {
   return (
     <Container
       style={{ ...style, borderBottom: `1px solid ${theme.lineColor.main}` }}
+      role="region"
+      aria-label={title}
     >
       <CommendWapper>
         <h2>{title}</h2>

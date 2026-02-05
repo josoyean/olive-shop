@@ -57,14 +57,16 @@ const BrandsContainer: React.FC<BrandsContainerProps> = (props) => {
     handleLoadData();
   }, []);
   return (
-    <Container>
+    <Container role="region" aria-label={title}>
       <h2>{title}</h2>
       <div>
-        <BrandNameWrapper>
+        <BrandNameWrapper role="tablist" aria-label="브랜드 목록">
           {data?.map((item, index) => (
             <li
               className={`${index === activeIndex ? "on" : ""}`}
               key={index}
+              role="tab"
+              aria-selected={index === activeIndex}
               onClick={(event) => {
                 event.preventDefault();
                 setActiveIndex(index);

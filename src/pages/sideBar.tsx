@@ -44,16 +44,17 @@ const SideBar = () => {
   return (
     <>
       {productData.length !== 0 && (
-        <Container style={{ top: barPosition + "px" }} ref={barRef}>
-          <h4>
+        <Container role="complementary" aria-label="Recently Viewed Products" style={{ top: barPosition + "px" }} ref={barRef}>
+          <h4 role="heading" aria-level={4}>
             최근 본 상품 <span>{productData.length}</span>
           </h4>
 
-          <div>
+          <div role="list">
             {productData?.map(
               (data, index) =>
                 index < 5 && (
                   <ProductBox
+                    role="listitem"
                     key={index}
                     onClick={(event) => {
                       event.preventDefault();
@@ -62,7 +63,7 @@ const SideBar = () => {
                       );
                     }}
                   >
-                    <img src={data?.img} alt={data?.name} />
+                    <img role="img" src={data?.img} alt={data?.name} />
                     {data.soldOut && <span>품절</span>}
                   </ProductBox>
                 )

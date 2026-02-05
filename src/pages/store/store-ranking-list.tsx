@@ -30,7 +30,7 @@ const StoreRankingList: React.FC = () => {
     handleData();
   }, [handleData]);
   return (
-    <div>
+    <section role="region" aria-label="랭킹">
       <MainLine>
         <Center>
           <div>
@@ -60,7 +60,7 @@ const StoreRankingList: React.FC = () => {
           </Container>
         </div>
       </Center>
-    </div>
+    </section>
   );
 };
 

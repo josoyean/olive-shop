@@ -44,7 +44,7 @@ const StorePlanShopList = () => {
     handleData();
   }, [handleData]);
   return (
-    <div>
+    <section role="region" aria-label="기획전">
       <MainLine>
         <Center>
           <div>
@@ -107,7 +107,7 @@ const StorePlanShopList = () => {
           </Container>
         </div>
       </Center>
-    </div>
+    </section>
   );
 };
 

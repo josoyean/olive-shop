@@ -40,7 +40,7 @@ const StoreUserOrder = () => {
     handleData();
   }, [location]);
   return (
-    <Container>
+    <Container role="region" aria-label="주문 완료">
       <div className="title-box">
         <h2>
           주문이 <em>완료</em>되었습니다

@@ -18,12 +18,13 @@ const RecentProducts = ({
 
   return (
     <ClickAwayListener onClickAway={onClickAway}>
-      <ItemsContainer>
-        <div className="header">
-          <h2>
+      <ItemsContainer role="region" aria-label="Recently Viewed Products">
+        <div className="header" role="group">
+          <h2 role="heading" aria-level={2}>
             전체 <em>{productData?.length}</em>개
           </h2>
           <button
+            role="button"
             onClick={(event) => {
               event.preventDefault();
               dispatch(clearProducts());
@@ -32,9 +33,9 @@ const RecentProducts = ({
             전체 삭제
           </button>
         </div>
-        <div className="wrapper">
+        <div className="wrapper" role="group">
           {productData?.length > 0 ? (
-            <Container>
+            <Container role="list">
               {productData?.map((item, index) => (
                 <ObjectCardColumn
                   size="230px"

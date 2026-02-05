@@ -146,7 +146,7 @@ const StoreUserCart = () => {
     }
   };
   return (
-    <div>
+    <section role="region" aria-label="장바구니">
       <MainLine>
         <Center>
           <div className="top-l">
@@ -637,7 +637,7 @@ const StoreUserCart = () => {
         {/* 주문완료 */}
         {headerType === "3" && <StoreUserOrder />}
       </Center>
-    </div>
+    </section>
   );
 };
 

@@ -139,15 +139,15 @@ const ReviewWriteContainer = forwardRef<
     alert(fieldError.message || "Form validation error");
   };
   return (
-    <form ref={ref} onSubmit={handleSubmit(onSubmit, onError)}>
-      <ObjectBox>
-        <img src={selectReview?.img} alt="상품" />
-        <div>
-          <strong>{selectReview?.brand}</strong>
+    <form role="form" ref={ref} onSubmit={handleSubmit(onSubmit, onError)}>
+      <ObjectBox role="group">
+        <img role="img" src={selectReview?.img} alt="상품" />
+        <div role="group">
+          <strong role="heading" aria-level={3}>{selectReview?.brand}</strong>
           <em>{selectReview?.name}</em>
         </div>
       </ObjectBox>
-      <RatingBox>
+      <RatingBox role="group" aria-label="Rating">
         <strong>상품은 어떠셨나요?</strong>
         <Controller
           name="ratingValue"
@@ -178,7 +178,7 @@ const ReviewWriteContainer = forwardRef<
           )}
         />
       </RatingBox>
-      <ReviewBox>
+      <ReviewBox role="group" aria-label="Review Text">
         <strong>솔직한 상품 리뷰를 남겨주세요</strong>
         <Controller
           name="textValue"
@@ -210,11 +210,11 @@ const ReviewWriteContainer = forwardRef<
           {(watchTextValue && getValues("textValue")?.length) || 0} / 1,000
         </em>
       </ReviewBox>
-      <ReviewImgBox>
+      <ReviewImgBox role="group" aria-label="Review Photos">
         <strong>포토</strong>
-        <div>
+        <div role="list">
           {Array.from({ length: 5 }).map((_, index) => (
-            <div className="review-preview-img__btns" key={index}>
+            <div className="review-preview-img__btns" role="listitem" key={index}>
               <input
                 type="file"
                 accept="image/*"
@@ -224,6 +224,7 @@ const ReviewWriteContainer = forwardRef<
               />
               {!reviewImages[index] ? (
                 <span
+                  role="button"
                   className="thumbnailFile"
                   onClick={(event) => {
                     event.preventDefault();
@@ -237,10 +238,11 @@ const ReviewWriteContainer = forwardRef<
                   />
                 </span>
               ) : (
-                <img src={reviewImages[index]} alt="" />
+                <img role="img" src={reviewImages[index]} alt="" />
               )}
               {!reviewImages[index] || (
                 <span
+                  role="button"
                   className="thumbnailClearBtn"
                   onClick={(event) => {
                     event.preventDefault();

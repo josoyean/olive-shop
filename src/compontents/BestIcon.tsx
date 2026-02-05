@@ -1,10 +1,10 @@
 import styled from "styled-components";
 const BestIcon = ({ best, today }: { best: boolean; today: boolean }) => {
   return (
-    <Container>
-      {best && <Icon className="best-icon">베스트</Icon>}
+    <Container role="status">
+      {best && <Icon className="best-icon" aria-label="베스트 상품">베스트</Icon>}
 
-      {today && <Icon className="today-icon">오특</Icon>}
+      {today && <Icon className="today-icon" aria-label="오늘의 특가">오특</Icon>}
     </Container>
   );
 };

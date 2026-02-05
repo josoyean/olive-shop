@@ -345,12 +345,12 @@ const AppLayout: React.FC = () => {
   const gubRef = useRef<HTMLDivElement | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   useEffect(() => {
-    function handleClickOutside(event: React.MouseEvent<HTMLDivElement>) {
+    function handleClickOutside(event: MouseEvent) {
       if (
         componentRef.current &&
-        !componentRef.current.contains(event.target) &&
+        !componentRef.current.contains(event.target as Node) &&
         gubRef.current &&
-        !gubRef.current.contains(event.target)
+        !gubRef.current.contains(event.target as Node)
       ) {
         // 여기서 원하는 작업을 수행
         setMenuBar(false);
@@ -425,10 +425,10 @@ const AppLayout: React.FC = () => {
     <div>
       <TopButton />
       <ChatButton />
-      <header style={{ paddingTop: "15px" }}>
+      <header role="banner" style={{ paddingTop: "15px" }}>
         <Center style={{ position: "relative" }}>
           <HeaderWrapper>
-            <div className="subNav">
+            <nav className="subNav" role="navigation" aria-label="사용자 메뉴">
               {userData.token !== ""
                 ? memberNav.map((item, index) => (
                     <span
@@ -436,6 +436,8 @@ const AppLayout: React.FC = () => {
                       // .key.(index === 4 ?{ data-tooltip-id="my-tooltip-click"} : "")
                       data-tooltip-id={index === 4 ? "my-tooltip-click" : ""}
                       key={index}
+                      tabIndex={0}
+                      role="button"
                       onClick={(event) => {
                         event.preventDefault();
 
@@ -456,6 +458,25 @@ const AppLayout: React.FC = () => {
                         }
                         navigate(item.path);
                       }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          if (item.path === "") {
+                            alert("준비중 입니다");
+                            return;
+                          }
+                          if (item.name === "로그아웃") {
+                            if (window.confirm("정말 로그아웃 하시겠습니까?")) {
+                              handleSignedOut();
+                            }
+                          }
+                          if (item.name === "최근 본 상품") {
+                            handleTooltipOpen();
+                            return;
+                          }
+                          navigate(item.path);
+                        }
+                      }}
                     >
                       {item.name}
                       {item.name == "장바구니" && (
@@ -470,6 +491,8 @@ const AppLayout: React.FC = () => {
                       data-tooltip-id={index === 3 ? "my-tooltip-click" : ""}
                       className={index === 3 ? "" : "subNavBtn"}
                       key={index}
+                      tabIndex={0}
+                      role="button"
                       onClick={(event) => {
                         event.preventDefault();
                         if (item.name === "장바구니") {
@@ -482,6 +505,20 @@ const AppLayout: React.FC = () => {
                         }
 
                         navigate(item.path);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          if (item.name === "장바구니") {
+                            alert("로그인후 사용 가능 합니다");
+                            return;
+                          }
+                          if (item.name === "최근 본 상품") {
+                            handleTooltipOpen();
+                            return;
+                          }
+                          navigate(item.path);
+                        }
                       }}
                     >
                       {item.name}
@@ -512,15 +549,24 @@ const AppLayout: React.FC = () => {
                   ></RecentProducts>
                 )}
               </Tooltip>
-            </div>
+            </nav>
             <div className="nav">
               <img
                 src="https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/sign/images/logo.jpeg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8zYTBjYzg1NC1jMWE5LTQ2MTktYTBiNy1iMTdmMGE2ZGE3MWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvbG9nby5qcGVnIiwiaWF0IjoxNzYxNTQ5NzkwLCJleHAiOjE3OTMwODU3OTB9.M88LPsG-ohG78jriZTdPelEdyHVsX_oj0lrW_Kd_ndM"
                 alt="main-log"
                 className="main-log"
+                tabIndex={0}
+                role="button"
                 onClick={() => {
                   navigate("/");
                   setSearchValue("");
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    navigate("/");
+                    setSearchValue("");
+                  }
                 }}
               />
               <Search
@@ -535,25 +581,47 @@ const AppLayout: React.FC = () => {
             <div
               ref={gubRef}
               className="gub-btn"
+              tabIndex={0}
+              role="button"
+              aria-expanded={menuBar}
+              aria-haspopup="true"
               onClick={(event) => {
                 event.preventDefault();
                 console.log("menuBar", menuBar);
                 setMenuBar(!menuBar);
               }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setMenuBar(!menuBar);
+                }
+              }}
             >
               <MenuIcon />
               <span>카테고리</span>
             </div>
-            <ul className="gub-menu">
+            <ul className="gub-menu" role="menubar" aria-label="메인 메뉴">
               {GubNav.map((item, index) => (
                 <li
                   key={index}
+                  role="menuitem"
+                  tabIndex={0}
                   onClick={() => {
                     if (item.path === "") {
                       alert("준비중 입니다");
                       return;
                     }
                     navigate(item.path);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      if (item.path === "") {
+                        alert("준비중 입니다");
+                        return;
+                      }
+                      navigate(item.path);
+                    }
                   }}
                   className={item.path === location.pathname ? " active" : ""}
                 >
@@ -563,14 +631,14 @@ const AppLayout: React.FC = () => {
               ))}
             </ul>
             {menuBar && (
-              <div className="open-gub" ref={componentRef}>
+              <div className="open-gub" ref={componentRef} role="menu" aria-label="카테고리 메뉴">
                 {GubMenu.map((menu, idex) => (
                   <div
                     key={idex}
                     className="main-menu"
                     style={{ gridColumn: `${menu.grid}` }}
                   >
-                    <h2 className="main-title">{menu.title.name}</h2>
+                    <h2 className="main-title" aria-label={menu.title.name}>{menu.title.name}</h2>
                     <div
                       className="sub-menu"
                       style={{
@@ -580,9 +648,12 @@ const AppLayout: React.FC = () => {
                       }}
                     >
                       {menu.main.map((items, index) => (
-                        <div key={index}>
+                        <div key={index} role="menuitem">
                           <h3
                             className="sub-title"
+                            aria-label={items.title.name}
+                            tabIndex={0}
+                            role="button"
                             onClick={(event) => {
                               event.preventDefault();
                               setMenuBar(false);
@@ -591,14 +662,25 @@ const AppLayout: React.FC = () => {
                                 `/store/goods?menu=${menu.title.name}&item=${items.title.name}`
                               );
                             }}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                setMenuBar(false);
+                                navigate(
+                                  `/store/goods?menu=${menu.title.name}&item=${items.title.name}`
+                                );
+                              }
+                            }}
                           >
                             {items.title.name} &gt;
                           </h3>
-                          <ul>
+                          <ul role="menu">
                             {items.sub.map((item, index) => (
                               <li
                                 key={index}
                                 className="title"
+                                role="menuitem"
+                                tabIndex={0}
                                 onClick={(event) => {
                                   event.preventDefault();
                                   setMenuBar(false);
@@ -606,6 +688,15 @@ const AppLayout: React.FC = () => {
                                   navigate(
                                     `/store/goods?menu=${menu.title.name}&item=${items.title.name}&title=${item.name}`
                                   );
+                                }}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Enter" || event.key === " ") {
+                                    event.preventDefault();
+                                    setMenuBar(false);
+                                    navigate(
+                                      `/store/goods?menu=${menu.title.name}&item=${items.title.name}&title=${item.name}`
+                                    );
+                                  }
                                 }}
                               >
                                 {item.name}
@@ -623,7 +714,7 @@ const AppLayout: React.FC = () => {
         </GubWrapper>
       </header>
 
-      <div>{<Outlet></Outlet>}</div>
+      <main role="main">{<Outlet></Outlet>}</main>
 
       {/* <ChatbotContainer /> */}
 
@@ -641,6 +732,10 @@ const HeaderWrapper = styled.div`
     justify-content: flex-end;
     img {
       cursor: pointer;
+      &:focus {
+        outline: 2px solid ${({ theme }) => theme.color.main};
+        outline-offset: 2px;
+      }
     }
     > span {
       cursor: pointer;
@@ -648,6 +743,10 @@ const HeaderWrapper = styled.div`
       display: block;
       font-size: ${({ theme }) => theme.fontSize.small};
       color: ${({ theme }) => theme.fontColor.sub};
+      &:focus {
+        outline: 2px solid ${({ theme }) => theme.color.main};
+        outline-offset: 2px;
+      }
       &.subNavBtn::after {
         display: block;
         right: -8px;
@@ -701,6 +800,10 @@ const GubWrapper = styled.div`
     column-gap: 10px;
     justify-content: center;
     align-items: center;
+    &:focus {
+      outline: 2px solid ${({ theme }) => theme.color.main};
+      outline-offset: -2px;
+    }
   }
   span {
     font-size: ${({ theme }) => theme.fontSize.large};
@@ -718,6 +821,10 @@ const GubWrapper = styled.div`
       align-items: center;
       gap: 10px;
       padding: 0 15px;
+      &:focus {
+        outline: 2px solid ${({ theme }) => theme.color.main};
+        outline-offset: -2px;
+      }
       span {
         position: relative;
         &.none::after {
@@ -742,7 +849,8 @@ const GubWrapper = styled.div`
         border-left: 1px solid ${({ theme }) => theme.lineColor.main};
       }
 
-      &:hover {
+      &:hover,
+      &:focus {
         span {
           position: relative;
           color: ${({ theme }) => theme.color.main};
@@ -781,6 +889,10 @@ const GubWrapper = styled.div`
     h3,
     li {
       cursor: pointer;
+      &:focus {
+        outline: 2px solid ${({ theme }) => theme.color.main};
+        outline-offset: 2px;
+      }
     }
     ul {
       display: flex;

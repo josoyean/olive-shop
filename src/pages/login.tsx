@@ -126,7 +126,7 @@ const Login = () => {
     <Center>
       <Container style={{ height: "calc(100vh - 311px)", minHeight: "570px" }}>
         <h1>로그인</h1>
-        <FormControl onSubmit={handleSubmit(onSubmit, onError)}>
+        <FormControl onSubmit={handleSubmit(onSubmit, onError)} role="form" aria-label="로그인 폼">
           <InputWrapper className="input-wrapper">
             <input
               type="text"

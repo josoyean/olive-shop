@@ -5,8 +5,8 @@ const Nav = () => {
   const [searchParams] = useSearchParams();
   const pageType = searchParams.get("t_page");
   return (
-    <NavContainer>
-      <h1>{pageType}</h1>
+    <NavContainer role="navigation" aria-label="Mypage Navigation">
+      <h1 role="heading" aria-level={1}>{pageType}</h1>
     </NavContainer>
   );
 };

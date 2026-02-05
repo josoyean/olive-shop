@@ -88,7 +88,7 @@ const StoreBrandDetail = () => {
   );
   return (
     <Center>
-      <Container>
+      <Container role="region" aria-label="브랜드 상세">
         <TitleContainer>{brandInfo?.name}</TitleContainer>
         <InfoContainer>
           <div className="img-box">
@@ -150,7 +150,7 @@ const StoreBrandDetail = () => {
                 </span>
               ))}
           </TypeFilter>
-          <div className="bBox">
+          <div className="bBox" role="list" aria-label="상품 목록">
             {objectsList &&
               objectsList?.map((list, index) => (
                 <ObjectCardColumn

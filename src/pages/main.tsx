@@ -89,7 +89,7 @@ const MainPage: React.FC = () => {
       });
   }, []);
   return (
-    <div>
+    <div role="region" aria-label="메인 콘텐츠">
       <BannerContainer />
       <Center style={{ display: "flex", columnGap: "40px", marginTop: "40px" }}>
         <CommendObject title="요즘 주목 받는 상품" data={attentionItems} />
