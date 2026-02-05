@@ -28,6 +28,8 @@ lang - react, styled-components , typesjavascript, react-query, redex
 
 \- react-simple-captcha를 적용해 로그인 시 보안 요소를 강화
 
+\- 클릭 요소를 button 태그로 통일하고 아이콘 버튼에 aria-label을 적용해 접근성 개선
+
 #### 1) Supabase API를 활용해 데이터 조회 및 관리 기능 구현,로그인, 아이디·비밀번호 찾기 기능 연동
 
 ```
@@ -317,6 +319,22 @@ if (!validateCaptcha(data.captcha)) {
 
 로그인시 보안 강화를 위해 자동 입력 방지 문자를 사용해서 사용자가 안심하게 서비스를 이용할수있도록 적용했습니다.
 
+#### 7) 클릭 요소를 button 태그로 통일하고 아이콘 버튼에 aria-label을 적용해 접근성 개선
+​
+```
+  <Modal
+      isOpen={isOpen}
+      ariaHideApp={false}
+      onRequestClose={() => onClose()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      shouldCloseOnOverlayClick={false}
+    >
+```
+​
+role,aria-modal,aria-label 를 사용해서 적용해 키보드·스크린리더 접근성을 개선 했습니다
+
 [https://github.com/josoyean/olive-shop](https://github.com/josoyean/olive-shop)
 
  [GitHub - josoyean/olive-shop
@@ -324,3 +342,4 @@ if (!validateCaptcha(data.captcha)) {
 Contribute to josoyean/olive-shop development by creating an account on GitHub.
 
 github.com](https://github.com/josoyean/olive-shop)
+
