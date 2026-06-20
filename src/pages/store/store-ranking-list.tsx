@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
-import styled from "styled-components";
-import { Center, MainTitle } from "../../../public/assets/style";
 import { supabase } from "../../supabase";
-import type { CardImageType } from "compontents/card/card.type";
-import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
-import { theme } from "../../../public/assets/styles/theme";
+import type { CardImageType } from "components/card/card.type";
+import ObjectCardColumn from "../../components/card/ObjectCardColumn";
 import { useSearchParams } from "react-router-dom";
-import EmptyComponent from "../../compontents/EmptyComponent";
-import { handleFilter } from "../../bin/common";
-import CategoryMenu from "../../compontents/CategoryMenu";
+import EmptyComponent from "../../components/EmptyComponent";
+import { handleFilter } from "../../utils/common";
+import CategoryMenu from "../../components/CategoryMenu";
+import { PageHero } from "@/components/layout/PageHero";
+import { Center } from "@/components/ui/Center";
+import { cn } from "@/lib/cn";
+
 const StoreRankingList: React.FC = () => {
   const [searchParams] = useSearchParams();
   const menuType = searchParams.get("menuType");
@@ -31,19 +32,23 @@ const StoreRankingList: React.FC = () => {
   }, [handleData]);
   return (
     <section role="region" aria-label="랭킹">
-      <MainLine>
-        <Center>
-          <div>
-            <span>랭킹</span>
-            <em>오늘의 랭킹! 요즘 가장 핫한 상품</em>
-          </div>
-        </Center>
-      </MainLine>
+      <PageHero
+        title="랭킹"
+        subtitle="오늘의 랭킹! 요즘 가장 핫한 상품"
+        className="h-[100px] bg-[url('/public/assets/images/icons/bg_best1_top.png')] bg-[position:50%_0] bg-no-repeat [&_em]:text-inherit [&_span]:text-inherit"
+      />
       <Center>
         <div>
           <CategoryMenu />
 
-          <Container style={objects?.length === 0 ? { display: "unset" } : {}}>
+          <div
+            className={cn(
+              "grid grid-cols-4 justify-around gap-y-[30px] pb-[50px] [grid-template-columns:repeat(4,215px)]",
+              "[&_.best-icon]:hidden [&_.object_box]:relative [&_.object_box>span]:absolute [&_.object_box>span]:left-[-22px] [&_.object_box>span]:top-3 [&_.object_box>span]:z-[9] [&_.object_box>span]:block [&_.object_box>span]:h-12 [&_.object_box>span]:w-12 [&_.object_box>span]:cursor-pointer [&_.object_box>span]:rounded-full [&_.object_box>span]:border-2 [&_.object_box>span]:border-primary [&_.object_box>span]:bg-white [&_.object_box>span]:text-center [&_.object_box>span]:text-xl [&_.object_box>span]:font-bold [&_.object_box>span]:leading-[48px] [&_.object_box>span]:text-primary",
+              "[&_.tags]:text-center [&_h5]:text-center"
+            )}
+            style={objects?.length === 0 ? { display: "unset" } : {}}
+          >
             {objects && objects?.length > 0 ? (
               objects?.map((item, index) => (
                 <div key={`fallback=${index}`} className="object_box">
@@ -57,7 +62,7 @@ const StoreRankingList: React.FC = () => {
                 subText="랭킹 타입을 다시 선택해주세요"
               />
             )}
-          </Container>
+          </div>
         </div>
       </Center>
     </section>
@@ -65,54 +70,3 @@ const StoreRankingList: React.FC = () => {
 };
 
 export default StoreRankingList;
-
-const Container = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 215px);
-  justify-content: space-around;
-  row-gap: 30px;
-  padding-bottom: 50px;
-  .object_box {
-    position: relative;
-    > span {
-      width: 48px;
-      height: 48px;
-      background-color: #fff;
-      text-align: center;
-      border-radius: 50%;
-      line-height: 48px;
-      display: block;
-      font-size: 20px;
-      font-weight: bold;
-      color: ${theme.color.main};
-      position: absolute;
-      left: -22px;
-      z-index: 9;
-      top: 12px;
-      border: 2px solid ${theme.color.main};
-      cursor: pointer;
-    }
-  }
-  .best-icon {
-    display: none;
-  }
-  .tags,
-  h5 {
-    text-align: center;
-  }
-`;
-
-const MainLine = styled(MainTitle)`
-  height: 100px;
-  background: url("/public/assets/images/icons/bg_best1_top.png") 50% 0
-    no-repeat;
-
-  > div {
-    > div {
-      padding-top: 30px;
-      em,
-      span {
-      }
-    }
-  }
-`;

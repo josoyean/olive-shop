@@ -3,7 +3,7 @@ import axios, { HttpStatusCode } from "axios";
 import { HOST_URL } from "../bin/env";
 import { REACT_APP_API_KEY } from "../bin/env";
 import { supabase } from "../supabase";
-import type { CardImageType } from "compontents/card/card.type";
+import type { CardImageType } from "components/card/card.type";
 import moment from "moment";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;

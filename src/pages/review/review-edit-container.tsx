@@ -1,20 +1,19 @@
-import type { PaymentObjectType, ReviewType } from "compontents/card/card.type";
+import type { PaymentObjectType, ReviewType } from "components/card/card.type";
 import { forwardRef, useEffect, useRef, useState, type JSX } from "react";
-import styled from "styled-components";
-import { theme } from "../../../public/assets/styles/theme";
 import { Rating } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
-import { Textarea } from "../../../public/assets/style";
+import { TextareaField } from "@/components/ui";
 import { useForm, Controller, type FieldErrors } from "react-hook-form";
 import { useSelector } from "react-redux";
-import type { RootState } from "redex/store";
+import type { RootState } from "redux/store";
 import { supabase } from "../../supabase";
+import { cn } from "@/lib/cn";
 
 interface ReviewWriteProps {
   data: {
-    selectReview: ReviewType | null; // 타입 명확하면 any 대신 string, number 등으로 바꿔줘요!
-    orders: PaymentObjectType[] | null; // 타입 명확하면 any 대신 string, number 등으로 바꿔줘요!
-    handleWriteReview: () => void; // 함수 타입 명시
+    selectReview: ReviewType | null;
+    orders: PaymentObjectType[] | null;
+    handleWriteReview: () => void;
   };
 }
 
@@ -22,6 +21,30 @@ interface DataType {
   ratingValue: number;
   textValue: string;
 }
+
+const objectBoxClass = cn(
+  "flex cursor-pointer gap-5 border-b border-line-main py-5",
+  "[&>div]:flex [&>div]:flex-col [&>div]:gap-[7px] [&>div]:pt-[5px]",
+  "[&>div_em]:block [&>div_em]:overflow-hidden [&>div_em]:text-sm",
+  "[&>div_strong]:text-sm [&>div_span]:text-sm [&>div_span]:font-semibold",
+  "[&>img]:h-[90px] [&>img]:w-[90px] [&>img]:rounded-[3px]"
+);
+
+const ratingBoxClass = cn(
+  "flex items-center gap-[15px] border-b border-line-main py-5",
+  "[&_.MuiRating-iconActive]:scale-100 [&_.MuiRating-iconFilled]:text-[#ff3d47] [&_.MuiRating-iconHover]:scale-100 [&_.MuiRating-iconHover]:text-[#ff3d47]"
+);
+
+const reviewBoxClass =
+  "py-5 pb-10 [&>em]:mt-[5px] [&>em]:block [&>em]:float-right [&>em]:text-[13px] [&>em]:text-[#ff3d47] [&>strong]:mb-[15px] [&>strong]:block";
+
+const reviewImgBoxClass = cn(
+  "[&>div]:mt-[15px] [&>div]:grid [&>div]:grid-cols-[repeat(5,120px)] [&>div]:justify-between",
+  "[&_.review-preview-img__btns]:relative [&_.review-preview-img__btns]:h-[120px] [&_.review-preview-img__btns]:w-[120px] [&_.review-preview-img__btns]:border [&_.review-preview-img__btns]:border-line-main",
+  "[&_.review-preview-img__btns_img]:h-full [&_.review-preview-img__btns_img]:w-full",
+  "[&_.thumbnailClearBtn]:absolute [&_.thumbnailClearBtn]:right-[5px] [&_.thumbnailClearBtn]:top-[5px] [&_.thumbnailClearBtn]:block [&_.thumbnailClearBtn]:h-5 [&_.thumbnailClearBtn]:w-5 [&_.thumbnailClearBtn]:cursor-pointer",
+  "[&_.thumbnailFile]:flex [&_.thumbnailFile]:h-full [&_.thumbnailFile]:w-full [&_.thumbnailFile]:items-center [&_.thumbnailFile]:justify-center [&_.thumbnailFile]:rounded-[5px] [&_.thumbnailFile_img]:h-10 [&_.thumbnailFile_img]:w-10"
+);
 
 const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
   (props, ref): JSX.Element => {
@@ -48,7 +71,6 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
     const watchTextValue = watch("textValue");
 
     useEffect(() => {
-    
       if (!selectReview) return;
       setValue("textValue", selectReview.reviewText || "");
       setValue("ratingValue", selectReview.score || 0);
@@ -95,7 +117,7 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
       const firstError = fieldsOrder.find((key) => errorKeys.includes(key));
       if (!firstError) return;
 
-      const fieldError = errors[firstError]; // FieldError | undefined
+      const fieldError = errors[firstError];
 
       if (!fieldError) return;
 
@@ -108,14 +130,14 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
     };
     return (
       <form role="form" ref={ref} onSubmit={handleSubmit(onSubmit, onError)}>
-        <ObjectBox role="group">
+        <div className={objectBoxClass} role="group">
           <img role="img" src={selectReview?.objectInfo?.img} alt="상품" />
           <div role="group">
             <strong role="heading" aria-level={3}>{selectReview?.objectInfo?.brand}</strong>
             <em>{selectReview?.objectInfo?.name}</em>
           </div>
-        </ObjectBox>
-        <RatingBox role="group" aria-label="Rating">
+        </div>
+        <div className={ratingBoxClass} role="group" aria-label="Rating">
           <strong>상품은 어떠셨나요?</strong>
           <Controller
             name="ratingValue"
@@ -133,7 +155,7 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
                 precision={1}
                 onChange={(_, newValue: number | null) => {
                   if (!newValue) return;
-                  field.onChange(newValue); // 폼에 반영
+                  field.onChange(newValue);
                 }}
                 size="large"
                 value={field.value}
@@ -146,14 +168,14 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
               />
             )}
           />
-        </RatingBox>
-        <ReviewBox role="group" aria-label="Review Text">
+        </div>
+        <div className={reviewBoxClass} role="group" aria-label="Review Text">
           <strong>솔직한 상품 리뷰를 남겨주세요</strong>
           <Controller
             name="textValue"
             control={control}
             render={({ field }) => (
-              <Textarea
+              <TextareaField
                 {...field}
                 width="100%"
                 height="200px"
@@ -178,8 +200,8 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
           <em>
             {(watchTextValue && getValues("textValue")?.length) || 0} / 1,000
           </em>
-        </ReviewBox>
-        <ReviewImgBox role="group" aria-label="Review Photos">
+        </div>
+        <div className={reviewImgBoxClass} role="group" aria-label="Review Photos">
           <strong>포토</strong>
           <div role="list">
             {Array.from({ length: 5 }).map((_, index) => (
@@ -229,117 +251,10 @@ const ReviewEditContainer = forwardRef<HTMLFormElement, ReviewWriteProps>(
               </div>
             ))}
           </div>
-        </ReviewImgBox>
+        </div>
       </form>
     );
   }
 );
-const ReviewImgBox = styled.div`
-  > div {
-    margin-top: 15px;
-    display: grid;
-    grid-template-columns: repeat(5, 120px);
-    justify-content: space-between;
-  }
-  .review-preview-img__btns {
-    width: 120px;
-    height: 120px;
-    border: 1px solid ${theme.lineColor.main};
-    position: relative;
-    .thumbnailFile {
-      width: 100%;
-      height: 100%;
 
-      img {
-        width: 40px;
-        height: 40px;
-      }
-    }
-    img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-  .thumbnailFile {
-    display: flex;
-    height: 100%;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-
-    border-radius: 5px;
-  }
-
-  .thumbnailClearBtn {
-    width: 20px;
-    height: 20px;
-    display: block;
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    cursor: pointer;
-  }
-`;
-const ReviewBox = styled.div`
-  padding: 20px 0 40px;
-  strong {
-    margin-bottom: 15px;
-    display: block;
-  }
-
-  > em {
-    font-size: 13px;
-    color: #ff3d47;
-    /* margin-right: auto; */
-    display: block;
-    float: right;
-    margin-top: 5px;
-  }
-`;
-const RatingBox = styled.div`
-  display: flex;
-  column-gap: 15px;
-  padding: 20px 0;
-  border-bottom: 1px solid ${theme.lineColor.main};
-  align-items: center;
-  .MuiRating-iconFilled,
-  .MuiRating-iconHover {
-    color: #ff3d47;
-  }
-  .MuiRating-iconActive,
-  .MuiRating-iconHover {
-    transform: none;
-  }
-`;
-const ObjectBox = styled.div`
-  padding: 20px 0;
-  /* border-top: 2px solid #000; */
-  border-bottom: 1px solid ${theme.lineColor.main};
-  cursor: pointer;
-  display: flex;
-  column-gap: 20px;
-  > div {
-    padding-top: 5px;
-    display: flex;
-    flex-direction: column;
-    row-gap: 7px;
-    span {
-      font-size: 14px;
-      font-weight: 600;
-    }
-    strong {
-      font-size: 14px;
-    }
-    em {
-      font-size: 14px;
-      overflow: hidden;
-      display: block;
-    }
-  }
-  img {
-    width: 90px;
-    height: 90px;
-    border-radius: 3px;
-  }
-`;
 export default ReviewEditContainer;

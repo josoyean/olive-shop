@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #116dff;
+  --color-text-main: #131518;
+  --color-text-sub: #333333;
+  --color-text-red: #e02020;
+  --color-line-main: #dddddd;
+  --color-line-sub: #e5e7ea;
+  --color-sale: #f65c60;
+  --color-coupon: #9bce26;
+  --color-free: #ad85ed;
+  --color-one-more: #ff8942;
+  --color-today-sale: #6fcff7;
+  --color-olive-green: #9bce26;
+  --color-star: #f27370;
+
+  --font-size-large: 16px;
+  --font-size-middle: 14px;
+  --font-size-small: 12px;
+}
+
+/* 원본 App.css + styled-components 전역 스타일 유지 */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    color: var(--color-text-main);
+  }
+
+  span {
+    color: #333;
+    white-space: nowrap;
+  }
+
+  li,
+  ul {
+    list-style-type: none;
+  }
+
+  em {
+    font-style: normal;
+  }
+
+  button {
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+  }
+
+  #root {
+    overflow: hidden;
+  }
+
+  table {
+    border-spacing: 0;
+    border: 0;
+  }
+
+  /* Tailwind preflight가 고정 크기 이미지를 깨뜨리는 문제 방지 */
+  img {
+    max-width: none;
+    height: auto;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+}

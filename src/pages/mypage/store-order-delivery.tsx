@@ -1,18 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import moment from "moment";
-import styled from "styled-components";
-import { calculatePrice, handlePrice, handleSaleTF } from "../../bin/common";
-import type { RootState } from "../../redex/store";
+import { cn } from "@/lib/cn";
+import { BlueButton, TableWrapper, WhiteButton } from "@/components/ui/FormElements";
+import { calculatePrice, handlePrice, handleSaleTF } from "../../utils/common";
+import type { RootState } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 interface OrderDataType {
   [key: string]: OrderType[];
 }
 import { supabase } from "../../supabase";
-import {
-  BlueButton,
-  TableStyle,
-  WhiteButton,
-} from "../../../public/assets/style";
 import { Select } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -21,11 +17,53 @@ import {
   type CardImageType,
   type CartType,
   type OrderType,
-} from "compontents/card/card.type";
+} from "components/card/card.type";
 import { useNavigate } from "react-router-dom";
-import { addItemCart } from "../../pages/carts/addItemCart";
-import EmptyComponent from "../../compontents/EmptyComponent";
+import { addItemCart } from "@/services/cart";
+import EmptyComponent from "../../components/EmptyComponent";
 import { orderDeliveryData, paymentOrderCancel } from "../../api/axios-index";
+
+const orderBoxClasses = cn(
+  "mt-[60px]",
+  "[&_.text-box]:flex [&_.text-box]:items-center [&_.text-box]:justify-between",
+  "[&_.text-box>div]:flex [&_.text-box>div]:items-baseline [&_.text-box>div]:gap-2.5",
+  "[&_.text-box_span]:cursor-pointer [&_.text-box_span]:text-sm",
+  "[&_.order-box]:mt-5 [&_.order-box]:grid [&_.order-box]:h-[117px] [&_.order-box]:w-full [&_.order-box]:grid-cols-5 [&_.order-box]:overflow-hidden [&_.order-box]:rounded-[10px] [&_.order-box]:bg-[#f5f5f5]",
+  "[&_li]:relative [&_li]:flex [&_li]:flex-col [&_li]:items-center [&_li]:justify-center",
+  "[&_li_em]:text-[40px] [&_li_em]:font-medium [&_li_em]:not-italic [&_li_em]:text-[#888]",
+  "[&_li_em.on]:text-primary [&_li_span]:text-base [&_li_span]:text-[#666]",
+  "[&_li]:after:absolute [&_li]:after:right-0 [&_li]:after:top-1/2 [&_li]:after:-translate-y-1/2 [&_li]:after:text-[40px] [&_li]:after:font-bold [&_li]:after:text-[#888] [&_li]:after:content-['>']",
+  "[&_li:last-child]:after:hidden"
+);
+
+const searchClasses = cn(
+  "flex w-[calc(100%-70px)] flex-col gap-[15px]",
+  "[&_ul]:flex [&_ul]:flex-row [&_ul]:gap-[5px]",
+  "[&_li]:block [&_li]:h-7 [&_li]:w-fit [&_li]:cursor-pointer [&_li]:rounded-[3px] [&_li]:border [&_li]:border-[#797979] [&_li]:bg-white [&_li]:px-[15px] [&_li]:text-center [&_li]:text-xs [&_li]:leading-7 [&_li]:text-[#797979]",
+  "[&_li.on]:border-[#797979] [&_li.on]:bg-[#797979] [&_li.on]:text-white"
+);
+
+const dateContainerClasses = cn(
+  "flex flex-row items-center gap-[15px]",
+  "[&_.MuiInputBase-root]:h-[25px] [&_.MuiInputBase-root]:text-[13px]",
+  "[&>div]:flex [&>div]:items-end [&>div]:gap-2.5",
+  "[&>div>div]:flex [&>div>div]:items-end [&>div>div]:gap-[5px]",
+  "[&_.label]:text-[13px] [&_.label]:text-black"
+);
+
+const tableClasses = cn(
+  "[&_tbody_td]:border-r [&_tbody_td]:border-[#ccc] [&_tbody_td]:p-5 [&_tbody_td:last-child]:border-r-0",
+  "[&_.orderId]:text-center [&_.orderId]:text-[13px] [&_.orderId]:font-medium [&_.orderId]:text-primary",
+  "[&_.objectsInfo]:flex [&_.objectsInfo]:cursor-pointer [&_.objectsInfo]:items-center [&_.objectsInfo]:justify-between",
+  "[&_.img-wrapper]:relative [&_.img-wrapper]:h-[85px] [&_.img-wrapper]:w-[85px] [&_.img-wrapper]:overflow-hidden [&_.img-wrapper]:rounded-[10px]",
+  "[&_.img-wrapper_img]:h-[85px] [&_.img-wrapper_img]:w-[85px]",
+  "[&_.img-wrapper_span]:absolute [&_.img-wrapper_span]:bottom-0 [&_.img-wrapper_span]:left-0 [&_.img-wrapper_span]:right-0 [&_.img-wrapper_span]:h-[22px] [&_.img-wrapper_span]:bg-black/50 [&_.img-wrapper_span]:text-center [&_.img-wrapper_span]:text-xs [&_.img-wrapper_span]:leading-[22px] [&_.img-wrapper_span]:text-white",
+  "[&_.info]:w-[calc(100%-95px)] [&_.info_p]:mb-1 [&_.info_p]:block [&_.info_p]:text-sm [&_.info_p]:font-bold [&_.info_p]:text-[#777]",
+  "[&_.info_h5]:mb-[5px] [&_.info_h5]:line-clamp-2 [&_.info_h5]:max-h-9 [&_.info_h5]:overflow-hidden [&_.info_h5]:text-[13px] [&_.info_h5]:font-normal [&_.info_h5]:leading-[18px] [&_.info_h5]:text-black",
+  "[&_.objectCount]:text-center [&_.discount]:border-r [&_.discount]:border-[#ccc] [&_.discount]:text-center",
+  "[&_.deliveryStep>div]:flex [&_.deliveryStep>div]:flex-col [&_.deliveryStep>div]:items-center [&_.deliveryStep>div]:justify-center [&_.deliveryStep>div]:gap-[5px]",
+  "[&_.deliveryStep_button]:text-[13px] [&_.deliveryStep_em]:text-xs"
+);
 
 const StoreOrderDelivery = () => {
   const navigate = useNavigate();
@@ -272,7 +310,7 @@ const StoreOrderDelivery = () => {
 
   return (
     <section role="region" aria-label="주문/배송 조회">
-      <OrderBox>
+      <div className={orderBoxClasses}>
         <div className="text-box">
           <div>
             <h2>주문/배송 조회</h2>
@@ -310,12 +348,12 @@ const StoreOrderDelivery = () => {
             <span>배송완료</span>
           </li>
         </ul>
-      </OrderBox>
-      <SearchBox>
-        <div>
-          <em>구매기간</em>
+      </div>
+      <div className="mt-[30px] mb-[30px] flex w-full overflow-hidden rounded-[5px]">
+        <div className="flex w-[calc(100%-100px)] items-baseline bg-[#fafafa] p-5">
+          <em className="block w-[70px] text-[13px] text-[#888]">구매기간</em>
 
-          <Search>
+          <div className={searchClasses}>
             <ul>
               <li
                 className={`${selectedMonth === 1 ? "on" : ""}`}
@@ -354,7 +392,7 @@ const StoreOrderDelivery = () => {
                 12개월
               </li>
             </ul>
-            <DateContainer>
+            <div className={dateContainerClasses}>
               <div>
                 <div>
                   <FormControl sx={{ minWidth: 70 }} size="small">
@@ -553,8 +591,8 @@ const StoreOrderDelivery = () => {
                   <span className="label">일</span>
                 </div>
               </div>
-            </DateContainer>
-          </Search>
+            </div>
+          </div>
         </div>
         <BlueButton
           width="100px"
@@ -566,8 +604,8 @@ const StoreOrderDelivery = () => {
         >
           조회
         </BlueButton>
-      </SearchBox>
-      <Table>
+      </div>
+      <TableWrapper className={tableClasses}>
         <table>
           <thead>
             <tr>
@@ -741,280 +779,8 @@ const StoreOrderDelivery = () => {
             )}
           </tbody>
         </table>
-      </Table>
+      </TableWrapper>
     </section>
   );
 };
-const Table = styled(TableStyle)`
-  tbody td {
-    padding: 20px 8px;
-  }
-  tbody {
-    td {
-      border-right: 1px solid #ccc;
-      &:last-child {
-        border-right: none;
-      }
-    }
-    td.orderId {
-      color: #116dff;
-      font-weight: 500;
-      text-align: center;
-      font-size: 13px;
-    }
-    td.objectsInfo {
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      .img-wrapper {
-        position: relative;
-        border-radius: 10px;
-        overflow: hidden;
-        width: 85px;
-        height: 85px;
-        img {
-          width: 85px;
-          height: 85px;
-        }
-        span {
-          position: absolute;
-          width: 100%;
-          line-height: 22px;
-          height: 22px;
-          font-size: 12px;
-          background-color: rgba(0, 0, 0, 0.5);
-          color: #fff;
-          bottom: 0;
-          left: 0;
-          text-align: center;
-          right: 0;
-        }
-      }
-
-      .info {
-        width: calc(100% - 95px);
-        p {
-          display: block;
-          margin-bottom: 4px;
-          color: #777;
-          font-size: 14px;
-          font-weight: 700;
-        }
-        h5 {
-          overflow: hidden;
-          max-height: 36px;
-          -webkit-box-orient: vertical;
-          text-overflow: ellipsis;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          word-break: normal;
-          font-size: 13px;
-          line-height: 18px;
-          font-weight: normal;
-          margin-bottom: 5px;
-          color: #000;
-        }
-      }
-    }
-    td.objectCount {
-      text-align: center;
-    }
-    td.discount {
-      text-align: center;
-      border-right: 1px solid #ccc !important;
-      div {
-        text-align: center;
-        em {
-          display: block;
-          font-size: 12px;
-          color: #b5b5b5;
-          text-decoration: line-through;
-        }
-        p {
-          display: block;
-          color: #e02020;
-          font-weight: 500;
-          margin-top: 3px;
-        }
-      }
-    }
-    td.deliveryStep {
-      > div {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        row-gap: 5px;
-        justify-content: center;
-        button {
-          font-size: 13px;
-        }
-        em {
-          font-size: 12px;
-        }
-      }
-    }
-  }
-`;
-const DateContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  column-gap: 15px;
-  align-items: center;
-  .MuiInputBase-root {
-    height: 25px;
-    font-size: 13px;
-  }
-  > div {
-    display: flex;
-    align-items: end;
-    column-gap: 10px;
-    > div {
-      display: flex;
-      align-items: flex-end;
-      column-gap: 5px;
-    }
-    .label {
-      color: #000;
-      font-size: 13px;
-    }
-  }
-`;
-const Search = styled.div`
-  display: flex;
-  flex-direction: column;
-  row-gap: 15px;
-  width: calc(100% - 70px);
-  ul {
-    display: flex;
-    flex-direction: row;
-    column-gap: 5px;
-    li {
-      padding: 0 15px;
-      height: 28px;
-      width: fit-content;
-      text-align: center;
-      line-height: 28px;
-      color: #797979;
-      font-size: 12px;
-      border-radius: 3px;
-      display: block;
-      cursor: pointer;
-      background-color: #fff;
-      border: 1px solid #797979;
-      &.on {
-        color: #fff;
-        background-color: #797979;
-      }
-    }
-  }
-`;
-const SearchBox = styled.div`
-  width: 100%;
-  border-radius: 5px;
-  overflow: hidden;
-  display: flex;
-  margin-top: 30px;
-  margin-bottom: 30px;
-  > div {
-    background-color: #fafafa;
-    width: calc(100% - 100px);
-    padding: 20px;
-    display: flex;
-    align-items: baseline;
-    > em {
-      color: #888;
-      display: block;
-      width: 70px;
-      font-size: 13px;
-    }
-  }
-`;
-const OrderBox = styled.div`
-  margin-top: 60px;
-  .text-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    > div {
-      display: flex;
-      align-items: baseline;
-      column-gap: 10px;
-    }
-    span {
-      font-size: 14px;
-      cursor: pointer;
-    }
-  }
-  li {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    position: relative;
-    em {
-      color: #888;
-      font-style: normal;
-      font-size: 40px;
-      font-weight: 500;
-      &.on {
-        color: ${({ theme }) => theme.color.main};
-      }
-    }
-    span {
-      color: #666;
-      font-size: 16px;
-    }
-    &::after {
-      display: block;
-      content: ">";
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      right: 0;
-      color: #888;
-      font-size: 40px;
-      font-weight: bold;
-    }
-    &:last-child::after {
-      display: none;
-    }
-  }
-
-  .order-box {
-    overflow: hidden;
-    width: 100%;
-    margin-top: 20px;
-    border-radius: 10px;
-    background-color: #f5f5f5;
-    height: 117px;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-  }
-  .review-box {
-    overflow: hidden;
-    width: 100%;
-    margin-top: 20px;
-    /* height: 117px; */
-    display: grid;
-    column-gap: 50px;
-    grid-template-columns: repeat(2, 1fr);
-    li {
-      height: 117px;
-      cursor: pointer;
-      border-radius: 10px;
-      flex-direction: row-reverse;
-      column-gap: 10px;
-      background-color: #f5f5f5;
-      &::after {
-        display: none;
-      }
-      em {
-        color: ${({ theme }) => theme.color.main};
-      }
-    }
-    li::after {
-    }
-  }
-`;
 export default StoreOrderDelivery;

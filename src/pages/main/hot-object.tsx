@@ -1,11 +1,11 @@
 import React, { useRef } from "react";
-import styled from "styled-components";
-import { Center } from "../../../public/assets/style";
-import ObjectCardRow from "../../compontents/card/ObjectCardRow";
+import { Center } from "@/components/ui";
+import ObjectCardRow from "../../components/card/ObjectCardRow";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import type { CardImageType } from "../../compontents/card/card.type";
+import type { CardImageType } from "../../components/card/card.type";
+import { cn } from "@/lib/cn";
 
 const HotObject: React.FC<{ data: CardImageType[] }> = ({ data }) => {
   const sliderRef = useRef<Slider | null>(null);
@@ -33,9 +33,20 @@ const HotObject: React.FC<{ data: CardImageType[] }> = ({ data }) => {
   };
 
   return (
-    <ItemsContainer role="region" aria-label="조회 급상승, 인기템">
+    <Center
+      className={cn(
+        "my-[60px] [&_h2]:text-center",
+        "[&_.list-container]:h-[200px] [&_.list-container]:w-1/2 [&_.list-container]:overflow-hidden [&_.slider-container]:w-1/2",
+        "[&_.list-container_.slick-slide_span]:block [&_.list-container_.slick-slide_span]:box-border [&_.list-container_.slick-slide_span]:overflow-hidden [&_.list-container_.slick-slide_span]:text-ellipsis [&_.list-container_.slick-slide_span]:break-keep [&_.list-container_.slick-slide_span]:p-[8px_3px] [&_.list-container_.slick-slide_span]:font-normal [&_.list-container_.slick-slide_span]:text-[#a4a4a4]",
+        "[&_.list-container_.slick-slide_em]:inline-block [&_.list-container_.slick-slide_em]:w-[30px] [&_.list-container_.slick-slide_em]:font-normal [&_.list-container_.slick-slide_em]:text-[#95bcfa]",
+        "[&_.list-container_.slick-slide.slick-active.slick-current.slick-center_span]:rounded-[5px] [&_.list-container_.slick-slide.slick-active.slick-current.slick-center_span]:border [&_.list-container_.slick-slide.slick-active.slick-current.slick-center_span]:border-line-main [&_.list-container_.slick-slide.slick-active.slick-current.slick-center_span]:font-bold [&_.list-container_.slick-slide.slick-active.slick-current.slick-center_span]:text-[#181818]",
+        "[&_.list-container_.slick-slide.slick-active.slick-current.slick-center_em]:font-bold [&_.list-container_.slick-slide.slick-active.slick-current.slick-center_em]:text-primary"
+      )}
+      role="region"
+      aria-label="조회 급상승, 인기템"
+    >
       <h2>조회 급상승, 인기템</h2>
-      <Container>
+      <div className="mt-[15px] box-border flex border border-line-main p-[15px]">
         <Slider className="slider-container" {...settings} ref={sliderRef}>
           {data &&
             data?.map((item, index) => (
@@ -57,69 +68,9 @@ const HotObject: React.FC<{ data: CardImageType[] }> = ({ data }) => {
               </span>
             ))}
         </Slider>
-      </Container>
-    </ItemsContainer>
+      </div>
+    </Center>
   );
 };
 
 export default HotObject;
-const ItemsContainer = styled(Center)`
-  margin: 60px auto;
-
-  h2 {
-    text-align: center;
-  }
-  .list-container,
-  .slider-container {
-    width: 50%;
-  }
-
-  .list-container {
-    height: 200px;
-    overflow: hidden;
-    .slick-slide {
-      span {
-        color: #a4a4a4;
-        font-weight: 400;
-      }
-      em {
-        /* background-color: red; */
-        font-weight: 400;
-        color: #95bcfa;
-      }
-    }
-    .slick-slide.slick-active.slick-current.slick-center {
-      span {
-        border-radius: 5px;
-        border: 1px solid ${({ theme }) => theme.lineColor.main};
-        color: #181818;
-        font-weight: 700;
-        em {
-          color: #116dff;
-          font-weight: 700;
-        }
-      }
-    }
-
-    span {
-      padding: 8px 3px;
-      box-sizing: border-box;
-      overflow: hidden;
-      display: block;
-      word-break: keep-all;
-      text-overflow: ellipsis;
-      em {
-        display: inline-block;
-        width: 30px;
-      }
-    }
-  }
-`;
-
-const Container = styled.div`
-  margin-top: 15px;
-  border: 1px solid ${({ theme }) => theme.lineColor.main};
-  padding: 15px;
-  box-sizing: border-box;
-  display: flex;
-`;

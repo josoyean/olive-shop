@@ -1,16 +1,17 @@
 import { useEffect } from "react";
-import { Center, Container } from "../../public/assets/style";
-import styled from "styled-components";
+import { Center } from "@/components/ui/Center";
+import { Container, InputWrapper } from "@/components/ui/FormElements";
+import { cn } from "@/lib/cn";
 import { useForm, FieldErrors } from "react-hook-form";
 import { db } from "../firebase";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../redex/store";
+import type { RootState } from "../redux/store";
 import { useCookies } from "react-cookie";
-import { add } from "../redex/reducers/userReducer";
+import { add } from "../redux/reducers/userReducer";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { handleCartItems, getUserInfo } from "../bin/common";
+import { handleCartItems, getUserInfo } from "../utils/common";
 import {
   loadCaptchaEnginge,
   LoadCanvasTemplateNoReload,
@@ -23,6 +24,7 @@ interface DataType {
   saveId: boolean;
   captcha: string;
 }
+
 const Login = () => {
   const [, setCookie] = useCookies(["token"]);
   const auth = getAuth();
@@ -47,7 +49,7 @@ const Login = () => {
                 ...(data.saveId ? { userId: data.id } : {}),
               })
             );
-            setCookie("token", token, { maxAge: 1 * 24 * 60 * 60 }); // 1일
+            setCookie("token", token, { maxAge: 1 * 24 * 60 * 60 });
             handleCartItems(token, dispatch, false);
             navigate(-1);
           })
@@ -71,8 +73,8 @@ const Login = () => {
     }
 
     try {
-      const usersRef = collection(db, "users"); // users 컬렉션 참조
-      const id = query(usersRef, where("id", "==", data.id)); // 특정 이메일 찾기
+      const usersRef = collection(db, "users");
+      const id = query(usersRef, where("id", "==", data.id));
 
       const idSnapshot = await getDocs(id);
       if (!idSnapshot.empty) {
@@ -98,7 +100,7 @@ const Login = () => {
     const firstError = fieldsOrder.find((key) => errorKeys.includes(key));
     if (!firstError) return;
 
-    const fieldError = errors[firstError]; // FieldError | undefined
+    const fieldError = errors[firstError];
 
     if (!fieldError) return;
 
@@ -109,6 +111,7 @@ const Login = () => {
     setFocus(firstError);
     alert(fieldError.message || "Form validation error");
   };
+
   useEffect(() => {
     setValue("saveId", user.saveId);
     if (user.saveId) {
@@ -124,10 +127,17 @@ const Login = () => {
 
   return (
     <Center>
-      <Container style={{ height: "calc(100vh - 311px)", minHeight: "570px" }}>
+      <Container
+        className="min-h-[570px]"
+        style={{ height: "calc(100vh - 311px)" }}
+      >
         <h1>로그인</h1>
-        <FormControl onSubmit={handleSubmit(onSubmit, onError)} role="form" aria-label="로그인 폼">
-          <InputWrapper className="input-wrapper">
+        <form
+          onSubmit={handleSubmit(onSubmit, onError)}
+          role="form"
+          aria-label="로그인 폼"
+        >
+          <InputWrapper className="!gap-2.5">
             <input
               type="text"
               placeholder="OLIVE SHOP 아이디"
@@ -145,13 +155,18 @@ const Login = () => {
               })}
             />
           </InputWrapper>
-          <CaptchaWrapper>
-            <div>
+          <div className="mt-[25px] flex flex-col gap-2.5">
+            <div className="flex flex-row items-center">
               <LoadCanvasTemplateNoReload
                 reloadColor="red"
                 reloadText="reload"
               />
-              <span onClick={() => loadCaptchaAgain()}>&#x21bb;</span>
+              <span
+                className="h-10 w-10 cursor-pointer text-center text-[30px] leading-10"
+                onClick={() => loadCaptchaAgain()}
+              >
+                &#x21bb;
+              </span>
             </div>
             <input
               type="text"
@@ -164,12 +179,13 @@ const Login = () => {
               }}
               maxLength={6}
             />
-          </CaptchaWrapper>
-          <LabelWrapper>
-            <label htmlFor="">
+          </div>
+          <div className="my-[15px] mb-[30px] flex w-[400px] items-center justify-between">
+            <label className="flex items-center text-sm text-text-sub">
               <input
                 type="checkbox"
                 placeholder="아이디 저장"
+                className="mr-[5px]"
                 {...register("saveId")}
                 onChange={(event) => {
                   setValue("saveId", event.target.checked);
@@ -179,6 +195,7 @@ const Login = () => {
             </label>
             <div>
               <span
+                className="relative ml-[15px] block cursor-pointer text-xs text-text-sub after:absolute after:-right-2 after:top-0 after:content-['_|_'] last:after:hidden"
                 onClick={() => {
                   navigate("/member/find-id");
                 }}
@@ -186,6 +203,7 @@ const Login = () => {
                 아이디 찾기
               </span>
               <span
+                className="relative ml-[15px] block cursor-pointer text-xs text-text-sub"
                 onClick={() => {
                   navigate("/member/find-password");
                 }}
@@ -193,9 +211,9 @@ const Login = () => {
                 비밀번호 변경
               </span>
             </div>
-          </LabelWrapper>
+          </div>
 
-          <InputWrapper className="input-wrapper">
+          <InputWrapper className="!gap-2.5">
             <button type="submit">로그인</button>
             <button
               type="button"
@@ -206,93 +224,10 @@ const Login = () => {
               회원가입
             </button>
           </InputWrapper>
-        </FormControl>
+        </form>
       </Container>
     </Center>
   );
 };
+
 export default Login;
-// height: calc(100vh - 308px);
-const CaptchaWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-top: 25px;
-  row-gap: 10px;
-  > div {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
-    canvas {
-      width: 350px;
-      height: 40px;
-    }
-    span {
-      width: 40px;
-      height: 40px;
-      cursor: pointer;
-      font-size: 30px;
-      text-align: center;
-      line-height: 40px;
-    }
-  }
-`;
-const LabelWrapper = styled.div`
-  display: flex;
-  width: 400px;
-  align-items: center;
-  justify-content: space-between;
-  margin: 15px 0 30px;
-  label {
-    font-size: ${({ theme }) => theme.fontSize.middle};
-    color: ${({ theme }) => theme.fontColor.sub};
-    display: flex;
-    align-items: center;
-    input[type="checkbox"] {
-      margin-right: 05px;
-    }
-  }
-  span {
-    cursor: pointer;
-    position: relative;
-    display: block;
-    float: left;
-    margin-left: 15px;
-    font-size: ${({ theme }) => theme.fontSize.small};
-    color: ${({ theme }) => theme.fontColor.sub};
-    &::after {
-      display: block;
-      right: -8px;
-      top: 0;
-      position: absolute;
-      content: " | ";
-    }
-    &:last-child::after {
-      display: none;
-    }
-  }
-`;
-
-const InputWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  row-gap: 10px;
-
-  button {
-    border-color: transparent;
-    font-size: 15px;
-
-    &[type="submit"] {
-      background-color: ${({ theme }) => theme.color.main};
-      color: #fff;
-    }
-
-    &[type="button"] {
-      background-color: #000;
-      color: #fff;
-    }
-  }
-`;
-
-const FormControl = styled.form``;

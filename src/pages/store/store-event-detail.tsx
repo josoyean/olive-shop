@@ -1,32 +1,41 @@
-import { Center } from "../../../public/assets/style";
-import styled from "styled-components";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
+import { Center } from "@/components/ui/Center";
+import { cn } from "@/lib/cn";
+
+function getEventTagColor(color: string) {
+  if (color === "온&오프라인") return "bg-[#d87299]";
+  if (color === "오프라인몰") return "bg-[#9f87c9]";
+  return "bg-[#9bce26]";
+}
 
 const StoreEventDetail = () => {
   const information = useLocation().state;
 
   return (
     <Center>
-      <Container role="article" aria-label="이벤트 상세">
-        <div>
-          <div>
+      <div role="article" aria-label="이벤트 상세">
+        <div className="flex items-center justify-between py-[15px] [&_em]:text-[#333] [&_h2]:font-[350]">
+          <div className="flex items-stretch gap-[15px]">
             {(information?.off_line || information?.on_line) && (
-              <Tags
-                $color={
-                  information?.off_line && information?.on_line
-                    ? "온&오프라인"
-                    : information?.off_line
-                    ? "오프라인몰"
-                    : "온라인몰"
-                }
+              <span
+                className={cn(
+                  "inline-block h-7 min-w-[100px] rounded-[20px] text-center text-[13px] font-bold leading-7 text-white",
+                  getEventTagColor(
+                    information?.off_line && information?.on_line
+                      ? "온&오프라인"
+                      : information?.off_line
+                      ? "오프라인몰"
+                      : "온라인몰"
+                  )
+                )}
               >
                 {information?.off_line && information?.on_line
                   ? "온&오프라인"
                   : information?.off_line
                   ? "오프라인몰"
                   : "온라인몰"}
-              </Tags>
+              </span>
             )}
             <h2>{information?.detail_text}</h2>
           </div>
@@ -35,52 +44,14 @@ const StoreEventDetail = () => {
             {moment(information?.end_date).format("YYYY-MM-DD")}
           </em>
         </div>
-        <img src={information?.detail_img} alt="detail_img" />
-      </Container>
+        <img
+          className="mx-auto my-10 block w-[750px]"
+          src={information?.detail_img}
+          alt="detail_img"
+        />
+      </div>
     </Center>
   );
 };
 
 export default StoreEventDetail;
-const Tags = styled.span<{ $color: string }>`
-  min-width: 100px;
-  text-align: center;
-  color: #fff;
-  display: inline-block;
-  height: 28px;
-  line-height: 28px;
-  font-size: 13px;
-  border-radius: 20px;
-  background-color: ${({ $color }) =>
-    $color === "온&오프라인"
-      ? "#d87299"
-      : $color === "오프라인몰"
-      ? "#9f87c9"
-      : "#9bce26"};
-  font-weight: 700;
-`;
-const Container = styled.div`
-  > div {
-    padding: 15px 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    h2 {
-      font-weight: 350;
-    }
-    em {
-      color: #333;
-    }
-    > div {
-      align-items: stretch;
-      column-gap: 15px;
-      display: flex;
-    }
-  }
-
-  img {
-    width: 750px;
-    margin: 40px auto;
-    display: block;
-  }
-`;

@@ -2,10 +2,10 @@ import React, { useState, ReactNode, useEffect } from "react";
 
 import BannerContainer from "./main/banner-container";
 import CommendObject from "./main/commend-object";
-import { Center } from "../../public/assets/style";
+import { Center } from "@/components/ui";
 import EventContainer from "./main/event-container";
 import HotObject from "./main/hot-object";
-import type { BrandType, CardImageType } from "compontents/card/card.type";
+import type { BrandType, CardImageType } from "components/card/card.type";
 import BrandsContainer from "./main/brands-container";
 import {
   attentionData,
@@ -91,7 +91,7 @@ const MainPage: React.FC = () => {
   return (
     <div role="region" aria-label="메인 콘텐츠">
       <BannerContainer />
-      <Center style={{ display: "flex", columnGap: "40px", marginTop: "40px" }}>
+      <Center className="mt-10 flex gap-10">
         <CommendObject title="요즘 주목 받는 상품" data={attentionItems} />
         <CommendObject title="고객님을 위한 추천 상품" data={recommendItems} />
       </Center>

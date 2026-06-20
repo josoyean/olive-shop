@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import type { CardImageType } from "compontents/card/card.type";
+import type { CardImageType } from "components/card/card.type";
 import { useNavigate } from "react-router-dom";
 import { bannersData } from "../../api/axios-index";
+import { cn } from "@/lib/cn";
 
 interface BannerType {
   object_seq: number;
@@ -56,17 +56,29 @@ const BannerContainer: React.FC = () => {
     seq: number
   ) => {
     event.preventDefault();
-    if (isDragging) return; // 드래그 중이면 클릭 이벤트 무시
+    if (isDragging) return;
 
     navigate(`/store/brand-detail?getBrand=${seq}`);
   };
   return (
     <section role="region" aria-label="메인 배너">
-      <BannerWrapper role="group" aria-roledescription="슬라이드">
+      <div
+        role="group"
+        aria-roledescription="슬라이드"
+        className={cn(
+          "relative z-[99] mx-auto h-[450px] w-full max-w-[1920px]",
+          "[&_.slick-dots]:bottom-[10px] [&_.slick-dots_button:before]:text-[9px]",
+          "[&_.slick-prev]:left-[calc((100%-1020px)/2+20px)] [&_.slick-prev]:z-[9] [&_.slick-prev]:h-[25px] [&_.slick-prev]:w-[25px]",
+          "[&_.slick-next]:right-[calc((100%-1020px)/2+20px)] [&_.slick-next]:h-[25px] [&_.slick-next]:w-[25px]",
+          "[&_.slick-prev:before]:text-[25px] [&_.slick-next:before]:text-[25px]",
+          "[&_li.slick-active_button:before]:text-primary"
+        )}
+      >
         <Slider className="slider-container" {...settings}>
           {banner?.map((item, index) => (
-            <SliderBox
+            <div
               key={index}
+              className="h-[450px] outline-none [&_img:focus]:border-none [&_img]:h-full [&_img]:w-full [&_img]:object-cover"
               onClick={(event: React.MouseEvent<HTMLElement, MouseEvent>) => {
                 event.preventDefault();
                 if (item?.objects?.brand_seq === undefined) return;
@@ -74,73 +86,15 @@ const BannerContainer: React.FC = () => {
               }}
             >
               <img src={item.img} alt={item.item} />
-            </SliderBox>
+            </div>
           ))}
         </Slider>
-        <ButtonWrapper>
+        <div className="absolute bottom-[5px] left-[calc((100%-1020px)/2+300px)] text-base font-bold text-text-sub">
           {slideIndex + 1} / {banner?.length}
-        </ButtonWrapper>
-      </BannerWrapper>
+        </div>
+      </div>
     </section>
   );
 };
 
 export default BannerContainer;
-
-const BannerWrapper = styled.div`
-  width: 100vw;
-  height: 450px;
-  max-width: 1920px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 99;
-  .slick-dots {
-    bottom: 10px;
-
-    button:before {
-      font-size: 9px;
-    }
-  }
-  .slick-prev,
-  .slick-next {
-    width: 25px;
-    height: 25px;
-    &::before {
-      font-size: 25px;
-    }
-  }
-  .slick-next {
-    right: calc((100% - 1020px) / 2 + 20px);
-  }
-  .slick-prev {
-    left: calc((100% - 1020px) / 2 + 20px);
-    z-index: 9;
-  }
-  li.slick-active {
-    button:before {
-      color: ${({ theme }) => theme.color.main};
-    }
-  }
-`;
-const SliderBox = styled.div`
-  /* width: 100vw; */
-  /* width: 1920px; */
-  outline: none;
-  height: 450px;
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    &:focus {
-      border: none;
-    }
-  }
-`;
-const ButtonWrapper = styled.div`
-  position: absolute;
-  bottom: 5px;
-  left: calc((100% - 1020px) / 2 + 300px);
-  color: ${({ theme }) => theme.fontColor.sub};
-  font-size: ${({ theme }) => theme.fontSize.large};
-  font-weight: bold;
-`;

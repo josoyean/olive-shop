@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { Center } from "../../../public/assets/style";
 import { useSearchParams } from "react-router-dom";
-import styled from "styled-components";
-import { GubMenu } from "../../app-layout";
+import { GUB_MENU } from "@/constants/navigation";
 import { supabase } from "../../supabase";
 import {
   CardImageType,
   filteredSearch,
-} from "../../compontents/card/card.type";
-import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
-import { handleFilter } from "../../bin/common";
+} from "../../components/card/card.type";
+import ObjectCardColumn from "../../components/card/ObjectCardColumn";
+import { handleFilter } from "../../utils/common";
+import { Center } from "@/components/ui/Center";
+
 interface menuType {
   name: string;
   path?: string;
@@ -31,10 +31,8 @@ const StoreList = () => {
   const handleData = async (title: string | null) => {
     let query = supabase.from("objects").select("*");
     if (!title) {
-      // 대분류까지
       query = query.eq("objectTypeMain", searchItem);
     } else {
-      // 소분류까지 - 전부다
       query = query
         .eq("objectTypeMain", searchItem)
         .eq("objectTypeSub", searchTitle);
@@ -47,7 +45,7 @@ const StoreList = () => {
   useEffect(() => {
     handleData(searchTitle);
     if (searchTitle !== "") return;
-    const searchMenuFilter = GubMenu.filter(
+    const searchMenuFilter = GUB_MENU.filter(
       (menu) => menu.title.name === searchMenu
     )[0].main;
     const searchItemFilter = searchMenuFilter?.filter(
@@ -58,8 +56,16 @@ const StoreList = () => {
 
   return (
     <Center>
-      <Wrapper role="region" aria-label="상품 목록">
-        <ContainerLeft role="navigation" aria-label="카테고리 메뉴">
+      <div
+        className="flex min-h-[calc(100vh-166.5px)] border-x border-line-main"
+        role="region"
+        aria-label="상품 목록"
+      >
+        <div
+          className="h-inherit w-[170px] border-r border-line-main [&_h2]:mt-[17px] [&_h2]:text-center [&_li]:cursor-pointer [&_li]:text-center [&_li]:text-sm [&_li]:text-text-sub [&_li:hover]:text-primary [&_ul]:mt-[17px] [&_ul]:flex [&_ul]:flex-col [&_ul]:gap-2"
+          role="navigation"
+          aria-label="카테고리 메뉴"
+        >
           <h2>{!searchTitle ? searchItem : searchTitle}</h2>
           {!searchTitle && (
             <ul role="menu" aria-label="서브 카테고리">
@@ -82,14 +88,14 @@ const StoreList = () => {
               ))}
             </ul>
           )}
-        </ContainerLeft>
-        <ContainerRight>
+        </div>
+        <div className="min-w-[calc(100%-170px)] p-[15px] [&_h3]:mt-[7px] [&_h3]:text-center">
           <h3>
             {!searchTitle ? searchItem : searchTitle} 카테고리에서{" "}
-            <em style={{ color: "#116dff" }}>{objects?.length}개</em>의 상품이
+            <em className="text-primary">{objects?.length}개</em>의 상품이
             등록되어 있습니다.
           </h3>
-          <div className="filter">
+          <div className="my-[25px] mb-[15px] flex gap-[15px] [&_img]:cursor-pointer [&_span]:relative [&_span]:block [&_span]:cursor-pointer [&_span]:text-xs [&_span]:text-text-sub [&_span]:after:absolute [&_span]:after:right-[-8px] [&_span]:after:top-0 [&_span]:after:font-normal [&_span]:after:content-['_|_'] [&_span:last-child]:after:hidden">
             {filteredSearch?.map((item) => (
               <span
                 key={item.type}
@@ -112,7 +118,11 @@ const StoreList = () => {
               </span>
             ))}
           </div>
-          <Object role="list" aria-label="상품 목록">
+          <div
+            className="mt-10 grid grid-cols-4 gap-x-[15px] gap-y-5"
+            role="list"
+            aria-label="상품 목록"
+          >
             {objectsList &&
               objectsList?.map((list, index) => (
                 <ObjectCardColumn
@@ -122,85 +132,11 @@ const StoreList = () => {
                   data={list && list}
                 />
               ))}
-          </Object>
-        </ContainerRight>
-      </Wrapper>
+          </div>
+        </div>
+      </div>
     </Center>
   );
 };
 
-const Object = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px 15px;
-  margin-top: 40px;
-`;
-const Wrapper = styled.div`
-  min-height: calc(100vh - 166.5px);
-  border-right: 1px solid ${({ theme }) => theme.lineColor.main};
-  border-left: 1px solid ${({ theme }) => theme.lineColor.main};
-  display: flex;
-`;
-const ContainerLeft = styled.div`
-  width: 170px;
-  height: inherit;
-  border-right: 1px solid ${({ theme }) => theme.lineColor.main};
-  h2 {
-    text-align: center;
-    margin-top: 17px;
-  }
-
-  ul {
-    margin-top: 17px;
-    display: flex;
-    flex-direction: column;
-    row-gap: 8px;
-    li {
-      cursor: pointer;
-      text-align: center;
-      color: ${({ theme }) => theme.fontColor.sub};
-      font-size: ${({ theme }) => theme.fontSize.middle};
-
-      &:hover {
-        color: ${({ theme }) => theme.color.main};
-      }
-    }
-  }
-`;
-const ContainerRight = styled.div`
-  min-width: calc(100% - 170px);
-  padding: 15px;
-  h3 {
-    text-align: center;
-    margin-top: 7px;
-  }
-
-  .filter {
-    display: flex;
-    column-gap: 15px;
-    margin: 25px 0 15px;
-    /* justify-content: flex-end; */
-    img {
-      cursor: pointer;
-    }
-    span {
-      cursor: pointer;
-      position: relative;
-      display: block;
-      font-size: ${({ theme }) => theme.fontSize.small};
-      color: ${({ theme }) => theme.fontColor.sub};
-      &::after {
-        display: block;
-        right: -8px;
-        top: 0;
-        position: absolute;
-        content: " | ";
-        font-weight: 400;
-      }
-      &:last-child::after {
-        display: none;
-      }
-    }
-  }
-`;
 export default StoreList;

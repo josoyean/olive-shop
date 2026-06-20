@@ -1,21 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
-import { Center, MainTitle } from "../../../public/assets/style";
-import styled from "styled-components";
 import { useSearchParams } from "react-router-dom";
-import CategoryMenu from "../../compontents/CategoryMenu";
+import CategoryMenu from "../../components/CategoryMenu";
 import { supabase } from "../../supabase";
-import { handleFilter } from "../../bin/common";
-import { theme } from "../../../public/assets/styles/theme";
-import { Tabs } from "../../../public/assets/style";
+import { handleFilter } from "../../utils/common";
 import {
   filteredSearch,
   type CardImageType,
-} from "../../compontents/card/card.type";
-import EmptyComponent from "../../compontents/EmptyComponent";
-import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
+} from "../../components/card/card.type";
+import EmptyComponent from "../../components/EmptyComponent";
+import ObjectCardColumn from "../../components/card/ObjectCardColumn";
+import { PageHero } from "@/components/layout/PageHero";
+import { Center } from "@/components/ui/Center";
+import { Tabs, TabItem } from "@/components/ui/FormElements";
 
 const StoreGoodsSale = () => {
-  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
+  const today = new Date().toISOString().split("T")[0];
   const [searchParams, setSearchParams] = useSearchParams();
   const menuType = searchParams.get("menuType");
   const tabsType = searchParams.get("tabsType");
@@ -37,7 +36,6 @@ const StoreGoodsSale = () => {
     } else {
       query = query.in("saleItem.one_more", [1, 2]);
     }
-    //세일
     if (tabsType === "핫인기세일") {
       query = query
         .filter("saleItem.start_sale_date", "lte", today)
@@ -60,56 +58,47 @@ const StoreGoodsSale = () => {
 
   return (
     <section role="region" aria-label="세일">
-      <MainLine>
-        <Center>
-          <div>
-            <span>세일</span>
-            <em>핫 세일! 이건 꼭 사야 해!</em>
-          </div>
-        </Center>
-      </MainLine>
+      <PageHero
+        title="세일"
+        subtitle="핫 세일! 이건 꼭 사야 해!"
+        className="h-[100px] bg-[url('/public/assets/images/icons/bg_sale_top.png')] bg-[position:50%_0] bg-no-repeat [&_em]:text-black [&_span]:text-black"
+      />
       <Center>
         <div>
           <Tabs grid={2} role="tablist" aria-label="세일 필터">
-            <div className={tabsType === "핫인기세일" ? "on" : ""} role="tab" aria-selected={tabsType === "핫인기세일"}>
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.preventDefault();
-                  setSelected("popular");
-                  setSearchParams({
-                    menuType: "전체",
-                    tabsType: "핫인기세일",
-                  });
-                }}
-              >
-                핫인기 세일
-              </button>
-            </div>
-            <div className={tabsType === "증정하나더" ? "on" : ""} role="tab" aria-selected={tabsType === "증정하나더"}>
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.preventDefault();
-                  setSelected("popular");
-                  setSearchParams({
-                    menuType: "전체",
-                    tabsType: "증정하나더",
-                  });
-                }}
-              >
-                증정/하나 더
-              </button>
-            </div>
+            <TabItem
+              active={tabsType === "핫인기세일"}
+              onClick={() => {
+                setSelected("popular");
+                setSearchParams({
+                  menuType: "전체",
+                  tabsType: "핫인기세일",
+                });
+              }}
+            >
+              핫인기 세일
+            </TabItem>
+            <TabItem
+              active={tabsType === "증정하나더"}
+              onClick={() => {
+                setSelected("popular");
+                setSearchParams({
+                  menuType: "전체",
+                  tabsType: "증정하나더",
+                });
+              }}
+            >
+              증정/하나 더
+            </TabItem>
           </Tabs>
           <CategoryMenu />
           {objectsList && objectsList?.length > 0 ? (
-            <Container>
-              <h2>
+            <div>
+              <h2 className="mb-[25px] border-b-2 border-[#333] pb-2.5 text-center font-[350] [&_span]:text-primary">
                 전체 <span>{objectsList?.length}</span>개의 상품이 등록되어
                 있습니다
               </h2>
-              <div className="filter">
+              <div className="flex items-center justify-end gap-[15px] border-b border-[#ddd] pb-[25px] [&_img]:cursor-pointer [&_span]:relative [&_span]:block [&_span]:cursor-pointer [&_span]:text-xs [&_span]:text-text-sub [&_span]:after:absolute [&_span]:after:right-[-8px] [&_span]:after:top-0 [&_span]:after:font-normal [&_span]:after:content-['_|_'] [&_span:last-child]:after:hidden">
                 {filteredSearch?.map((item) => (
                   <span
                     key={item.type}
@@ -121,19 +110,13 @@ const StoreGoodsSale = () => {
                     onClick={(event) => {
                       event.preventDefault();
                       setSelected(item.type);
-                      // const filteredData = handleFilter(
-                      //   item.type ?? "popular",
-                      //   objectsList ?? []
-                      // );
-
-                      // setObjectsList(filteredData);
                     }}
                   >
                     {item.name}
                   </span>
                 ))}
               </div>
-              <div className="object">
+              <div className="my-10 mb-[50px] grid grid-cols-4 justify-between gap-y-10 [grid-template-columns:repeat(4,230px)] [&_.tags]:text-center [&_h5]:text-center">
                 {objectsList?.map((object) => (
                   <ObjectCardColumn
                     size="230px"
@@ -142,7 +125,7 @@ const StoreGoodsSale = () => {
                   />
                 ))}
               </div>
-            </Container>
+            </div>
           ) : (
             <EmptyComponent
               mainText="선택 결과가 없어요"
@@ -156,74 +139,3 @@ const StoreGoodsSale = () => {
 };
 
 export default StoreGoodsSale;
-const Container = styled.div`
-  h2 {
-    text-align: center;
-    font-weight: 350;
-    border-bottom: 2px solid #333;
-    padding-bottom: 10px;
-    margin-bottom: 25px;
-    span {
-      color: ${theme.color.main};
-    }
-  }
-
-  .filter {
-    display: flex;
-    column-gap: 15px;
-    align-items: center;
-    justify-content: flex-end;
-    padding-bottom: 25px;
-    border-bottom: 1px solid #ddd;
-    /* justify-content: flex-end; */
-    img {
-      cursor: pointer;
-    }
-    span {
-      cursor: pointer;
-      position: relative;
-      display: block;
-      font-size: ${({ theme }) => theme.fontSize.small};
-      color: ${({ theme }) => theme.fontColor.sub};
-      &::after {
-        display: block;
-        right: -8px;
-        top: 0;
-        position: absolute;
-        content: " | ";
-        font-weight: 400;
-      }
-      &:last-child::after {
-        display: none;
-      }
-    }
-  }
-
-  .object {
-    display: grid;
-    grid-template-columns: repeat(4, 230px);
-    row-gap: 40px;
-    justify-content: space-between;
-    margin-bottom: 50px;
-    margin: 40px 0;
-    h5,
-    .tags {
-      text-align: center;
-    }
-  }
-`;
-
-const MainLine = styled(MainTitle)`
-  height: 100px;
-  background: url("/public/assets/images/icons/bg_sale_top.png") 50% 0 no-repeat;
-
-  > div {
-    > div {
-      padding-top: 30px;
-      em,
-      span {
-        color: #000;
-      }
-    }
-  }
-`;

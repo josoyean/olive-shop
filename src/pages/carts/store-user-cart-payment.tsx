@@ -1,15 +1,15 @@
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
+import { cn } from "@/lib/cn";
+import { GreenButton, InfoText } from "@/components/ui/FormElements";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useForm, FieldErrors, Controller } from "react-hook-form";
 import { db } from "../../firebase";
 import { supabase } from "../../supabase";
-import type { RootState } from "../../redex/store";
+import type { RootState } from "../../redux/store";
 import { doc, updateDoc } from "firebase/firestore";
 import MenuItem from "@mui/material/MenuItem";
 import { useDispatch, useSelector } from "react-redux";
-import { GreenBtn, Info, Tags } from "../../../public/assets/style";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -17,15 +17,41 @@ import FormControl from "@mui/material/FormControl";
 import { useDaumPostcodePopup } from "react-daum-postcode";
 import Select from "@mui/material/Select";
 import moment from "moment";
-import type { CartType, PaymentObjectType, UserInfoType } from "compontents/card/card.type";
+import type { CartType, PaymentObjectType, UserInfoType } from "components/card/card.type";
 import {
   calculatePrice,
   handlePrice,
   getUserInfo,
   isEmptyObject,
-} from "../../bin/common";
-import { deleteCart } from "../../redex/reducers/userCartCount";
+} from "../../utils/common";
+import { deleteCart } from "../../redux/reducers/userCartCount";
 import type { PriceType } from "./store-user-cart";
+
+
+const tagClasses = "!text-white whitespace-normal px-1.5 py-0.5 rounded-[10px] text-xs mr-0.5";
+const informationClasses = cn(
+  "flex items-center gap-5",
+  "[&_.img-wrapper]:relative [&_.img-wrapper]:h-[85px] [&_.img-wrapper]:w-[85px] [&_.img-wrapper]:overflow-hidden [&_.img-wrapper]:rounded-[10px]",
+  "[&_.img-wrapper_img]:h-[85px] [&_.img-wrapper_img]:w-[85px]",
+  "[&_.img-wrapper_span]:absolute [&_.img-wrapper_span]:bottom-0 [&_.img-wrapper_span]:left-0 [&_.img-wrapper_span]:right-0 [&_.img-wrapper_span]:h-[22px] [&_.img-wrapper_span]:bg-black/50 [&_.img-wrapper_span]:text-center [&_.img-wrapper_span]:text-xs [&_.img-wrapper_span]:leading-[22px] [&_.img-wrapper_span]:text-white",
+  "[&_.infor-wrapper]:max-w-[228px] [&_.infor-wrapper_span]:mb-1 [&_.infor-wrapper_span]:block [&_.infor-wrapper_span]:font-bold [&_.infor-wrapper_span]:text-[#777]",
+  "[&_.infor-wrapper_em]:mb-1 [&_.infor-wrapper_em]:block [&_.infor-wrapper_em]:text-xs [&_.infor-wrapper_em]:font-bold [&_.infor-wrapper_em]:text-[#777]",
+  "[&_.infor-wrapper_p]:mb-[5px] [&_.infor-wrapper_p]:line-clamp-2 [&_.infor-wrapper_p]:max-h-9 [&_.infor-wrapper_p]:overflow-hidden [&_.infor-wrapper_p]:text-sm [&_.infor-wrapper_p]:leading-[18px] [&_.infor-wrapper_p]:text-black"
+);
+const tableBoxClasses = cn(
+  "[&>div:first-child]:mt-5 [&>div:not(:first-child)]:mt-10 [&_h3]:font-light",
+  "[&_table]:my-2.5 [&_table]:w-full [&_table]:border-t [&_table]:border-black",
+  "[&_tr]:border-b [&_tr]:border-[#e6e6e6]",
+  "[&_th]:w-[170px] [&_th]:border-b [&_th]:border-[#e6e6e6] [&_th]:bg-[#f4f4f4] [&_th]:p-[15px] [&_th]:text-left [&_th]:text-sm [&_th]:font-normal [&_th]:text-[#222]",
+  "[&_td]:border-b [&_td]:border-[#e6e6e6] [&_td]:p-[15px] [&_td]:text-[13px]",
+  "[&_td_input]:!text-[13px] [&_td_p]:mt-[5px] [&_td_p]:text-[10px] [&_td_p_em]:text-red-600",
+  "[&_.post_input]:mr-5 [&_.post_input]:w-[120px]",
+  "[&_.post_button]:w-[100px] [&_.post_button]:border [&_.post_button]:border-primary [&_.post_button]:bg-white [&_.post_button]:text-primary",
+  "[&_.address_td>div]:flex [&_.address_td>div]:flex-col [&_.address_td>div]:gap-2.5",
+  "[&_.objects_table]:table-fixed [&_.objects_th]:p-2.5 [&_.objects_th]:text-center",
+  "[&_.MuiFormControlLabel-label]:text-[13px] [&_.MuiFormControlLabel-label]:text-black",
+  "[&_.MuiButtonBase-root]:p-[5px] [&_.Mui-checked>span]:text-primary"
+);
 const postcodeScriptUrl =
   "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
 interface CardType {
@@ -407,12 +433,17 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
     setValue("addressSub", "");
   };
   return (
-    <Container onSubmit={handleSubmit(onSubmit, onError)} role="form" aria-label="주문/결제 폼">
-      <div className="title-box">
+    <form
+      onSubmit={handleSubmit(onSubmit, onError)}
+      role="form"
+      aria-label="주문/결제 폼"
+      className="relative z-[9] -mt-5 rounded-[5px] bg-white p-5 [&_input[type=text]]:h-7 [&_input[type=text]]:w-[400px] [&_input[type=text]]:rounded-md [&_input[type=text]]:border [&_input[type=text]]:border-line-sub [&_input[type=text]]:px-[5px] [&_input[type=text]]:text-[15px] [&_input[type=text]]:text-[#131518] [&_input[type=text]:focus]:border-primary [&_input[type=text]:focus]:outline-none"
+    >
+      <div className="title-box flex items-center justify-between border-t-2 border-black py-[15px]">
         <h2>주문 / 결제</h2>
       </div>
 
-      <TableBox>
+      <div className={tableBoxClasses}>
         <div>
           <h3>배송지정보</h3>
           <table>
@@ -423,7 +454,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
               </tr>
               <tr>
                 <th>
-                  받은분 <Info>*</Info>
+                  받은분 <InfoText>*</InfoText>
                 </th>
                 <td>
                   <input
@@ -441,7 +472,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
               </tr>
               <tr>
                 <th>
-                  연락처 <Info>*</Info>
+                  연락처 <InfoText>*</InfoText>
                 </th>
                 <td>
                   <input
@@ -454,20 +485,22 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
               </tr>
               <tr className="address">
                 <th>
-                  주소 <Info>*</Info>
+                  주소 <InfoText>*</InfoText>
                 </th>
-                <td>
+                <td className="address">
                   <div>
-                    <div className="post">
+                    <div className="post flex items-center">
                       <input
                         type="text"
+                        className="post_input"
                         {...register("postNumber", {
                           required: "주소를 입력하세요.",
                         })}
                         disabled
                       />
-                      <GreenBtn
+                      <GreenButton
                         type="button"
+                        className="post_button"
                         onClick={(event) => {
                           event.preventDefault();
                           open({ onComplete: handleComplete });
@@ -475,7 +508,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                         }}
                       >
                         우편번호 찾기
-                      </GreenBtn>
+                      </GreenButton>
                     </div>
                     <input
                       type="text"
@@ -513,7 +546,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
               <tr>
                 <th>
                   공동현관 출입 방법
-                  <Info>*</Info>
+                  <InfoText>*</InfoText>
                 </th>
                 <td>
                   <Controller
@@ -597,7 +630,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                         : getValues("enter") === "S"
                         ? "경비실 호출 방법"
                         : "기타 상세")}
-                    <Info>*</Info>
+                    <InfoText>*</InfoText>
                   </th>
                   <td>
                     <input
@@ -629,20 +662,20 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
         </div>
         <div className="objects">
           <h3>올리브샵 배송상품</h3>
-          <table>
+          <table className="objects_table">
             <thead>
               <tr>
-                <th style={{ width: "50%" }}>상품정보</th>
-                <th style={{ width: "20%" }}>판매가</th>
-                <th style={{ width: "15%" }}>수량</th>
-                <th style={{ width: "15%" }}>구매가</th>
+                <th className="objects_th" style={{ width: "50%" }}>상품정보</th>
+                <th className="objects_th" style={{ width: "20%" }}>판매가</th>
+                <th className="objects_th" style={{ width: "15%" }}>수량</th>
+                <th className="objects_th" style={{ width: "15%" }}>구매가</th>
               </tr>
             </thead>
             <tbody>
               {product?.map((item: CartType, index: number) => (
                 <tr key={index}>
-                  <TableBody style={{ padding: "30px" }}>
-                    <Information>
+                  <td className="border-r border-[#e6e6e6] p-[30px]">
+                    <div className={informationClasses}>
                       <div className="img-wrapper">
                         <img src={item?.objects?.img} alt="productImg" />
                         {item?.objects?.soldOut && <span>품절</span>}
@@ -665,33 +698,35 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                         )}
                         <span>{item?.objects?.brand}</span>
                         <p>{item?.objects?.name}</p>
-                        <Tags>
+                        <div className="!justify-normal gap-px">
                           {item?.objects?.saleItem !== null && (
-                            <span className="sale">세일</span>
+                            <span className={cn(tagClasses, "bg-sale")}>세일</span>
                           )}
                           {item?.objects?.coupon && (
-                            <span className="coupon">쿠폰</span>
+                            <span className={cn(tagClasses, "bg-coupon")}>쿠폰</span>
                           )}
                           {item?.objects?.saleItem?.one_more && (
-                            <span className="oneMore">
+                            <span className={cn(tagClasses, "bg-one-more")}>
                               {item?.objects?.saleItem?.one_more}+1
                             </span>
                           )}
                           {moment().isBetween(
                             item?.objects?.saleItem?.start_today_sale_date,
                             item?.objects?.saleItem?.end_today_sale_date
-                          ) && <span className="today_sale">오특</span>}
-                        </Tags>
+                          ) && (
+                            <span className={cn(tagClasses, "bg-today-sale")}>오특</span>
+                          )}
+                        </div>
                       </div>
-                    </Information>
-                  </TableBody>
-                  <TableBody className="count">
+                    </div>
+                  </td>
+                  <td className="count border-r border-[#e6e6e6] text-center text-sm font-medium text-[#222]">
                     {item?.objects?.count?.toLocaleString()}원
-                  </TableBody>
-                  <TableBody className="objectCount">
+                  </td>
+                  <td className="objectCount border-r border-[#e6e6e6] text-center text-sm text-[#b5b5b5]">
                     {item?.object_count}
-                  </TableBody>
-                  <TableBody className="discount">
+                  </td>
+                  <td className="discount border-r-0 text-center [&_em]:block [&_em]:text-[13px] [&_em]:text-[#b5b5b5] [&_em]:line-through [&_p]:mt-[3px] [&_p]:block [&_p]:text-[15px] [&_p]:font-medium [&_p]:text-text-red">
                     {moment().isBetween(
                       item?.objects?.saleItem?.start_sale_date,
                       item?.objects?.saleItem?.end_sale_date
@@ -724,13 +759,13 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                         handlePrice(null, item?.objects?.count)
                       )?.toLocaleString()
                     )}
-                  </TableBody>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <PaymentBox className="payment">
+        <div className="payment flex gap-10 [&>div]:w-full">
           <div style={{ width: "60%" }}>
             <h3>결제수단 선택</h3>
             <table>
@@ -825,7 +860,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                   <>
                     <tr>
                       <th>
-                        카드종류 <Info>*</Info>
+                        카드종류 <InfoText>*</InfoText>
                       </th>
                       <td>
                         <Controller
@@ -920,7 +955,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           </div>
           <div style={{ width: "40%" }}>
             <h3>최종 결제정보</h3>
-            <PaymentInfo>
+            <div className="my-2.5 w-full rounded-sm border-2 border-black p-[15px] [&_li]:flex [&_li]:justify-between [&_li]:py-2 [&_li>*]:text-sm [&_li>*]:text-[#222] [&_li_span]:font-semibold [&_li_span.color]:text-star [&_.total]:mt-2.5 [&_.total]:border-t [&_.total]:border-black [&_.total_li]:p-3 [&_.total_li>*]:text-[17px] [&_.total_li>*]:font-semibold [&_.total_button]:block [&_.total_button]:w-full [&_.total_button]:rounded-[5px] [&_.total_button]:bg-star [&_.total_button]:p-[15px] [&_.total_button]:text-[19px] [&_.total_button]:text-white">
               <ul>
                 <li>
                   <em>총 상품금액</em>
@@ -957,295 +992,12 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                   <button type="submit">결제하기</button>
                 </li>
               </ul>
-            </PaymentInfo>
+            </div>
           </div>
-        </PaymentBox>
-      </TableBox>
-    </Container>
+        </div>
+      </div>
+    </form>
   );
 };
 
-/* 결제 정보 */
-
-const Information = styled.div`
-  column-gap: 20px;
-  display: flex;
-  align-items: center;
-  .img-wrapper {
-    position: relative;
-    border-radius: 10px;
-    overflow: hidden;
-    width: 85px;
-    height: 85px;
-    img {
-      width: 85px;
-      height: 85px;
-    }
-    span {
-      position: absolute;
-      width: 100%;
-      line-height: 22px;
-      height: 22px;
-      font-size: 12px;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: #fff;
-      bottom: 0;
-      left: 0;
-      text-align: center;
-      right: 0;
-    }
-  }
-  > div.infor-wrapper {
-    max-width: 228px;
-    > span,
-    em {
-      display: block;
-      margin-bottom: 4px;
-      color: #777;
-      font-weight: 700;
-    }
-    p {
-      overflow: hidden;
-      max-height: 36px;
-      -webkit-box-orient: vertical;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      word-break: normal;
-      font-size: 14px;
-      line-height: 18px;
-      margin-bottom: 5px;
-      color: #000;
-    }
-    em {
-      font-size: 12px;
-    }
-  }
-`;
-const TableBody = styled.td`
-  border-right: 1px solid #e6e6e6;
-  &.count {
-    text-align: center;
-    color: #222;
-    font-weight: 500;
-    font-size: 14px;
-  }
-  &.objectCount {
-    text-align: center;
-    font-size: 14px;
-    color: #b5b5b5;
-  }
-  &.discount {
-    text-align: center;
-
-    em {
-      display: block;
-      font-size: 13px;
-      color: #b5b5b5;
-      text-decoration: line-through;
-    }
-    p {
-      display: block;
-      color: #e02020;
-      font-weight: 500;
-      margin-top: 3px;
-      font-size: 15px;
-    }
-  }
-
-  &.delivery {
-    text-align: center;
-    color: #333;
-    font-size: 14px;
-    font-weight: 800;
-    p {
-      color: #666;
-      font-size: 12px;
-      font-weight: 400;
-      margin-top: 3px;
-    }
-  }
-
-  &:last-child {
-    border-right: none;
-  }
-`;
-const Container = styled.form`
-  padding: 20px;
-  margin-top: -20px;
-  background-color: #fff;
-  z-index: 9;
-  position: relative;
-  border-radius: 5px;
-  div.title-box {
-    border-top: 2px solid #000;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 0;
-    .gray_btn {
-      width: 90px;
-    }
-  }
-
-  input[type="text"] {
-    width: 400px;
-    height: 28px;
-    border: 1px solid ${({ theme }) => theme.lineColor.sub};
-    font-size: 15px;
-    color: #131518;
-    border-radius: 6px;
-    padding: 0px 5px;
-    &:focus {
-      border-color: #116dff;
-
-      outline: none;
-    }
-  }
-`;
-const TableBox = styled.div`
-  > div:first-child {
-    margin-top: 20px;
-  }
-  > div:not(:first-child) {
-    margin-top: 40px;
-  }
-  h3 {
-    font-weight: 300;
-  }
-
-  table {
-    margin: 10px 0;
-    width: 100%;
-    border-top: 1px solid #000;
-
-    tr {
-      border-bottom: 1px solid #e6e6e6;
-      th {
-        padding: 15px;
-        width: 170px;
-        background: #f4f4f4;
-        border-bottom: 1px solid #e6e6e6;
-        text-align: left;
-        color: #222;
-        font-weight: 400;
-        font-size: 14px;
-      }
-      td {
-        padding: 15px;
-        font-size: 13px;
-        border-bottom: 1px solid #e6e6e6;
-        input {
-          font-size: 13px !important;
-        }
-        p {
-          font-size: 10px;
-          margin-top: 5px;
-          em {
-            color: red;
-          }
-        }
-      }
-    }
-
-    .post {
-      input[type="text"] {
-        width: 120px;
-
-        margin-right: 20px;
-      }
-      button {
-        border: 1px solid #116dff;
-        color: #116dff;
-        background: #fff;
-        width: 100px;
-      }
-    }
-
-    .address td > div {
-      display: flex;
-      flex-direction: column;
-      row-gap: 10px;
-    }
-  }
-  .objects {
-    table {
-      table-layout: fixed;
-      width: 100%;
-    }
-    th {
-      padding: 10px;
-      text-align: center;
-    }
-  }
-  .MuiFormControlLabel-label {
-    font-size: 13px;
-    color: #000;
-  }
-  .MuiButtonBase-root {
-    padding: 5px;
-    &.Mui-checked > span {
-      color: #116dff;
-    }
-  }
-`;
-const PaymentBox = styled.div`
-  display: flex;
-  column-gap: 40px;
-  > div {
-    width: 100%;
-  }
-  table {
-    /* width: 60%; */
-  }
-  .MuiFormControlLabel-label {
-    font-size: 13px;
-    color: #000;
-  }
-`;
-const PaymentInfo = styled.div`
-  width: 100%;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 2px;
-  border: 2px solid #000;
-
-  li {
-    display: flex;
-    padding: 8px 0;
-    justify-content: space-between;
-    > * {
-      color: #222;
-      font-size: 14px;
-    }
-    span {
-      font-weight: 600;
-      &.color {
-        color: #f27370;
-      }
-    }
-  }
-
-  .total {
-    /* padding: 10px 0; */
-    margin-top: 10px;
-    border-top: 1px solid #000;
-    li {
-      padding: 12px;
-      > * {
-        font-size: 17px;
-        font-weight: 600;
-      }
-    }
-    button {
-      width: 100%;
-      padding: 15px;
-      display: block;
-      border-radius: 5px;
-      color: #fff;
-      font-size: 19px;
-      background-color: #f27370;
-    }
-  }
-`;
 export default StoreUserPayment;

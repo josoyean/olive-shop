@@ -1,14 +1,36 @@
-import type { ReviewType } from "compontents/card/card.type";
+import type { ReviewType } from "components/card/card.type";
 import { forwardRef } from "react";
-import styled from "styled-components";
-import { theme } from "../../../public/assets/styles/theme";
-import { getStarWidth } from "../../bin/common";
+import { StarBox } from "@/components/ui";
+import { getStarWidth } from "../../utils/common";
+import { cn } from "@/lib/cn";
 
 interface ReviewProps {
   data: {
-    viewReview: ReviewType | null; // 타입 명확하면 any 대신 string, number 등으로 바꿔줘요!
+    viewReview: ReviewType | null;
   };
 }
+
+const objectBoxClass = cn(
+  "flex gap-5 border-b border-line-main py-5",
+  "[&>div]:flex [&>div]:flex-col [&>div]:gap-[7px] [&>div]:pt-[5px]",
+  "[&>div_em]:block [&>div_em]:overflow-hidden [&>div_em]:text-sm",
+  "[&>div_strong]:text-sm [&>div_span]:text-sm [&>div_span]:font-semibold",
+  "[&>img]:h-[90px] [&>img]:w-[90px] [&>img]:rounded-[3px]"
+);
+
+const ratingBoxClass = cn(
+  "flex items-center gap-[15px] border-b border-line-main py-5",
+  "[&_.MuiRating-iconActive]:scale-100 [&_.MuiRating-iconFilled]:text-[#ff3d47] [&_.MuiRating-iconHover]:scale-100 [&_.MuiRating-iconHover]:text-[#ff3d47]"
+);
+
+const reviewBoxClass =
+  "py-5 [&>div]:min-h-[150px] [&>div]:rounded-[7px] [&>div]:border [&>div]:border-line-main [&>div]:p-[5px] [&>div_span]:text-[13px] [&>strong]:mb-[15px] [&>strong]:block";
+
+const reviewImgBoxClass = cn(
+  "[&>div]:mt-[15px] [&>div]:grid [&>div]:grid-cols-[repeat(5,120px)] [&>div]:justify-between",
+  "[&>div_img]:h-[120px] [&>div_img]:w-[120px] [&>div_img]:rounded-[5px] [&>div_img]:border [&>div_img]:border-line-main"
+);
+
 const ReviewViewContainer = forwardRef<
   HTMLFormElement | HTMLInputElement,
   ReviewProps
@@ -17,14 +39,14 @@ const ReviewViewContainer = forwardRef<
 
   return (
     <div role="region" aria-label="Review Details" ref={ref}>
-      <ObjectBox role="group">
+      <div className={objectBoxClass} role="group">
         <img role="img" src={viewReview?.objectInfo?.img} alt="상품" />
         <div role="group">
           <strong role="heading" aria-level={3}>{viewReview?.objectInfo?.brand}</strong>
           <em>{viewReview?.objectInfo?.name}</em>
         </div>
-      </ObjectBox>
-      <RatingBox role="group" aria-label="Product Rating">
+      </div>
+      <div className={ratingBoxClass} role="group" aria-label="Product Rating">
         <strong>상품 평점</strong>
         <StarBox role="list" size="25px">
           {[0, 1, 2, 3, 4].map((i) => (
@@ -42,8 +64,8 @@ const ReviewViewContainer = forwardRef<
             </li>
           ))}
         </StarBox>
-      </RatingBox>
-      <ReviewBox role="group" aria-label="Review Content">
+      </div>
+      <div className={reviewBoxClass} role="group" aria-label="Review Content">
         <strong>상품 리뷰</strong>
         <div role="article">
           <span
@@ -52,121 +74,19 @@ const ReviewViewContainer = forwardRef<
             }}
           ></span>
         </div>
-      </ReviewBox>
+      </div>
       {(viewReview?.reviewImg || [])?.length > 0 && (
-        <ReviewImgBox role="group" aria-label="Review Photos">
+        <div className={reviewImgBoxClass} role="group" aria-label="Review Photos">
           <strong>포토</strong>
           <div role="list">
             {viewReview?.reviewImg?.map((img, index) => (
               <img role="img" key={index} src={img} alt="포토" />
             ))}
           </div>
-        </ReviewImgBox>
+        </div>
       )}
     </div>
   );
 });
-export const StarBox = styled.ul<{ size?: string }>`
-  display: flex;
-  column-gap: 4px;
-  li {
-    width: ${({ size }) => size ?? "20px"};
-    height: ${({ size }) => size ?? "20px"};
-    position: relative;
-  }
-  span {
-    position: absolute;
-    z-index: 4;
-    top: 0;
-    left: 0;
-    display: block;
-    width: 100%;
-    height: ${({ size }) => size ?? "20px"};
-    background-color: #f27370;
-  }
-  img {
-    width: ${({ size }) => size ?? "20px"};
-    height: ${({ size }) => size ?? "20px"};
-    z-index: 9;
-    position: absolute;
-    overflow: hidden;
-  }
-`;
 
-const ReviewImgBox = styled.div`
-  > div {
-    margin-top: 15px;
-    display: grid;
-    grid-template-columns: repeat(5, 120px);
-    justify-content: space-between;
-    img {
-      width: 120px;
-      height: 120px;
-      border: 1px solid ${theme.lineColor.main};
-      border-radius: 5px;
-    }
-  }
-`;
-const ReviewBox = styled.div`
-  padding: 20px 0;
-  strong {
-    margin-bottom: 15px;
-    display: block;
-  }
-
-  > div {
-    padding: 5px;
-    border: 1px solid ${theme.lineColor.main};
-    border-radius: 7px;
-    min-height: 150px;
-    span {
-      font-size: 13px;
-    }
-  }
-`;
-const RatingBox = styled.div`
-  display: flex;
-  column-gap: 15px;
-  padding: 20px 0;
-  border-bottom: 1px solid ${theme.lineColor.main};
-  align-items: center;
-  .MuiRating-iconFilled,
-  .MuiRating-iconHover {
-    color: #ff3d47;
-  }
-  .MuiRating-iconActive,
-  .MuiRating-iconHover {
-    transform: none;
-  }
-`;
-const ObjectBox = styled.div`
-  padding: 20px 0;
-  border-bottom: 1px solid ${theme.lineColor.main};
-
-  display: flex;
-  column-gap: 20px;
-  > div {
-    padding-top: 5px;
-    display: flex;
-    flex-direction: column;
-    row-gap: 7px;
-    span {
-      font-size: 14px;
-      font-weight: 600;
-    }
-    strong {
-      font-size: 14px;
-    }
-    em {
-      font-size: 14px;
-      overflow: hidden;
-      display: block;
-    }
-  }
-  img {
-    width: 90px;
-    height: 90px;
-    border-radius: 3px;
-  }
-`;
 export default ReviewViewContainer;

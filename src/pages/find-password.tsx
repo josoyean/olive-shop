@@ -1,11 +1,12 @@
 import { useState } from "react";
-import styled from "styled-components";
+import { cn } from "@/lib/cn";
 import { useForm, FieldErrors } from "react-hook-form";
-import { Center, Container, InputWrapper } from "../../public/assets/style";
+import { Center } from "@/components/ui/Center";
+import { Container, InputWrapper } from "@/components/ui/FormElements";
 import { auth } from "../firebase";
 import { ErrorMessage } from "@hookform/error-message";
-import type { CheckedType } from "../types/userInfor";
-import { formatPhoneNumber, numberOnly, setupRecaptcha } from "../bin/common";
+import type { CheckedType } from "../types/userInfo";
+import { formatPhoneNumber, numberOnly, setupRecaptcha } from "../utils/common";
 import {
   signInWithPhoneNumber,
   signInWithCredential,
@@ -205,7 +206,7 @@ const FindPassword = () => {
         <h1 role="heading" aria-level={1}>비밀번호 변경</h1>
         {isPassword ? (
           <form role="form" action="" onSubmit={handleSubmit2(onSubmit2, onError2)}>
-            <InputWrapper className="input-wrapper">
+            <InputWrapper>
               <div role="group">
                 <span>비밀번호</span>
                 <input
@@ -275,7 +276,7 @@ const FindPassword = () => {
               </div>
             </InputWrapper>
 
-            <InputWrapper className="button">
+            <InputWrapper variant="button">
               <button
                 role="button"
                 type="submit"
@@ -290,7 +291,7 @@ const FindPassword = () => {
           </form>
         ) : (
           <form role="form" action="" onSubmit={handleSubmit1(onSubmit1, onError1)}>
-            <InputWrapper className="input-wrapper">
+            <InputWrapper>
               <div role="group">
                 <span>아이디</span>
                 <input
@@ -381,7 +382,14 @@ const FindPassword = () => {
               </div>
               <div role="group">
                 <span>핸드폰번호</span>
-                <button>
+                <div
+                  className={cn(
+                    "flex w-[400px] items-center gap-[30px]",
+                    "[&_input[type=text]]:w-[300px]",
+                    "[&_button[type=button]]:w-[100px] [&_button[type=button]]:bg-primary [&_button[type=button]]:text-white",
+                    "[&_button[type=button].action]:bg-black"
+                  )}
+                >
                   <input
                     type="text"
                     placeholder="핸드폰번호를 입력해주세요"
@@ -395,14 +403,14 @@ const FindPassword = () => {
                     })}
                     onChange={(e) => {
                       const filteredValue = numberOnly(e.target.value);
-                      setValue1("phoneNumber", filteredValue); // 필터링한 값으로 업데이트
+                      setValue1("phoneNumber", filteredValue);
                       setChecked({ phone: false, code: false });
                     }}
                   />
                   <button
                     role="button"
                     type="button"
-                    className={`${checked.phone && "action"}`}
+                    className={cn(checked.phone && "action")}
                     onClick={() => {
                       if (getValues1("phoneNumber").length !== 11) {
                         alert("핸드폰번호를 확인해주세요");
@@ -415,7 +423,7 @@ const FindPassword = () => {
                   >
                     인증번호 전송
                   </button>
-                </button>
+                </div>
 
                 <ErrorMessage
                   errors={errors1}
@@ -427,7 +435,14 @@ const FindPassword = () => {
               </div>
               <div role="group">
                 <span>인증번호</span>
-                <Buttom>
+                <div
+                  className={cn(
+                    "flex w-[400px] items-center gap-[30px]",
+                    "[&_input[type=text]]:w-[300px]",
+                    "[&_button[type=button]]:w-[100px] [&_button[type=button]]:bg-primary [&_button[type=button]]:text-white",
+                    "[&_button[type=button].action]:bg-black"
+                  )}
+                >
                   <input
                     type="text"
                     placeholder="인증번호를 입력해주세요"
@@ -441,15 +456,14 @@ const FindPassword = () => {
                     })}
                     onChange={(e) => {
                       const filteredValue = numberOnly(e.target.value);
-                      setValue1("code", filteredValue); // 필터링한 값으로 업데이트
+                      setValue1("code", filteredValue);
                     }}
                   />
                   <button
                     role="button"
                     type="button"
-                    className={`${checked.code && "action"}`}
+                    className={cn(checked.code && "action")}
                     onClick={() => {
-                      // reset1();
                       if (!checked.phone) {
                         alert("인증번호 전송을 해주세요");
                         return;
@@ -464,7 +478,7 @@ const FindPassword = () => {
                   >
                     인증번호 확인
                   </button>
-                </Buttom>
+                </div>
                 <ErrorMessage
                   errors={errors1}
                   name="code"
@@ -475,7 +489,7 @@ const FindPassword = () => {
               </div>
             </InputWrapper>
 
-            <InputWrapper className="button">
+            <InputWrapper variant="button">
               <button
                 role="button"
                 type="button"
@@ -503,22 +517,3 @@ const FindPassword = () => {
 };
 
 export default FindPassword;
-const Buttom = styled.div`
-  display: flex;
-  align-items: center;
-  width: 400px;
-  justify-items: center;
-  column-gap: 30px;
-  input[type="text"] {
-    width: 300px;
-  }
-  button[type="button"] {
-    width: 100px;
-    background-color: ${({ theme }) => theme.color.main};
-    color: #fff;
-    &.action {
-      background-color: #000;
-      color: #fff;
-    }
-  }
-`;

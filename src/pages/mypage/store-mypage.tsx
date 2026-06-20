@@ -1,15 +1,19 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Center } from "../../../public/assets/style";
+import { Center } from "@/components/ui/Center";
+import {
+  InputBox,
+  TextareaField,
+  WhiteButton,
+} from "@/components/ui/FormElements";
+import { cn } from "@/lib/cn";
 import Nav from "./nav";
 import { useSearchParams } from "react-router-dom";
-import type { RootState } from "../../redex/store";
-import styled from "styled-components";
+import type { RootState } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import Mypage from "./mypage";
-import { isEmptyObject, defaultProfile, getUserInfo } from "../../bin/common";
-import ModalContainer from "../../compontents/ModalContainer";
-import { InputBox, Textarea, WhiteButton } from "../../../public/assets/style";
-import type { UserInfoType } from "compontents/card/card.type";
+import { isEmptyObject, defaultProfile, getUserInfo } from "../../utils/common";
+import ModalContainer from "../../components/ModalContainer";
+import type { UserInfoType } from "components/card/card.type";
 import {
   collection,
   query,
@@ -113,13 +117,12 @@ const StoreMypage = () => {
 
   return (
     <div role="main">
-      <Center style={{ display: "flex" }}>
+      <Center className="flex">
         <Nav></Nav>
-        <Container>
-          {/* 나의 프로필 */}
-          <InfoUser role="region" aria-label="User Profile">
-            <div className="top-box" role="group">
-              <em role="heading" aria-level={2}>
+        <div className="min-h-[calc(100vh-177.5px)] w-[calc(100%-170px)] p-[30px]">
+          <div className="w-full" role="region" aria-label="User Profile">
+            <div className="top-box flex flex-row items-center justify-between bg-black px-5 py-[9px]" role="group">
+              <em className="text-base font-semibold text-white" role="heading" aria-level={2}>
                 {`${userInfo?.name?.slice(0, 1)}*${userInfo?.name?.slice(
                   userInfo?.name?.length - 1,
                   userInfo?.name?.length
@@ -128,6 +131,7 @@ const StoreMypage = () => {
               </em>
               <span
                 role="button"
+                className="cursor-pointer text-[13px] text-white"
                 onClick={(event) => {
                   event.preventDefault();
                   setOpenedMyInfo(true);
@@ -136,25 +140,27 @@ const StoreMypage = () => {
                 나의 프로필 변경 &gt;
               </span>
             </div>
-            <div className="bottom-box" role="group">
+            <div className="bottom-box border border-[#ccc] px-5 py-[13px]" role="group">
               <ul role="list">
-                <li role="listitem">
-                  <span>프로필 사진</span>
-                  <em>
+                <li className="mb-2.5 flex gap-[15px] last:mb-0" role="listitem">
+                  <span className="block w-[70px] text-[13px]">프로필 사진</span>
+                  <em className="text-xs text-[#797979]">
                     <img
                       role="img"
+                      className="h-[60px] w-[60px] overflow-hidden rounded-full border border-line-main"
                       src={userInfo.profileImg || defaultProfile}
                       alt="프로필"
                     />
                   </em>
                 </li>
-                <li role="listitem">
-                  <span>닉네임</span>
-                  <em>{userInfo?.nickName || "저장된 닉네임이 없습니다."}</em>
+                <li className="mb-2.5 flex gap-[15px] last:mb-0" role="listitem">
+                  <span className="block w-[70px] text-[13px]">닉네임</span>
+                  <em className="text-xs text-[#797979]">{userInfo?.nickName || "저장된 닉네임이 없습니다."}</em>
                 </li>
-                <li role="listitem">
-                  <span>소개</span>
+                <li className="mb-2.5 flex gap-[15px] last:mb-0" role="listitem">
+                  <span className="block w-[70px] text-[13px]">소개</span>
                   <em
+                    className="text-xs text-[#797979]"
                     dangerouslySetInnerHTML={{
                       __html: userInfo?.infoText || "저장된 소개가 없습니다.",
                     }}
@@ -162,11 +168,11 @@ const StoreMypage = () => {
                 </li>
               </ul>
             </div>
-          </InfoUser>
+          </div>
           {pageType === "마이페이지" && <Mypage></Mypage>}
           {pageType === "주문배송" && <StoreOrderDelivery></StoreOrderDelivery>}
           {pageType === "리뷰조회" && <MypageReviews></MypageReviews>}
-        </Container>
+        </div>
       </Center>
 
       <ModalContainer
@@ -181,13 +187,14 @@ const StoreMypage = () => {
           handleChangeProfile(myInfoData);
         }}
       >
-        <ModalMyInfo role="form" aria-label="Profile Edit Form">
+        <div className="py-5" role="form" aria-label="Profile Edit Form">
           <ul role="list">
-            <li role="listitem">
-              <em>프로필 이미지</em>
-              <div className="profile" role="group">
+            <li className="flex" role="listitem">
+              <em className="block w-[117px] text-sm font-normal text-text-main">프로필 이미지</em>
+              <div className="profile flex w-[calc(100%-117px)] flex-col" role="group">
                 <img
                   role="img"
+                  className="border border-[#dadde0]"
                   src={myInfoData.profileImg || defaultProfile}
                   alt="프로필 미리보기"
                   style={{
@@ -198,7 +205,7 @@ const StoreMypage = () => {
                   }}
                 />
 
-                <div className="review-preview-img__btns" role="group">
+                <div className="review-preview-img__btns -mt-[25px] ml-[13px] flex w-fit items-center gap-2.5 rounded-[40px] border border-[#dadde0] bg-white px-2.5 py-1" role="group">
                   <input
                     type="file"
                     accept="image/*"
@@ -208,7 +215,7 @@ const StoreMypage = () => {
                   />
                   <span
                     role="button"
-                    className="thumbnailFile"
+                    className="thumbnailFile block h-[23px] w-[23px] [&_img]:h-full [&_img]:w-full"
                     onClick={(event) => {
                       event.preventDefault();
                       fileInputRef?.current?.click();
@@ -221,7 +228,7 @@ const StoreMypage = () => {
                   </span>
                   <span
                     role="button"
-                    className="thumbnailClearBtn"
+                    className="thumbnailClearBtn block h-[23px] w-[23px] [&_img]:h-full [&_img]:w-full"
                     onClick={(event) => {
                       event.preventDefault();
                       setMyInfoData((prevState) => ({
@@ -238,9 +245,9 @@ const StoreMypage = () => {
                 </div>
               </div>
             </li>
-            <li role="listitem" style={{ marginTop: "20px" }}>
-              <em>닉네임</em>
-              <div className="nickname" role="group">
+            <li className="mt-5 flex" role="listitem">
+              <em className="block w-[117px] text-sm font-normal text-text-main">닉네임</em>
+              <div className="nickname relative flex w-[calc(100%-117px)] gap-5" role="group">
                 <InputBox
                   width="100%"
                   height="35px"
@@ -263,17 +270,17 @@ const StoreMypage = () => {
                     event.preventDefault();
                     handleNickNameCheck(myInfoData);
                   }}
-                  className={`${myInfoData?.nickNameCheck ? "check" : ""}`}
+                  className={cn(myInfoData?.nickNameCheck && "check !border-[#808080] !bg-[#dadde0] !text-[#808080]")}
                 >
                   중복 확인
                 </WhiteButton>
-                <em className="info">이름보다는 별명을 적어주세요</em>
+                <em className="info absolute bottom-[-17px] left-0 text-[10px] text-[#a7a7a7]">이름보다는 별명을 적어주세요</em>
               </div>
             </li>
-            <li role="listitem" style={{ marginTop: "50px" }}>
-              <em>소개</em>
-              <div className="information" role="group">
-                <Textarea
+            <li className="mt-[50px] flex" role="listitem">
+              <em className="block w-[117px] text-sm font-normal text-text-main">소개</em>
+              <div className="information relative w-[calc(100%-117px)]" role="group">
+                <TextareaField
                   width="100%"
                   maxLength={100}
                   value={myInfoData?.infoText}
@@ -285,147 +292,14 @@ const StoreMypage = () => {
                     }));
                   }}
                 />
-                <em className="info">개인정보를 남기지 않게 조심해 주세요</em>
-                <span>{myInfoData?.infoText?.length || 0} / 100</span>
+                <em className="info absolute bottom-[-17px] left-0 text-[10px] text-[#a7a7a7]">개인정보를 남기지 않게 조심해 주세요</em>
+                <span className="absolute bottom-[-17px] right-0 text-[10px] font-light text-[#808080]">{myInfoData?.infoText?.length || 0} / 100</span>
               </div>
             </li>
           </ul>
-        </ModalMyInfo>
+        </div>
       </ModalContainer>
     </div>
   );
 };
-const ModalMyInfo = styled.div`
-  padding: 20px 0;
-  li {
-    display: flex;
-    > em {
-      font-size: 14px;
-      width: 117px;
-      display: block;
-      font-weight: 400;
-      color: #131518;
-    }
-    > div {
-      width: calc(100% - 117px);
-    }
-  }
-  .profile {
-    /* width: auto; */
-    display: flex;
-    flex-direction: column;
-
-    // 프로필 사진
-    > img {
-      border: 1px solid #dadde0;
-    }
-    .review-preview-img__btns {
-      margin-top: -25px;
-      background-color: #fff;
-      display: flex;
-      border: 1px solid #dadde0;
-      border-radius: 40px;
-      column-gap: 10px;
-      width: fit-content;
-      padding: 4px 10px;
-      margin-left: 13px;
-      align-items: center;
-      span {
-        width: 23px;
-        height: 23px;
-        display: block;
-        img {
-          width: 100%;
-          height: 100%;
-        }
-      }
-    }
-  }
-  .nickname {
-    /* width: fit-content; */
-    display: flex;
-    column-gap: 20px;
-    position: relative;
-    .check {
-      color: #808080;
-      border: 1px solid #808080;
-      background-color: #dadde0;
-    }
-  }
-  .information {
-    position: relative;
-    > span {
-      position: absolute;
-      font-size: 10px;
-      font-weight: 300px;
-      color: #808080;
-      right: 0;
-      bottom: -17px;
-    }
-  }
-  em.info {
-    position: absolute;
-    font-size: 10px;
-    font-weight: 300px;
-    color: #a7a7a7;
-    left: 0;
-    bottom: -17px;
-  }
-`;
-const InfoUser = styled.div`
-  width: 100%;
-  .top-box {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 9px 20px;
-    background-color: black;
-
-    > em {
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    > span {
-      cursor: pointer;
-      color: #fff;
-      font-size: 13px;
-    }
-  }
-  .bottom-box {
-    padding: 13px 20px;
-    border: 1px solid #ccc;
-    li {
-      display: flex;
-      margin-bottom: 10px;
-      column-gap: 15px;
-      span {
-        display: block;
-        width: 70px;
-        font-size: 13px;
-      }
-      em {
-        font-size: 12px;
-        color: #797979;
-      }
-      img {
-        width: 60px;
-        border: 1px solid ${({ theme }) => theme.lineColor.main};
-        height: 60px;
-        border-radius: 50%;
-        overflow: hidden;
-      }
-      &:last-child {
-        margin-bottom: 0px;
-      }
-    }
-  }
-`;
-const Container = styled.div`
-  padding: 30px;
-  width: calc(100% - 170px);
-  min-height: calc(100vh - 177.5px);
-`;
 export default StoreMypage;

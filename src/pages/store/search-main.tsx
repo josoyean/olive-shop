@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import styled from "styled-components";
-import { Center } from "../../../public/assets/style";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../../supabase";
 import {
   CardImageType,
   BrandType,
   filteredSearch,
-} from "../../compontents/card/card.type";
-import ObjectCardColumn from "../../compontents/card/ObjectCardColumn";
-import { handleFilter } from "../../bin/common";
+} from "../../components/card/card.type";
+import ObjectCardColumn from "../../components/card/ObjectCardColumn";
+import { handleFilter } from "../../utils/common";
+import { Center } from "@/components/ui/Center";
+import { ObjectsBox } from "@/components/ui/FormElements";
 
 const SearchMain = () => {
   const [searchParams] = useSearchParams();
@@ -31,20 +31,16 @@ const SearchMain = () => {
 
     const seq = brandData?.brand_seq;
     if (brandData) {
-      //브랜드 종류 있을때
       setBrandInfo(brandData);
       const { data: nameData } = await supabase
         .from("objects")
         .select("*,saleItem(*)")
         .eq("brand_seq", seq);
-      // .filter("saleItem.start_sale_date", "lte", today)
-      // .filter("saleItem.end_sale_date", "gte", today);
       setObjects(nameData ?? []);
       setBrandYN(true);
       const filterData = handleFilter("popular", nameData ?? []);
       setObjectsList(filterData);
     } else {
-      // 브랜드 종류 없을때
       const { data: nameData } = await supabase
         .from("objects")
         .select("*")
@@ -61,10 +57,10 @@ const SearchMain = () => {
 
   return (
     <Center>
-      <Container role="region" aria-label="검색 결과">
+      <div role="region" aria-label="검색 결과" className="[&_h1]:my-10">
         <h1>'{searchValue || " "}'에 대한 검색결과</h1>
         {!searchValue || objects?.length === 0 ? (
-          <NoData>
+          <div className="flex h-[450px] flex-col items-center justify-center [&_img]:h-[100px] [&_img]:w-[100px] [&_p]:mb-3 [&_p]:text-xl [&_p]:font-bold [&_p]:leading-[29px] [&_p]:text-[#131518] [&_span]:text-center [&_span]:text-base [&_span]:leading-[22px] [&_span]:text-[#757d86]">
             <img
               src="https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/public/images/shopping.png"
               alt="no_data"
@@ -74,11 +70,12 @@ const SearchMain = () => {
               철자를 확인하거나 <br />
               다른 키워드로 검색해보세요
             </span>
-          </NoData>
+          </div>
         ) : (
           <>
             {brandYN && (
-              <BrandBox
+              <div
+                className="flex w-full cursor-pointer items-center gap-5 rounded-[5px] border border-line-main p-[15px_14px] [&_em]:font-bold [&_img]:h-20 [&_img]:w-[204px] [&_img]:overflow-hidden [&_img]:rounded-[3px] [&_img]:object-cover [&_p]:text-sm [&_p]:leading-[17px] [&_p]:text-[#757d86] [&_span]:mt-0.5 [&_span]:flex [&_span]:items-center [&_span]:gap-1.5 [&_span]:pr-3.5 [&_span]:text-lg [&_span]:leading-[26px] [&_span]:text-[#131518]"
                 onClick={(event) => {
                   event.preventDefault();
                   navigate(
@@ -94,7 +91,7 @@ const SearchMain = () => {
                     {" 바로가기 >"}
                   </span>
                 </div>
-              </BrandBox>
+              </div>
             )}
             <ObjectsBox>
               <div className="tBox">
@@ -137,123 +134,9 @@ const SearchMain = () => {
             </ObjectsBox>
           </>
         )}
-      </Container>
+      </div>
     </Center>
   );
 };
-const NoData = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  /* margin-top: 150px; */
-  height: 450px;
-  img {
-    width: 100px;
-    height: 100px;
-  }
-  p {
-    font-weight: 700;
-    color: #131518;
-    font-size: 20px;
-    line-height: 29px;
-    margin-bottom: 12px;
-  }
-  span {
-    color: #757d86;
-    text-align: center;
-    font-size: 16px;
-    line-height: 22px;
-  }
-`;
-const BrandBox = styled.div`
-  cursor: pointer;
-  width: 100%;
-  padding: 15px 14px;
-  display: flex;
-  align-items: center;
-  column-gap: 20px;
-  border-radius: 5px;
-  border: 1px solid ${({ theme }) => theme.lineColor.main};
-  img {
-    overflow: hidden;
-    border-radius: 3px;
-    width: 204px;
-    object-fit: cover;
-    height: 80px;
-  }
-  > div {
-    /* display: flex; */
-    /* flex-direction: column; */
-    p {
-      color: #757d86;
-      font-size: 14px;
-      line-height: 17px;
-    }
-    span {
-      color: #131518;
-      font-size: 18px;
-      line-height: 26px;
-      margin-top: 2px;
-      padding-right: 14px;
-      display: flex;
-      column-gap: 6px;
-      align-items: center;
-    }
-    em {
-      font-weight: 700;
-    }
-  }
-`;
-const ObjectsBox = styled.div`
-  border-top: 1px solid ${({ theme }) => theme.lineColor.main};
-  border-bottom: 1px solid ${({ theme }) => theme.lineColor.main};
-  padding: 25px 0;
-  margin: 45px 0;
-  > .tBox {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 
-    .filter {
-      display: flex;
-      column-gap: 15px;
-      align-items: center;
-      img {
-        cursor: pointer;
-      }
-      span {
-        cursor: pointer;
-        position: relative;
-        display: block;
-        font-size: ${({ theme }) => theme.fontSize.small};
-        color: ${({ theme }) => theme.fontColor.sub};
-        &::after {
-          display: block;
-          right: -8px;
-          top: 0;
-          position: absolute;
-          content: " | ";
-          font-weight: 400;
-        }
-        &:last-child::after {
-          display: none;
-        }
-      }
-    }
-  }
-
-  .bBox {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px 33px;
-    margin-top: 40px;
-  }
-`;
-const Container = styled.div`
-  h1 {
-    /* display: block; */
-    margin: 40px 0;
-  }
-`;
 export default SearchMain;

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Center, InputWrapper, Container } from "../../public/assets/style";
-import styled from "styled-components";
+import { Center } from "@/components/ui/Center";
+import { Container, InputWrapper } from "@/components/ui/FormElements";
+import { cn } from "@/lib/cn";
 import { useForm, FieldErrors } from "react-hook-form";
 import "firebase/auth";
 import {
@@ -9,9 +10,9 @@ import {
   PhoneAuthProvider,
 } from "firebase/auth";
 import { ErrorMessage } from "@hookform/error-message";
-import { formatPhoneNumber, numberOnly, setupRecaptcha } from "../bin/common";
+import { formatPhoneNumber, numberOnly, setupRecaptcha } from "../utils/common";
 import { useNavigate } from "react-router-dom";
-import type { CheckedType } from "../types/userInfor";
+import type { CheckedType } from "../types/userInfo";
 import { supabase } from "../supabase";
 import { auth } from "../firebase";
 interface DataType {
@@ -194,8 +195,8 @@ const SignUp = () => {
       <div id="recaptcha-container"></div>
       <Container>
         <h1>회원가입</h1>
-        <FormControl onSubmit={handleSubmit(onSubmit, onError)} role="form" aria-label="회원가입 폼">
-          <InputWrapper className="input-wrapper">
+        <form onSubmit={handleSubmit(onSubmit, onError)} role="form" aria-label="회원가입 폼">
+          <InputWrapper>
             <div>
               <span>아이디</span>
               <input
@@ -358,7 +359,14 @@ const SignUp = () => {
 
             <div>
               <span>핸드폰번호</span>
-              <Buttom>
+              <div
+                className={cn(
+                  "flex w-[400px] items-center gap-[30px]",
+                  "[&_input[type=text]]:w-[300px]",
+                  "[&_button[type=button]]:w-[100px] [&_button[type=button]]:bg-primary [&_button[type=button]]:text-white",
+                  "[&_button[type=button].action]:bg-black"
+                )}
+              >
                 <input
                   type="text"
                   placeholder="핸드폰번호를 입력해주세요"
@@ -372,13 +380,13 @@ const SignUp = () => {
                   })}
                   onChange={(e) => {
                     const filteredValue = numberOnly(e.target.value);
-                    setValue("phoneNumber", filteredValue); // 필터링한 값으로 업데이트
+                    setValue("phoneNumber", filteredValue);
                     setChecked({ phone: false, code: false });
                   }}
                 />
                 <button
                   type="button"
-                  className={`${checked.phone && "action"}`}
+                  className={cn(checked.phone && "action")}
                   onClick={() => {
                     if (getValues("phoneNumber").length !== 11) {
                       alert("핸드폰번호를 확인해주세요");
@@ -391,7 +399,7 @@ const SignUp = () => {
                 >
                   인증번호 전송
                 </button>
-              </Buttom>
+              </div>
               <ErrorMessage
                 errors={errors}
                 name="phoneNumber"
@@ -402,7 +410,14 @@ const SignUp = () => {
             </div>
             <div>
               <span>인증번호</span>
-              <Buttom>
+              <div
+                className={cn(
+                  "flex w-[400px] items-center gap-[30px]",
+                  "[&_input[type=text]]:w-[300px]",
+                  "[&_button[type=button]]:w-[100px] [&_button[type=button]]:bg-primary [&_button[type=button]]:text-white",
+                  "[&_button[type=button].action]:bg-black"
+                )}
+              >
                 <input
                   type="text"
                   placeholder="인증번호를 입력해주세요"
@@ -416,14 +431,13 @@ const SignUp = () => {
                   })}
                   onChange={(e) => {
                     const filteredValue = numberOnly(e.target.value);
-                    setValue("code", filteredValue); // 필터링한 값으로 업데이트
+                    setValue("code", filteredValue);
                   }}
                 />
                 <button
                   type="button"
-                  className={`${checked.code && "action"}`}
+                  className={cn(checked.code && "action")}
                   onClick={() => {
-                    // reset();
                     if (!checked.phone) {
                       alert("인증번호 전송을 해주세요");
                       return;
@@ -438,7 +452,7 @@ const SignUp = () => {
                 >
                   인증번호 확인
                 </button>
-              </Buttom>
+              </div>
               <ErrorMessage
                 errors={errors}
                 name="code"
@@ -449,7 +463,7 @@ const SignUp = () => {
             </div>
           </InputWrapper>
 
-          <InputWrapper className="button">
+          <InputWrapper variant="button">
             <button
               type="button"
               onClick={() => {
@@ -460,30 +474,9 @@ const SignUp = () => {
             </button>
             <button type="submit">회원가입</button>
           </InputWrapper>
-        </FormControl>
+        </form>
       </Container>
     </Center>
   );
 };
 export default SignUp;
-
-const Buttom = styled.div`
-  display: flex;
-  align-items: center;
-  width: 400px;
-  justify-items: center;
-  column-gap: 30px;
-  input[type="text"] {
-    width: 300px;
-  }
-  button[type="button"] {
-    width: 100px;
-    background-color: ${({ theme }) => theme.color.main};
-    color: #fff;
-    &.action {
-      background-color: #000;
-      color: #fff;
-    }
-  }
-`;
-const FormControl = styled.form``;

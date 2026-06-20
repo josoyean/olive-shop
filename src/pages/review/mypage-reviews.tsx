@@ -1,13 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import styled from "styled-components";
-import {
-  StarBox,
-  TableStyle,
-  Tabs,
-  WhiteButton,
-} from "../../../public/assets/style";
+import { StarBox, TabItem, TableWrapper, Tabs, WhiteButton } from "@/components/ui";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import type { RootState } from "redex/store";
+import type { RootState } from "redux/store";
 import { useSelector } from "react-redux";
 import { supabase } from "../../supabase";
 import moment from "moment";
@@ -16,13 +10,15 @@ import type {
   OrderType,
   PaymentObjectType,
   ReviewType,
-} from "../../compontents/card/card.type";
-import EmptyComponent from "../../compontents/EmptyComponent";
-import { getStarWidth } from "../../bin/common";
-import ModalContainer from "../../compontents/ModalContainer";
+} from "../../components/card/card.type";
+import EmptyComponent from "../../components/EmptyComponent";
+import { getStarWidth } from "../../utils/common";
+import ModalContainer from "../../components/ModalContainer";
 import ReviewWriteContainer from "./review-write-container";
 import ReviewViewContainer from "./review-view-container";
 import ReviewEditContainer from "./review-edit-container";
+import { cn } from "@/lib/cn";
+
 const MypageReviews = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -94,44 +90,51 @@ const MypageReviews = () => {
     setOpenedEditReview(false);
     handleData();
   };
+
+  const tableClass = cn(
+    "[&_tbody_td]:px-2 [&_tbody_td]:py-5",
+    "[&_tbody_td:last-child]:border-r-0",
+    "[&_tbody_td.date]:text-center [&_tbody_td.date]:text-sm [&_tbody_td.date]:font-medium",
+    "[&_.objects]:flex [&_.objects]:cursor-pointer [&_.objects]:gap-5",
+    "[&_.objects>div]:flex [&_.objects>div]:flex-col [&_.objects>div]:gap-[7px] [&_.objects>div]:pt-[5px]",
+    "[&_.objects>div_em]:block [&_.objects>div_em]:overflow-hidden [&_.objects>div_em]:text-ellipsis [&_.objects>div_em]:whitespace-nowrap [&_.objects>div_em]:text-sm [&_.objects>div_em]:w-[350px]",
+    "[&_.objects>div_strong]:text-sm [&_.objects>div_span]:text-sm [&_.objects>div_span]:font-semibold",
+    "[&_.objects_img]:h-[90px] [&_.objects_img]:w-[90px] [&_.objects_img]:rounded-[3px]",
+    "[&_.reviewBox]:flex [&_.reviewBox]:min-h-[90px] [&_.reviewBox]:flex-col [&_.reviewBox]:gap-[5px] [&_.reviewBox]:pt-[5px]",
+    "[&_.reviewBox_em]:block [&_.reviewBox_em]:overflow-hidden [&_.reviewBox_em]:text-ellipsis [&_.reviewBox_em]:whitespace-nowrap [&_.reviewBox_em]:text-sm [&_.reviewBox_em]:w-[398px]",
+    "[&_.reviewBox_span]:text-sm [&_.reviewBox_span]:font-semibold"
+  );
+
   return (
     <>
       <div>
         <Tabs grid={2} role="tablist" aria-label="리뷰 탭">
-          <div className={type === "1" ? "on" : ""} role="tab" aria-selected={type === "1"}>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.preventDefault();
-
-                setSearchParams({
-                  t_page: "리뷰조회",
-                  t_type: "1",
-                });
-              }}
-            >
-              리뷰 작성
-            </button>
-          </div>
-          <div className={type === "2" ? "on" : ""} role="tab" aria-selected={type === "2"}>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.preventDefault();
-
-                setSearchParams({
-                  t_page: "리뷰조회",
-                  t_type: "2",
-                });
-              }}
-            >
-              나의 리뷰
-            </button>
-          </div>
+          <TabItem
+            active={type === "1"}
+            onClick={() => {
+              setSearchParams({
+                t_page: "리뷰조회",
+                t_type: "1",
+              });
+            }}
+          >
+            리뷰 작성
+          </TabItem>
+          <TabItem
+            active={type === "2"}
+            onClick={() => {
+              setSearchParams({
+                t_page: "리뷰조회",
+                t_type: "2",
+              });
+            }}
+          >
+            나의 리뷰
+          </TabItem>
         </Tabs>
 
-        <Container>
-          <Table>
+        <div>
+          <TableWrapper className={tableClass}>
             {type === "1" ? (
               <table>
                 <thead>
@@ -364,8 +367,8 @@ const MypageReviews = () => {
                 </tbody>
               </table>
             )}
-          </Table>
-        </Container>
+          </TableWrapper>
+        </div>
       </div>
       <ModalContainer
         isOpen={openedWriteReview}
@@ -416,8 +419,6 @@ const MypageReviews = () => {
             orders: orders,
             handleWriteReview: handleWriteReview,
           }}
-          // formRef={formRef}
-          // inputRef={inputRef}
           ref={formRef}
         />
       </ModalContainer>
@@ -425,76 +426,4 @@ const MypageReviews = () => {
   );
 };
 
-const Table = styled(TableStyle)`
-  tbody td {
-    padding: 20px 8px;
-  }
-  tbody {
-    td {
-      /* border-right: 1px solid #ccc; */
-      &:last-child {
-        border-right: none;
-      }
-    }
-    td.date {
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .objects {
-      cursor: pointer;
-      display: flex;
-      column-gap: 20px;
-      > div {
-        padding-top: 5px;
-        display: flex;
-        flex-direction: column;
-        row-gap: 7px;
-        span {
-          font-size: 14px;
-          font-weight: 600;
-        }
-        strong {
-          font-size: 14px;
-        }
-        em {
-          font-size: 14px;
-          overflow: hidden; // 너비를 넘어가면 안보이게
-          text-overflow: ellipsis;
-          display: block;
-          white-space: nowrap;
-          width: 350px;
-        }
-      }
-      img {
-        width: 90px;
-        height: 90px;
-        border-radius: 3px;
-      }
-    }
-
-    .reviewBox {
-      min-height: 90px;
-      display: flex;
-      padding-top: 5px;
-      flex-direction: column;
-      row-gap: 5px;
-      span {
-        font-size: 14px;
-        font-weight: 600;
-      }
-
-      em {
-        font-size: 14px;
-        overflow: hidden; // 너비를 넘어가면 안보이게
-        text-overflow: ellipsis;
-        display: block;
-        white-space: nowrap;
-        width: 398px;
-      }
-    }
-  }
-`;
-const Container = styled.div``;
 export default MypageReviews;

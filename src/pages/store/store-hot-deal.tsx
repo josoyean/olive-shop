@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { Center, MainTitle } from "../../../public/assets/style";
-import styled from "styled-components";
 import { supabase } from "../../supabase";
-import HotDealCard from "../../compontents/card/HotDealCard";
-import type { CardImageType } from "compontents/card/card.type";
-import { theme } from "../../../public/assets/styles/theme";
+import HotDealCard from "../../components/card/HotDealCard";
+import type { CardImageType } from "components/card/card.type";
 import moment from "moment";
 import Countdown, { CountdownRenderProps } from "react-countdown";
+import { PageHero } from "@/components/layout/PageHero";
 
 const StoreHotDeal = () => {
   const [objects, setObjects] = useState<CardImageType[]>([]);
@@ -26,7 +24,6 @@ const StoreHotDeal = () => {
       console.error("Supabase Error:", error);
     }
   };
-  // 두 자리 숫자로 맞춰주는 함수
   const padZero = (num: number) => String(num).padStart(2, "0");
   useEffect(() => {
     handleData();
@@ -40,79 +37,33 @@ const StoreHotDeal = () => {
   };
   return (
     <section role="region" aria-label="오늘의 특가">
-      <MainLine>
-        <Center>
-          <div>
-            <span>오늘의 특가</span>
-            <em>딱 하루만! 오늘의 특가 찬스</em>
+      <PageHero
+        title="오늘의 특가"
+        subtitle="딱 하루만! 오늘의 특가 찬스"
+      />
+      <div className="relative z-[99] mx-auto -mt-[55px] w-[1080px] rounded-[5px] bg-white p-[30px]">
+        <div className="title relative">
+          <h2 className="border-b-2 border-black pb-2.5">오늘의 특가</h2>
+          <div className="absolute right-0 top-0 text-xl font-bold text-primary [&_span]:text-xl [&_span]:font-bold [&_span]:text-primary">
+            <Countdown
+              date={moment(todays).add(1, "day").toDate()}
+              renderer={renderer}
+            ></Countdown>
           </div>
-        </Center>
-      </MainLine>
-      <ObjectBox>
-        <div className="title">
-          <h2>오늘의 특가</h2>
-          <Countdown
-            date={moment(todays).add(1, "day").toDate()}
-            renderer={renderer}
-          ></Countdown>
         </div>
-        <div className="items" role="list" aria-label="특가 상품 목록">
+        <div
+          className="grid grid-cols-[500px_500px] justify-between gap-y-[35px] py-10"
+          role="list"
+          aria-label="특가 상품 목록"
+        >
           {objects &&
             objects?.map((item) => (
               <HotDealCard key={item.object_seq} data={item}></HotDealCard>
             ))}
         </div>
-      </ObjectBox>
+      </div>
     </section>
   );
 };
 
 export default StoreHotDeal;
-const ObjectBox = styled.div`
-  padding: 30px;
-  background-color: #fff;
-  margin: -55px auto 0;
-  z-index: 99;
-  position: relative;
-  border-radius: 5px;
-  width: 1080px;
-  .title {
-    position: relative;
-    h2 {
-      padding-bottom: 10px;
-      border-bottom: 2px solid #000;
-    }
-    span {
-      font-size: 20px;
-      font-weight: bold;
-      color: ${theme.color.main};
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
-  }
-
-  > div.items {
-    display: grid;
-    grid-template-columns: repeat(2, 500px);
-    justify-content: space-between;
-    row-gap: 35px;
-    padding: 40px 0;
-  }
-`;
-
-const MainLine = styled(MainTitle)`
-  height: 150px;
-  background: url("/public/assets/images/icons/bg_sp_visual.png") 50% 0
-    no-repeat;
-
-  > div {
-    > div {
-      padding-top: 30px;
-      em,
-      span {
-        color: #fff;
-      }
-    }
-  }
-`;

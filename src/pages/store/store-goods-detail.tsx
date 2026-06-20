@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
-import styled from "styled-components";
-import { Center, StarBox, Tags } from "../../../public/assets/style";
-import { theme } from "../../../public/assets/styles/theme";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "../../supabase";
 import { useNavigate } from "react-router-dom";
-import type { CardImageType, ReviewType } from "compontents/card/card.type";
+import type { CardImageType, ReviewType } from "components/card/card.type";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
-import type { RootState } from "redex/store";
+import type { RootState } from "redux/store";
 import Slider from "react-slick";
 import {
   calculatePrice,
@@ -16,16 +13,30 @@ import {
   handlePrice,
   handleSaleTF,
   defaultProfile,
-} from "../../bin/common";
+} from "../../utils/common";
 import { useSelector, useDispatch } from "react-redux";
-import ObjectCardRow from "../../compontents/card/ObjectCardRow";
+import ObjectCardRow from "../../components/card/ObjectCardRow";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { addProducts } from "../../redex/reducers/recentProductsData";
-import { addItemCart } from "../../pages/carts/addItemCart";
-import EmptyComponent from "../../compontents/EmptyComponent";
+import { addProducts } from "../../redux/reducers/recentProductsData";
+import { addItemCart } from "@/services/cart";
+import EmptyComponent from "../../components/EmptyComponent";
 import moment from "moment";
-import ModalContainer from "../../compontents/ModalContainer";
+import ModalContainer from "../../components/ModalContainer";
+import { Center } from "@/components/ui/Center";
+import { StarBox } from "@/components/ui/FormElements";
+import { cn } from "@/lib/cn";
+
+function GraphBar({ height }: { height: string }) {
+  return (
+    <span className="relative mx-auto my-2.5 block h-[100px] w-2 rounded-[5px] bg-[#e5e5e5]">
+      <span
+        className="absolute bottom-0 w-2 rounded-[5px] bg-[#f27370]"
+        style={{ height }}
+      />
+    </span>
+  );
+}
 
 const StoreGoodsDetail = () => {
   const userData = useSelector((state: RootState) => state?.user.token);
@@ -90,7 +101,6 @@ const StoreGoodsDetail = () => {
       .order("created_at", { ascending: false });
 
     const totalScore = reviewData?.map((item) => item?.score);
-    // const img = reviewData?.flatMap((item) => item?.reviewImg);
 
     setReviewSore(totalScore ?? []);
 
@@ -118,10 +128,10 @@ const StoreGoodsDetail = () => {
           if (!idSnapshot.empty) {
             return {
               ...item,
-              userInfo: idSnapshot.docs[0].data(), // null 제거
+              userInfo: idSnapshot.docs[0].data(),
             };
           } else {
-            return null; // 유저가 없으면 null 반환
+            return null;
           }
         } catch (error) {
           console.error("에러 발생:", error);
@@ -149,14 +159,10 @@ const StoreGoodsDetail = () => {
   };
   const reviewSettings = {
     infinite: false,
-    // speed: 500,
     swipeToSlide: true,
     slidesToShow: 5,
     arrows: false,
     slidesToScroll: 1,
-    // centerMode: true,
-    // centerPadding: "0px",
-    // variableWidth: "120px",
   };
 
   const detailSettings = {
@@ -169,20 +175,20 @@ const StoreGoodsDetail = () => {
   const getStarWidth = (index: number) => {
     const score =
       (reviewScore ?? [])?.reduce((a, c) => a + c) / (reviewScore?.length || 0);
-    if (score >= index + 1) return "100%"; // 꽉 찬 별
+    if (score >= index + 1) return "100%";
     if (score > index && score < index + 1) {
       const decimal = score - index;
-      return `${decimal * 100}%`; // 일부만 채운 별
+      return `${decimal * 100}%`;
     }
-    return "0%"; // 비어있는 별
+    return "0%";
   };
   const getStarIndividualWidth = (index: number, score: number) => {
-    if (score >= index + 1) return "100%"; // 꽉 찬 별
+    if (score >= index + 1) return "100%";
     if (score > index && score < index + 1) {
       const decimal = score - index;
-      return `${decimal * 100}%`; // 일부만 채운 별
+      return `${decimal * 100}%`;
     }
-    return "0%"; // 비어있는 별
+    return "0%";
   };
   const getGraphHeight = (index: number): string => {
     if (!reviewScore || reviewScore.length === 0) return "0%";
@@ -203,10 +209,8 @@ const StoreGoodsDetail = () => {
     let newLikes = null;
 
     if (data.likeUserId.includes(userData)) {
-      // 좋아요 누름
       newLikes = currentLikes.filter((id: string) => id !== userData);
     } else {
-      // 종아요 안누름
       newLikes = [...currentLikes, userData];
     }
 
@@ -218,12 +222,16 @@ const StoreGoodsDetail = () => {
 
     handleReviewData(searchObject ?? "");
   };
+
+  const soldOut = objects?.soldOut ?? true;
+
   return (
     <Center>
       <article role="article" aria-label="상품 상세 정보">
-        <BoxContainer>
+        <div className="mt-[45px] grid grid-cols-2 gap-x-[50px] [&>div]:min-h-[690px]">
           <div className="img_box">
             <img
+              className="h-[485px] w-[485px] overflow-hidden rounded-[3px] object-cover"
               src={
                 imgIndex === 0
                   ? objects?.img
@@ -231,10 +239,13 @@ const StoreGoodsDetail = () => {
               }
               alt="제품 이미지"
             />
-            <div className="all_img">
+            <div className="all_img mt-[25px] flex flex-wrap justify-center gap-[15px_10px]">
               <img
                 src={objects?.img}
-                className={0 === imgIndex ? "selected" : ""}
+                className={cn(
+                  "h-20 w-20 overflow-hidden rounded-[3px] border-2 border-transparent object-cover",
+                  0 === imgIndex && "border-primary"
+                )}
                 alt="제품 이미지"
                 onClick={() => setImageIndex(0)}
               />
@@ -244,14 +255,18 @@ const StoreGoodsDetail = () => {
                   onClick={() => setImageIndex(index + 1)}
                   src={img}
                   alt="제품 이미지"
-                  className={index + 1 === imgIndex ? "selected" : ""}
+                  className={cn(
+                    "h-20 w-20 overflow-hidden rounded-[3px] border-2 border-transparent object-cover",
+                    index + 1 === imgIndex && "border-primary"
+                  )}
                 />
               ))}
             </div>
           </div>
-          <div className="info_box">
+          <div className="info_box flex min-h-[690px] flex-col justify-between">
             <div>
               <h3
+                className="cursor-pointer text-lg font-light"
                 onClick={(event) => {
                   event.preventDefault();
                   navigate(
@@ -261,42 +276,48 @@ const StoreGoodsDetail = () => {
               >
                 {objects?.brands?.name + " >"}{" "}
               </h3>
-              <h2>{objects?.name}</h2>
+              <h2 className="mt-[15px] text-2xl font-normal">{objects?.name}</h2>
 
-              <Count>
+              <div className="mt-2.5 flex items-center gap-2.5">
                 {handleSaleTF(objects?.saleItem) && (
-                  <span>{(objects?.count ?? 0).toLocaleString()}원</span>
+                  <span className="text-lg font-normal text-[#a9a9a9] line-through">
+                    {(objects?.count ?? 0).toLocaleString()}원
+                  </span>
                 )}
-                <em>
+                <em className="text-[26px] font-bold text-text-red">
                   {handlePrice(
                     objects?.saleItem,
                     objects?.count
                   ).toLocaleString()}
                   원{objects?.option && "~"}
                 </em>
-              </Count>
-              <TagWrapper>
+              </div>
+              <div className="!justify-normal mt-[5px] flex gap-0.5 gap-px [&_span]:mr-px [&_span]:rounded-[15px] [&_span]:px-2 [&_span]:py-1 [&_span]:text-sm">
                 {handleSaleTF(objects?.saleItem) && (
-                  <span className="sale">세일</span>
+                  <span className="sale bg-[#f65c60] text-white">세일</span>
                 )}
-                {objects?.coupon && <span className="coupon">쿠폰</span>}
+                {objects?.coupon && (
+                  <span className="coupon bg-[#9bce26] text-white">쿠폰</span>
+                )}
                 {!objects?.saleItem ||
                   (objects?.saleItem?.one_more && (
-                    <span className="oneMore">
+                    <span className="oneMore bg-[#ff8942] text-white">
                       {objects?.saleItem?.one_more}+1
                     </span>
                   ))}
                 {handlePrice(objects?.saleItem, objects?.count) >= 20000 && (
-                  <span className="free">무배</span>
+                  <span className="free bg-[#ad85ed] text-white">무배</span>
                 )}
                 {moment().isBetween(
                   objects?.saleItem?.start_today_sale_date,
                   objects?.saleItem?.end_today_sale_date
-                ) && <span className="today_sale">오특</span>}
-              </TagWrapper>
+                ) && (
+                  <span className="today_sale bg-[#6fcff7] text-white">오특</span>
+                )}
+              </div>
             </div>
             <div>
-              <DeliveryInfo>
+              <div className="mt-[26px] border-y border-line-main px-2.5 py-[15px] [&_em]:mr-[5px] [&_em]:inline-block [&_em]:w-[60px] [&_em]:text-sm [&_em]:font-semibold [&_span]:text-sm [&>div]:mt-[7px] [&>div]:flex">
                 <h4>배송 정보</h4>
                 <div>
                   <em>일반 배송</em>
@@ -304,8 +325,8 @@ const StoreGoodsDetail = () => {
                     2,500원 (20,000 원 이상 무료배송) <br /> 올리브샵 배송
                   </span>
                 </div>
-              </DeliveryInfo>
-              <BuyContainer $soldOut={objects?.soldOut ?? true}>
+              </div>
+              <div className="mt-5 flex items-center justify-between border border-line-sub bg-[#f9f9f9] px-2.5 py-[15px] [&_span]:text-base [&_span]:font-bold [&>div]:flex [&>div]:overflow-hidden [&>div]:rounded [&>div]:border [&>div]:border-line-sub [&>div_button]:flex [&>div_button]:h-[30px] [&>div_button]:w-[30px] [&>div_button]:items-center [&>div_button]:justify-center [&>div_button]:bg-white [&>div_button]:text-[25px] [&>div>span]:block [&>div>span]:h-[30px] [&>div>span]:w-[60px] [&>div>span]:cursor-default [&>div>span]:border-x [&>div>span]:border-line-sub [&>div>span]:text-center [&>div>span]:text-xl [&>div>span]:leading-8">
                 <span>구매수량</span>
                 <div>
                   <button
@@ -325,7 +346,13 @@ const StoreGoodsDetail = () => {
                   >
                     <em>-</em>
                   </button>
-                  <span>{buyCount}</span>
+                  <span
+                    className={cn(
+                      soldOut ? "bg-[#efeded]" : "bg-white"
+                    )}
+                  >
+                    {buyCount}
+                  </span>
 
                   <button
                     className="buyPlus"
@@ -341,15 +368,15 @@ const StoreGoodsDetail = () => {
                     <em>+</em>
                   </button>
                 </div>
-              </BuyContainer>
+              </div>
               {objects?.saleItem?.one_more && (
-                <OneMoreContainer>
+                <div className="border border-line-sub bg-[#f9f9f9] px-2.5 py-[15px] [&_em]:text-primary [&_span]:text-[15px] [&_span]:font-semibold">
                   <span>
                     <em>{objects?.saleItem?.one_more}+1</em> 적용되어 구매됩니다
                   </span>
-                </OneMoreContainer>
+                </div>
               )}
-              <PriceContainer>
+              <div className="mt-5 border-b-2 border-primary px-2.5 pb-2.5 pt-[15px] [&_span]:block [&_span]:text-right [&_span]:text-[26px] [&_span]:font-black [&_span]:text-primary">
                 <span>
                   {calculatePrice(
                     buyCount,
@@ -358,8 +385,14 @@ const StoreGoodsDetail = () => {
                   )?.toLocaleString() || 0}
                   원
                 </span>
-              </PriceContainer>
-              <BuyButtonContainer $soldOut={objects?.soldOut ?? true}>
+              </div>
+              <div
+                className={cn(
+                  "mt-5 grid gap-[5px]",
+                  soldOut ? "grid-cols-1" : "grid-cols-2",
+                  "[&_button]:h-[60px] [&_button]:border [&_button]:border-line-main [&_button]:text-lg [&_button]:font-extrabold [&_button]:leading-[60px] [&_.buy]:bg-primary [&_.buy]:text-white [&_.soldOut]:bg-[#f5f5f5]"
+                )}
+              >
                 {objects?.soldOut ? (
                   <button
                     className="soldOut"
@@ -458,16 +491,20 @@ const StoreGoodsDetail = () => {
                     </button>
                   </>
                 )}
-              </BuyButtonContainer>
+              </div>
             </div>
           </div>
-        </BoxContainer>
-        <TabContainer>
-          <div className="tabs" role="tablist" aria-label="상품 정보 탭">
+        </div>
+        <div className="mt-[60px]">
+          <div
+            className="tabs grid grid-cols-2 [&_span]:block [&_span]:h-[60px] [&_span]:cursor-pointer [&_span]:border [&_span]:border-line-main [&_span]:text-center [&_span]:text-xl [&_span]:font-semibold [&_span]:leading-[60px] [&_span.active]:bg-primary [&_span.active]:text-white"
+            role="tablist"
+            aria-label="상품 정보 탭"
+          >
             <span
               role="tab"
               aria-selected={openedTabs === 1}
-              className={`${openedTabs === 1 && "active"}`}
+              className={cn(openedTabs === 1 && "active")}
               onClick={(event) => {
                 event.preventDefault();
                 setOpenedTabs(1);
@@ -479,7 +516,7 @@ const StoreGoodsDetail = () => {
             <span
               role="tab"
               aria-selected={openedTabs === 2}
-              className={`${openedTabs === 2 && "active"}`}
+              className={cn(openedTabs === 2 && "active")}
               onClick={(event) => {
                 event.preventDefault();
                 setOpenedTabs(2);
@@ -489,12 +526,20 @@ const StoreGoodsDetail = () => {
             </span>
           </div>
           {openedTabs === 1 ? (
-            <DetailedContainer $open={detailOpened}>
-              <div>
-                <img src={objects?.detailImg} alt="상세이미지" />
+            <div className="py-[50px]">
+              <div
+                className={cn(
+                  detailOpened ? "h-auto overflow-visible" : "h-[500px] overflow-hidden"
+                )}
+              >
+                <img
+                  className="mx-auto block w-full"
+                  src={objects?.detailImg}
+                  alt="상세이미지"
+                />
               </div>
               <button
-                className="moreButton"
+                className="moreButton relative mx-auto mt-0 block h-[50px] w-[720px] rounded border border-black text-center text-base text-[#131518] after:absolute after:left-0 after:top-[-100%] after:h-[47px] after:w-full after:bg-gradient-to-b after:from-white/0 after:to-white"
                 type="button"
                 onClick={async (event) => {
                   event.preventDefault();
@@ -504,13 +549,13 @@ const StoreGoodsDetail = () => {
               >
                 상품설명 {detailOpened ? "접기" : "더보기"}
               </button>
-            </DetailedContainer>
+            </div>
           ) : (
             <div style={{ padding: "50px 0" }}>
               {reviewItems?.length > 0 ? (
-                <ReviewsContainer>
-                  <div className="score-graph">
-                    <div className="score">
+                <div>
+                  <div className="score-graph grid grid-cols-2">
+                    <div className="score flex flex-col items-center justify-center gap-3 [&_em]:text-[35px] [&_em]:font-black [&>span]:text-lg [&>span]:font-bold">
                       <span>총 {reviewItems?.length?.toLocaleString()}건</span>
                       <em>
                         {Math.floor(
@@ -520,7 +565,7 @@ const StoreGoodsDetail = () => {
                         ) / 10}{" "}
                         점
                       </em>
-                      <ul className="star-box">
+                      <ul className="star-box flex gap-[7px] [&_img]:absolute [&_img]:z-[9] [&_img]:h-[26px] [&_img]:w-[26px] [&_img]:overflow-hidden [&_li]:relative [&_li]:h-[26px] [&_li]:w-[26px] [&_span]:absolute [&_span]:left-0 [&_span]:top-0 [&_span]:z-[4] [&_span]:block [&_span]:h-[26px] [&_span]:w-full [&_span]:bg-[#f27370]">
                         {[0, 1, 2, 3, 4].map((i) => (
                           <li key={i}>
                             <span
@@ -535,14 +580,12 @@ const StoreGoodsDetail = () => {
                         ))}
                       </ul>
                     </div>
-                    <div className="graph">
+                    <div className="graph [&_em]:block [&_em]:text-center [&_em]:text-sm [&_em]:font-bold [&_em]:text-[#aaa] [&_ul]:flex [&_ul]:justify-center">
                       <ul>
                         {[0, 1, 2, 3, 4].map((i) => (
-                          <li key={i}>
+                          <li key={i} className="w-14">
                             <em>{getGraphHeight(i)}</em>
-                            <GraphHeight
-                              height={getGraphHeight(i)}
-                            ></GraphHeight>
+                            <GraphBar height={getGraphHeight(i)} />
                             <em style={{ color: "#888" }}>{i + 1}점</em>
                           </li>
                         ))}
@@ -550,29 +593,41 @@ const StoreGoodsDetail = () => {
                     </div>
                   </div>
                   {reviewImages?.length > 0 && (
-                    <div className="reviews-img">
+                    <div className="reviews-img my-5 grid grid-cols-8 justify-between border-y border-line-sub px-0 py-[30px] pb-5 [grid-template-columns:repeat(8,120px)]">
                       {reviewImages?.map(
                         (item, index) =>
                           index < 8 && (
-                            <ReviewImg
+                            <div
                               key={index}
-                              $last={index === 7 ? "block" : "none"}
+                              className={cn(
+                                "relative h-[120px] w-[120px] cursor-pointer overflow-hidden rounded-[5px] border border-line-main",
+                                index === 7 && "[&_em]:block [&_img]:brightness-[0.8]"
+                              )}
                               onClick={(event) => {
                                 event.preventDefault();
                                 if (index === 7) {
-                                  // 더보기 클릭
                                   setImgOpened(true);
                                 } else {
-                                  // 일반 사진 클릭
                                   setDetailImgIndex(item?.index ?? "0");
                                   setDetailReviews(item);
                                   setDetailImgOpened(true);
                                 }
                               }}
                             >
-                              <em>더보기 </em>
-                              <img src={item?.img || ""} alt="reviews-img" />
-                            </ReviewImg>
+                              <em
+                                className={cn(
+                                  "absolute inset-0 z-[19] hidden text-center leading-[120px] text-white",
+                                  index === 7 && "block"
+                                )}
+                              >
+                                더보기{" "}
+                              </em>
+                              <img
+                                className="h-full w-full"
+                                src={item?.img || ""}
+                                alt="reviews-img"
+                              />
+                            </div>
                           )
                       )}
                     </div>
@@ -580,8 +635,11 @@ const StoreGoodsDetail = () => {
 
                   <div className="reviews-box">
                     {reviewItems?.map((item, index) => (
-                      <ReviewBox key={index}>
-                        <div className="user-info">
+                      <div
+                        key={index}
+                        className="flex border-b border-line-main py-[15px]"
+                      >
+                        <div className="user-info flex h-fit w-[255px] items-center gap-[15px] [&_em]:w-[calc(100%-100px)] [&_em]:overflow-hidden [&_em]:text-ellipsis [&_em]:whitespace-nowrap [&_em]:text-base [&_em]:font-bold [&_em]:leading-[19px] [&_em]:text-[#131518] [&>div]:h-[60px] [&>div]:w-[60px] [&>div]:overflow-hidden [&>div]:rounded-full [&>div]:border [&>div]:border-line-main [&_img]:h-full [&_img]:w-full">
                           <div>
                             <img
                               src={item?.userInfo?.profileImg || defaultProfile}
@@ -592,9 +650,12 @@ const StoreGoodsDetail = () => {
                             {item?.userInfo?.nickName || item?.userInfo?.name}
                           </em>
                         </div>
-                        <div className="reviews">
-                          <div className="score-date">
-                            <StarBox size="23px" className="star-box">
+                        <div className="reviews flex w-[calc(100%-255px)] flex-col gap-3 [&>span]:inline-block [&>span]:text-base [&>span]:leading-6 [&>span]:text-[#555]">
+                          <div className="score-date flex flex-row items-center gap-5 [&_em]:font-normal [&_em]:text-[#888]">
+                            <StarBox
+                              size="23px"
+                              className="star-box [&_img]:absolute [&_img]:z-[9] [&_img]:h-[23px] [&_img]:w-[23px] [&_li]:relative [&_li]:h-[23px] [&_li]:w-[23px] [&_span]:absolute [&_span]:left-0 [&_span]:top-0 [&_span]:z-[4] [&_span]:block [&_span]:h-[23px] [&_span]:w-full [&_span]:bg-[#f27370]"
+                            >
                               {[0, 1, 2, 3, 4].map((i) => (
                                 <li key={i}>
                                   <span
@@ -619,7 +680,7 @@ const StoreGoodsDetail = () => {
                           </div>
                           {item?.reviewImg && item?.reviewImg?.length > 0 && (
                             <div className="img-box">
-                              <ImgSliderContainer>
+                              <div className="[&_.img]:relative [&_.img]:!h-[148px] [&_.img]:!w-[148px] [&_.img]:overflow-hidden [&_.img]:rounded-[5px] [&_.img]:border [&_.img]:border-[#d9d9d9] [&_.img]:after:absolute [&_.img]:after:bottom-2.5 [&_.img]:after:right-2.5 [&_.img]:after:h-5 [&_.img]:after:w-5 [&_.img]:after:bg-[url(https://static.oliveyoung.co.kr/pc-static-root/image/product/ico_image_more.png)] [&_.img]:after:bg-[length:20px_auto] [&_.img]:after:bg-no-repeat [&_.img]:after:content-[''] [&_.img_img]:h-full [&_.img_img]:w-full [&_.slick-active]:border-none [&_.slick-track]:ml-[unset]">
                                 <Slider
                                   className="slider-container "
                                   {...reviewSettings}
@@ -639,18 +700,19 @@ const StoreGoodsDetail = () => {
                                     </div>
                                   ))}
                                 </Slider>
-                              </ImgSliderContainer>
+                              </div>
                             </div>
                           )}
                           <span>{item?.reviewText}</span>
-                          {/* item.userId !== userData && */}
                           {
                             <div
-                              className={`${
-                                item.likeUserId?.includes(userData) ? "on" : ""
-                              } ${
-                                item.userId === userData ? "my-review" : ""
-                              } like-box`}
+                              className={cn(
+                                "like-box flex items-center gap-[15px] [&_button]:h-[25px] [&_button]:w-[60px] [&_button]:rounded-[20px] [&_button]:border [&_button]:border-[#131518] [&_button]:text-base [&_button]:text-[#131518]",
+                                item.likeUserId?.includes(userData) &&
+                                  "[&_button]:border-primary [&_button]:bg-primary [&_button]:text-white",
+                                item.userId === userData &&
+                                  "[&_button]:border-[#ccc] [&_button]:bg-[#eeeeee] [&_button]:text-[#333333]"
+                              )}
                             >
                               <strong>이 리뷰가 도움이 돼요! </strong>
                               <button
@@ -675,17 +737,17 @@ const StoreGoodsDetail = () => {
                             </div>
                           }
                         </div>
-                      </ReviewBox>
+                      </div>
                     ))}
                   </div>
-                </ReviewsContainer>
+                </div>
               ) : (
                 <EmptyComponent mainText="등록된 리뷰가 없습니다." subText="" />
               )}
             </div>
           )}
-        </TabContainer>
-        <SliderContainer>
+        </div>
+        <div className="relative mb-[50px] border-t-2 border-black pt-[30px] [&_.best-icon]:absolute [&_.best-icon]:left-[5px] [&_.best-icon]:top-[5px] [&_.best-icon]:h-[35px] [&_.best-icon]:w-[35px] [&_.best-icon]:text-[9px] [&_.best-icon]:leading-[31px] [&_.img-box_em]:text-base [&_.slick-next]:right-[calc((100%-1020px)/2-40px)] [&_.slick-next]:h-[25px] [&_.slick-next]:w-[25px] [&_.slick-next:before]:text-[25px] [&_.slick-next:before]:!text-[#898989] [&_.slick-prev]:left-[calc((100%-1020px)/2-40px)] [&_.slick-prev]:z-[9] [&_.slick-prev]:h-[25px] [&_.slick-prev]:w-[25px] [&_.slick-prev:before]:text-[25px] [&_.slick-prev:before]:!text-[#898989]">
           <Slider className="slider-container" {...settings}>
             {objectItems &&
               objectItems?.map((item, index) => (
@@ -703,7 +765,7 @@ const StoreGoodsDetail = () => {
                 />
               ))}
           </Slider>
-        </SliderContainer>
+        </div>
         <ModalContainer
           isOpen={imgOpened}
           onClose={() => setImgOpened(false)}
@@ -713,7 +775,7 @@ const StoreGoodsDetail = () => {
           okText="취소"
         >
           {reviewImages?.length > 0 && (
-            <ReviewImagesModal>
+            <div className="grid h-full w-full grid-cols-[repeat(9,80px)] gap-[5px] overflow-x-hidden overflow-y-auto [grid-auto-rows:max-content] [&>div]:h-20 [&>div]:w-20 [&_img]:h-full [&_img]:w-full">
               {reviewImages?.map((item, index) => (
                 <div
                   key={index}
@@ -727,7 +789,7 @@ const StoreGoodsDetail = () => {
                   <img src={item?.img} alt="사진목록 이미지" />
                 </div>
               ))}
-            </ReviewImagesModal>
+            </div>
           )}
         </ModalContainer>
         <ModalContainer
@@ -737,16 +799,16 @@ const StoreGoodsDetail = () => {
           header="포토 상세"
           heightCheck="600px"
         >
-          <DetailReview>
-            <div className="img-wrap">
-              <div className="main-img">
+          <div className="grid h-full grid-cols-3 gap-x-5 py-[30px]">
+            <div className="img-wrap col-span-2 [&_img]:h-full [&_img]:w-full">
+              <div className="main-img h-[calc(100%-90px)] w-full border border-line-main">
                 <img
                   src={detailReviews?.reviewImg?.[Number(detailImgIndex)] ?? ""}
                   alt=""
                 />
               </div>
-              <div className="sub-img">
-                <DetailSliderContainer>
+              <div className="sub-img mt-2.5 [&_img]:border [&_img]:border-line-main">
+                <div className="[&_.slick-slide]:h-20 [&_.slick-slide]:w-20 [&_.slick-slide]:pr-[5px] [&_.slick-slide:last-child]:pr-0 [&_.slick-track]:ml-[unset]">
                   <Slider
                     className="slider-container "
                     {...detailSettings}
@@ -764,12 +826,12 @@ const StoreGoodsDetail = () => {
                       </div>
                     ))}
                   </Slider>
-                </DetailSliderContainer>
+                </div>
               </div>
             </div>
-            <div className="info">
-              <div className="reviews">
-                <div className="user-info">
+            <div className="info col-span-1">
+              <div className="reviews flex flex-col gap-2 [&>span]:inline-block [&>span]:text-base [&>span]:leading-6 [&>span]:text-[#555]">
+                <div className="user-info flex h-fit w-[255px] items-center gap-[7px] [&_em]:w-[calc(100%-100px)] [&_em]:overflow-hidden [&_em]:text-ellipsis [&_em]:whitespace-nowrap [&_em]:text-base [&_em]:font-bold [&_em]:leading-[19px] [&_em]:text-[#131518] [&>div]:h-[50px] [&>div]:w-[50px] [&>div]:overflow-hidden [&>div]:rounded-full [&>div]:border [&>div]:border-line-main [&_img]:h-full [&_img]:w-full">
                   <div>
                     <img
                       src={
@@ -783,7 +845,7 @@ const StoreGoodsDetail = () => {
                       detailReviews?.userInfo?.name}
                   </em>
                 </div>
-                <StarBox className="star-box">
+                <StarBox className="star-box flex gap-1 [&_img]:absolute [&_img]:z-[9] [&_img]:h-5 [&_img]:w-5 [&_li]:relative [&_li]:h-5 [&_li]:w-5 [&_span]:absolute [&_span]:left-0 [&_span]:top-0 [&_span]:z-[4] [&_span]:block [&_span]:h-5 [&_span]:w-full [&_span]:bg-[#f27370]">
                   {[0, 1, 2, 3, 4].map((i) => (
                     <li key={i}>
                       <span
@@ -805,700 +867,15 @@ const StoreGoodsDetail = () => {
                 <em>
                   {moment(detailReviews?.created_at).format("YYYY.MM.DD")}
                 </em>
-                {/* </div> */}
 
                 <span>{detailReviews?.reviewText}</span>
               </div>
             </div>
-          </DetailReview>
+          </div>
         </ModalContainer>
       </article>
     </Center>
   );
 };
-const DetailSliderContainer = styled.div`
-  .slick-track {
-    margin-left: unset;
-  }
-  .slick-slide {
-    width: 80px;
-    height: 80px;
-    padding-right: 5px;
-    &:last-child {
-      padding-right: 0;
-    }
-    /* margin: 0 5px; */
-    > div {
-      /* margin: 0 -5px; */
-      width: 100%;
-      height: 100%;
-      > div {
-        height: 100%;
-      }
-    }
-  }
-`;
-const DetailReview = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  column-gap: 20px;
-  height: 100%;
-  padding: 30px 0;
-  .img-wrap {
-    grid-column: 1 / span 2;
-    .main-img {
-      width: 100%;
-      height: calc(100% - 90px);
-      border: 1px solid ${({ theme }) => theme.lineColor.main};
-    }
-    .sub-img {
-      margin-top: 10px;
-      img {
-        border: 1px solid ${({ theme }) => theme.lineColor.main};
-      }
-    }
-    img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-
-  .info {
-    grid-column: 3 / span 1;
-  }
-
-  .user-info {
-    display: flex;
-    width: 255px;
-    column-gap: 7px;
-    align-items: center;
-    height: fit-content;
-    > div {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      border: 1px solid ${({ theme }) => theme.lineColor.main};
-      overflow: hidden;
-      img {
-        width: 100%;
-        height: 100%;
-      }
-    }
-
-    em {
-      width: calc(100% - 100px);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-weight: 700;
-      font-size: 16px;
-      line-height: 19px;
-      color: #131518;
-    }
-  }
-
-  .reviews {
-    display: flex;
-    flex-direction: column;
-    row-gap: 8px;
-
-    > span {
-      color: #555;
-      line-height: 24px;
-      font-size: 16px;
-      display: inline-block;
-    }
-  }
-
-  .star-box {
-    display: flex;
-    column-gap: 4px;
-    li {
-      width: 20px;
-      height: 20px;
-      position: relative;
-    }
-    span {
-      position: absolute;
-      z-index: 4;
-      top: 0;
-      left: 0;
-      display: block;
-      width: 100%;
-      height: 20px;
-      background-color: #f27370;
-    }
-    img {
-      width: 20px;
-      height: 20px;
-      z-index: 9;
-      position: absolute;
-      overflow: hidden;
-    }
-  }
-`;
-const ReviewImagesModal = styled.div`
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: grid;
-  width: 100%;
-  grid-auto-rows: max-content;
-  grid-template-columns: repeat(9, 80px);
-  gap: 5px;
-  > div {
-    width: 80px;
-    height: 80px;
-    img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-`;
-const ReviewBox = styled.div`
-  padding: 15px 0;
-  border-bottom: 1px solid ${({ theme }) => theme.lineColor.main};
-  display: flex;
-  .user-info {
-    display: flex;
-    width: 255px;
-    column-gap: 15px;
-    align-items: center;
-    height: fit-content;
-    > div {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      border: 1px solid ${({ theme }) => theme.lineColor.main};
-      overflow: hidden;
-      img {
-        width: 100%;
-        height: 100%;
-      }
-    }
-
-    em {
-      width: calc(100% - 100px);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-weight: 700;
-      font-size: 16px;
-      line-height: 19px;
-      color: #131518;
-    }
-  }
-  .score-date {
-    display: flex;
-    flex-direction: row;
-    column-gap: 20px;
-    align-items: center;
-    em {
-      color: #888;
-      font-weight: 400;
-    }
-  }
-
-  .reviews {
-    display: flex;
-    flex-direction: column;
-    row-gap: 12px;
-    width: calc(100% - 255px);
-    > span {
-      color: #555;
-      line-height: 24px;
-      font-size: 16px;
-      display: inline-block;
-    }
-  }
-  .img-box {
-  }
-  .like-box {
-    display: flex;
-    align-items: center;
-    column-gap: 15px;
-    button {
-      width: 60px;
-      border: 1px solid #131518;
-      color: #131518;
-      height: 25px;
-      border-radius: 20px;
-      font-size: 16px;
-    }
-
-    &.on {
-      button {
-        background-color: #116dff;
-        border: 1px solid #116dff;
-        color: #fff;
-      }
-    }
-    &.my-review {
-      button {
-        background-color: #eeeeee;
-        border: 1px solid #ccc;
-        color: #333333;
-      }
-    }
-  }
-`;
-const ImgSliderContainer = styled.div`
-  .slick-active {
-    border: none;
-  }
-  .slick-track {
-    margin-left: unset;
-  }
-  .img {
-    width: 148px !important;
-    border: 1px solid #d9d9d9;
-    border-radius: 5px;
-    overflow: hidden;
-    //width: 165px !important;
-    //padding-right: 10px;
-    height: 148px;
-    position: relative;
-    &::after {
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-      content: "";
-      width: 20px;
-      height: 20px;
-      background: url(https://static.oliveyoung.co.kr/pc-static-root/image/product/ico_image_more.png)
-        0 0 / 20px auto no-repeat;
-    }
-    img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-`;
-const ReviewImg = styled.div<{ $last: string }>`
-  width: 120px;
-  height: 120px;
-  border: 1px solid ${({ theme }) => theme.lineColor.main};
-  border-radius: 5px;
-  overflow: hidden;
-  cursor: pointer;
-  position: relative;
-  img {
-    width: 100%;
-    filter: ${(props) =>
-      props.$last === "block" ? "brightness(0.8)" : "none"};
-    height: 100%;
-  }
-  em {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    display: ${(props) => props.$last};
-    //display: block;
-    z-index: 19;
-    text-align: center;
-    line-height: 120px;
-    color: #fff;
-  }
-`;
-
-const GraphHeight = styled.span<{ height: string }>`
-  display: block;
-  width: 8px;
-  border-radius: 5px;
-  margin: 10px auto;
-  background-color: #e5e5e5;
-  height: 100px;
-  position: relative;
-  &::after {
-    content: "";
-    position: absolute;
-    width: 8px;
-    bottom: 0;
-    height: ${(theme) => theme.height};
-    background-color: #f27370;
-    border-radius: 5px;
-  }
-`;
-const ReviewsContainer = styled.div`
-  .score-graph {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    .score {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      row-gap: 12px;
-      > span {
-        font-size: 18px;
-        font-weight: 700;
-      }
-      em {
-        font-size: 35px;
-        font-weight: 900;
-      }
-    }
-
-    .star-box {
-      display: flex;
-      column-gap: 7px;
-      li {
-        width: 26px;
-        height: 26px;
-        position: relative;
-      }
-      span {
-        position: absolute;
-        z-index: 4;
-        top: 0;
-        left: 0;
-        display: block;
-        width: 100%;
-        height: 26px;
-        background-color: #f27370;
-      }
-      img {
-        width: 26px;
-        height: 26px;
-        z-index: 9;
-        position: absolute;
-        overflow: hidden;
-      }
-    }
-
-    .graph {
-      ul {
-        display: flex;
-        justify-content: center;
-        li {
-          width: 56px;
-          /* display: flex; */
-          /* flex-direction: column; */
-          /* align-items: center; */
-
-          em {
-            text-align: center;
-            display: block;
-            font-size: 14px;
-            color: #aaa;
-            font-weight: 700;
-          }
-        }
-      }
-    }
-  }
-
-  .reviews-img {
-    display: grid;
-    justify-content: space-between;
-    padding: 30px 0 20px 0;
-    margin: 20px 0;
-    border-bottom: 1px solid ${theme.lineColor.sub};
-    border-top: 1px solid ${theme.lineColor.sub};
-    grid-template-columns: repeat(8, 120px);
-  }
-`;
-const OneMoreContainer = styled.div`
-  border: 1px solid ${theme.lineColor.sub};
-  padding: 15px 10px;
-  background-color: #f9f9f9;
-  /* margin-top: 20px; */
-  span {
-    font-weight: 600;
-    font-size: 15px;
-    em {
-      color: ${theme.color.main};
-    }
-  }
-`;
-const SliderContainer = styled.div`
-  margin-bottom: 50px;
-  border-top: 2px solid #000;
-  padding-top: 30px;
-  position: relative;
-
-  .slick-prev,
-  .slick-next {
-    width: 25px;
-    height: 25px;
-    /* background-color: red; */
-    &::before {
-      font-size: 25px;
-      color: #898989 !important;
-    }
-  }
-  .slick-next {
-    right: calc((100% - 1020px) / 2 - 40px);
-  }
-  .slick-prev {
-    left: calc((100% - 1020px) / 2 - 40px);
-    z-index: 9;
-  }
-  li.slick-active {
-    button:before {
-      /* color: red; */
-    }
-  }
-  .best-icon {
-    width: 35px;
-    height: 35px;
-    font-size: 9px;
-    left: 5px;
-    top: 5px;
-    line-height: 31px !important;
-  }
-
-  .img-box em {
-    font-size: 16px;
-  }
-`;
-const DetailedContainer = styled.div<{ $open: boolean }>`
-  padding: 50px 0;
-  button {
-    width: 720px;
-    height: 50px;
-    margin: 0 auto;
-    display: block;
-    text-align: center;
-    border: 1px solid #000;
-    border-radius: 4px;
-    position: relative;
-    font-size: 16px;
-    color: #131518;
-    &::after {
-      content: "";
-      position: absolute;
-      top: -100%;
-      left: 0;
-      width: 100%;
-      height: 47px;
-      overflow: hidden;
-      background-image: linear-gradient(
-        to bottom,
-        rgba(255, 255, 255, 0),
-        #fff
-      );
-    }
-  }
-  > div {
-    height: ${({ $open }) => ($open ? "auto" : "500px")};
-    overflow: ${({ $open }) => ($open ? "unset" : "hidden")};
-    img {
-      margin: 0 auto;
-      display: block;
-      width: 100%;
-    }
-  }
-`;
-const TabContainer = styled.div`
-  margin-top: 60px;
-  .tabs {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    span {
-      height: 60px;
-      display: block;
-      line-height: 60px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid ${theme.lineColor.main};
-
-      &.active {
-        background-color: ${theme.color.main};
-        color: white;
-      }
-    }
-  }
-`;
-const PriceContainer = styled.div`
-  padding: 15px 10px 10px;
-  border-bottom: 2px solid ${theme.color.main};
-  margin-top: 20px;
-  span {
-    font-weight: 900;
-    font-size: 26px;
-    text-align: right;
-    display: block;
-    color: ${theme.color.main};
-  }
-`;
-const BuyContainer = styled.div<{ $soldOut: boolean }>`
-  margin-top: 20px;
-  border: 1px solid ${theme.lineColor.sub};
-  padding: 15px 10px;
-  background-color: #f9f9f9;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  span {
-    font-weight: 700;
-    font-size: 16px;
-  }
-
-  > div {
-    border-radius: 4px;
-    overflow: hidden;
-    display: flex;
-    border: 1px solid ${theme.lineColor.sub};
-    span {
-      cursor: unset;
-      display: block;
-      height: 30px;
-      width: 60px;
-      font-size: 20px;
-      line-height: 32px;
-      background-color: ${({ $soldOut }) => ($soldOut ? "#efeded" : "#fff")};
-      text-align: center;
-      border-right: 1px solid ${theme.lineColor.sub};
-      border-left: 1px solid ${theme.lineColor.sub};
-    }
-    button {
-      width: 30px;
-      height: 30px;
-      font-size: 25px;
-      text-align: center;
-      background-color: #ffffff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-  }
-`;
-const BuyButtonContainer = styled.div<{ $soldOut: boolean }>`
-  display: grid;
-  margin-top: 20px;
-  row-gap: 5px;
-  grid-template-columns: ${({ $soldOut }) =>
-    $soldOut ? "repeat(1, 1fr)" : "repeat(2, 1fr)"};
-  button {
-    height: 60px;
-    line-height: 60px;
-    font-size: 18px;
-    font-weight: 800;
-    border: 1px solid ${theme.lineColor.main};
-
-    &.buy {
-      background-color: ${theme.color.main};
-      color: #fff;
-    }
-
-    &.soldOut {
-      background-color: #f5f5f5;
-    }
-  }
-`;
-const DeliveryInfo = styled.div`
-  margin-top: 26px;
-  padding: 15px 10px;
-  border-top: 1px solid ${theme.lineColor.main};
-  border-bottom: 1px solid ${theme.lineColor.main};
-  span {
-    font-size: 14px;
-  }
-  em {
-    font-size: 14px;
-    display: inline-block;
-    width: 60px;
-  }
-  em {
-    font-weight: 600;
-    margin-right: 5px;
-  }
-  > div {
-    margin-top: 7px;
-    display: flex;
-  }
-`;
-const BoxContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 50px;
-  margin-top: 45px;
-  > div {
-    min-height: 690px;
-  }
-  .img_box {
-    > img {
-      width: 485px;
-      height: 485px;
-      object-fit: cover;
-      overflow: hidden;
-      border-radius: 3px;
-    }
-    .all_img {
-      display: flex;
-      gap: 20px 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px 10px;
-      margin-top: 25px;
-      > img {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        overflow: hidden;
-        border-radius: 3px;
-        border: 2px solid transparent;
-
-        &.selected {
-          border: 2px solid ${theme.color.main};
-        }
-      }
-    }
-  }
-  .info_box {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    > div {
-      > h3 {
-        font-weight: 300;
-        font-size: 18px;
-        cursor: pointer;
-      }
-      > h2 {
-        font-weight: 400;
-        margin-top: 15px;
-        font-size: 24px;
-      }
-    }
-  }
-`;
-const Count = styled.div`
-  display: flex;
-  align-items: center;
-  column-gap: 10px;
-  margin-top: 10px;
-  span {
-    color: #a9a9a9;
-    font-size: 18px;
-    text-decoration: line-through;
-    vertical-align: middle;
-    font-weight: 400;
-  }
-
-  em {
-    color: ${theme.fontColor.red};
-    font-size: 26px;
-    font-weight: 700;
-  }
-`;
-const TagWrapper = styled(Tags)`
-  justify-content: normal !important;
-  column-gap: 2px;
-  display: flex;
-  margin-top: 5px;
-  span {
-    font-size: ${theme.fontSize.middle};
-    padding: 4px 8px;
-    border-radius: 15px;
-    font-size: ${theme.fontSize.middle};
-    margin-right: 1px;
-  }
-`;
 
 export default StoreGoodsDetail;

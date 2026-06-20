@@ -1,33 +1,43 @@
 import { useEffect, useState } from "react";
-import {
-  Center,
-  MainTitle,
-  TableStyle,
-  Tags,
-} from "../../../public/assets/style";
-import styled from "styled-components";
+import { Center } from "@/components/ui/Center";
+import { TableWrapper } from "@/components/ui/FormElements";
+import { cn } from "@/lib/cn";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "redex/store";
-import type { CardImageType, CartType } from "compontents/card/card.type";
+import type { RootState } from "@/redux/store";
+import type { CardImageType, CartType } from "@/components/card/card.type";
 import moment from "moment";
 import {
   calculatePrice,
   handleCartItems,
   handlePrice,
   handleSaleTF,
-} from "../../bin/common";
+} from "../../utils/common";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import StoreUserPayment from "./store-user-cart-payment";
 import StoreUserOrder from "./store-user-order";
-import { modifyCartItems } from "./addItemCart";
-import EmptyComponent from "../../compontents/EmptyComponent";
+import { modifyCartItems } from "@/services/cart";
+import EmptyComponent from "../../components/EmptyComponent";
 import { cartDataDelete, userCartData } from "../../api/axios-index";
 export interface PriceType {
   [key: string]: number;
 }
+
+const tagClasses = "text-white px-1.5 py-0.5 rounded-[10px] text-xs mr-0.5";
+const buttonBoxClasses =
+  "text-center [&_button]:h-7 [&_button]:w-[95px] [&_button]:rounded-[5px] [&_button]:px-[5px] [&_button]:text-xs [&_button]:leading-7";
+const informationClasses = cn(
+  "flex items-center gap-5",
+  "[&_.img-wrapper]:relative [&_.img-wrapper]:h-[85px] [&_.img-wrapper]:w-[85px] [&_.img-wrapper]:overflow-hidden [&_.img-wrapper]:rounded-[10px]",
+  "[&_.img-wrapper_img]:h-[85px] [&_.img-wrapper_img]:w-[85px]",
+  "[&_.img-wrapper_span]:absolute [&_.img-wrapper_span]:bottom-0 [&_.img-wrapper_span]:left-0 [&_.img-wrapper_span]:right-0 [&_.img-wrapper_span]:h-[22px] [&_.img-wrapper_span]:bg-black/50 [&_.img-wrapper_span]:text-center [&_.img-wrapper_span]:text-xs [&_.img-wrapper_span]:leading-[22px] [&_.img-wrapper_span]:text-white",
+  "[&_.infor-wrapper]:max-w-[228px] [&_.infor-wrapper_span]:mb-1 [&_.infor-wrapper_span]:block [&_.infor-wrapper_span]:font-bold [&_.infor-wrapper_span]:text-[#777]",
+  "[&_.infor-wrapper_em]:mb-1 [&_.infor-wrapper_em]:block [&_.infor-wrapper_em]:text-xs [&_.infor-wrapper_em]:font-bold [&_.infor-wrapper_em]:text-[#777]",
+  "[&_.infor-wrapper_p]:mb-[5px] [&_.infor-wrapper_p]:line-clamp-2 [&_.infor-wrapper_p]:max-h-9 [&_.infor-wrapper_p]:overflow-hidden [&_.infor-wrapper_p]:text-sm [&_.infor-wrapper_p]:leading-[18px] [&_.infor-wrapper_p]:text-black"
+);
+
 const StoreUserCart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -147,41 +157,60 @@ const StoreUserCart = () => {
   };
   return (
     <section role="region" aria-label="장바구니">
-      <MainLine>
-        <Center>
-          <div className="top-l">
-            <span>
+      <div className="relative z-[2] h-[100px] bg-[url('/public/assets/images/icons/bg_sale_top.png')] bg-[position:50%_0] bg-no-repeat">
+        <Center className="flex h-[100px] items-center justify-between">
+          <div className="top-l flex items-center gap-[17px] pt-0">
+            <span className="text-black">
               {headerType === "1"
                 ? "장바구니"
                 : headerType === "2"
                 ? "주문/결제"
                 : "주문완료"}
             </span>
-            {headerType === "1" && <em>{cartItems?.length}</em>}
+            {headerType === "1" && (
+              <em className="block h-[45px] w-[45px] rounded-full bg-red-600 text-center text-[28px] font-bold leading-[47px] text-white">
+                {cartItems?.length}
+              </em>
+            )}
           </div>
 
-          <div className="top-r">
-            <span className={headerType === "1" ? "on" : ""}>
+          <div className="top-r pt-0">
+            <span
+              className={cn(
+                "text-xl font-normal text-[#8b8176]",
+                headerType === "1" && "text-black"
+              )}
+            >
               01 장바구니 &gt;
             </span>
-            <span className={headerType === "2" ? "on" : ""}>
+            <span
+              className={cn(
+                "text-xl font-normal text-[#8b8176]",
+                headerType === "2" && "text-black"
+              )}
+            >
               02 주문/결제 &gt;
             </span>
-            <span className={headerType === "3" ? "on" : ""}>03 주문완료</span>
+            <span
+              className={cn(
+                "text-xl font-normal text-[#8b8176]",
+                headerType === "3" && "text-black"
+              )}
+            >
+              03 주문완료
+            </span>
           </div>
         </Center>
-      </MainLine>
+      </div>
       <Center>
-        {/* 장바구니 */}
         {headerType === "1" && (
-          <Container>
-            <div className="title-box">
+          <div className="relative z-[9] -mt-5 rounded-[5px] bg-white p-5">
+            <div className="title-box flex items-center justify-between border-t-2 border-black py-[15px]">
               <h2>올리브샵 배송상품</h2>
               {cartItems?.length > 0 && (
-                <ButtonBox>
+                <div className={buttonBoxClasses}>
                   <button
-                    className="gray_btn"
-                    style={{ marginRight: "10px" }}
+                    className="gray_btn mr-2.5 border border-[#aaa] text-[#666]"
                     onClick={(event) => {
                       event.preventDefault();
                       if (checkedItems?.length === 0) {
@@ -194,7 +223,7 @@ const StoreUserCart = () => {
                     선택상품 삭제
                   </button>
                   <button
-                    className="delete_btn gray_btn"
+                    className="delete_btn gray_btn border border-[#aaa] text-[#666]"
                     onClick={(event) => {
                       event.preventDefault();
                       const items = products.filter(
@@ -213,10 +242,14 @@ const StoreUserCart = () => {
                   >
                     품절상품 삭제
                   </button>
-                </ButtonBox>
+                </div>
               )}
             </div>
-            <ProductBox>
+            <TableWrapper
+              className={cn(
+                "[&_tbody_tr.soldOut_.buy_btn]:border [&_tbody_tr.soldOut_.buy_btn]:border-[#aaa] [&_tbody_tr.soldOut_.buy_btn]:bg-[#dedede] [&_tbody_tr.soldOut_.buy_btn]:text-[#666]"
+              )}
+            >
               <table>
                 <thead>
                   <tr>
@@ -290,8 +323,14 @@ const StoreUserCart = () => {
                             }}
                           />
                         </td>
-                        <TableBody style={{ padding: "30px" }}>
-                          <Information
+                        <td
+                          className={cn(
+                            "border-r border-[#ccc] p-[30px]",
+                            product?.objects?.soldOut && ""
+                          )}
+                        >
+                          <div
+                            className={informationClasses}
                             onClick={(event) => {
                               event.preventDefault();
                               navigate(
@@ -323,15 +362,19 @@ const StoreUserCart = () => {
                               <span>{product?.brand}</span>
 
                               <p>{product?.name}</p>
-                              <Tags>
+                              <div className="!justify-normal gap-px">
                                 {product?.sale && (
-                                  <span className="sale">세일</span>
+                                  <span className={cn(tagClasses, "bg-sale")}>
+                                    세일
+                                  </span>
                                 )}
                                 {product?.coupon && (
-                                  <span className="coupon">쿠폰</span>
+                                  <span className={cn(tagClasses, "bg-coupon")}>
+                                    쿠폰
+                                  </span>
                                 )}
                                 {product?.objects?.saleItem?.one_more && (
-                                  <span className="oneMore">
+                                  <span className={cn(tagClasses, "bg-one-more")}>
                                     {product?.objects?.saleItem?.one_more}+1
                                   </span>
                                 )}
@@ -340,15 +383,19 @@ const StoreUserCart = () => {
                                     ?.start_today_sale_date,
                                   product?.objects?.saleItem
                                     ?.end_today_sale_date
-                                ) && <span className="today_sale">오특</span>}
-                              </Tags>
+                                ) && (
+                                  <span className={cn(tagClasses, "bg-today-sale")}>
+                                    오특
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                          </Information>
-                        </TableBody>
-                        <TableBody className="count">
+                          </div>
+                        </td>
+                        <td className="count border-r border-[#ccc] text-center font-medium text-[#222]">
                           {product?.objects?.count?.toLocaleString()}원
-                        </TableBody>
-                        <TableBody className="count">
+                        </td>
+                        <td className="count border-r border-[#ccc] text-center font-medium text-[#222]">
                           <FormControl sx={{ m: 1, minWidth: 50 }} size="small">
                             <Select
                               sx={{ height: 30 }}
@@ -373,8 +420,8 @@ const StoreUserCart = () => {
                               <MenuItem value={10}>10</MenuItem>
                             </Select>
                           </FormControl>
-                        </TableBody>
-                        <TableBody className="discount">
+                        </td>
+                        <td className="discount border-r border-[#ccc] text-center [&_em]:block [&_em]:text-xs [&_em]:text-[#b5b5b5] [&_em]:line-through [&_p]:mt-[3px] [&_p]:block [&_p]:font-medium [&_p]:text-text-red">
                           {product?.objects?.saleItem?.one_more !== null ? (
                             <>
                               <em>
@@ -425,8 +472,8 @@ const StoreUserCart = () => {
                               handlePrice(null, product?.objects?.count)
                             )?.toLocaleString() + "원"
                           )}
-                        </TableBody>
-                        <TableBody className="delivery">
+                        </td>
+                        <td className="delivery border-r border-[#ccc] text-center text-sm font-extrabold text-[#333]">
                           {
                             <>
                               {(calculatePrice(
@@ -439,14 +486,16 @@ const StoreUserCart = () => {
                               ) ?? 0) >= 20000
                                 ? "무료 배송"
                                 : "2,500원"}
-                              <p>도서산간 제외</p>
+                              <p className="mt-[3px] text-xs font-normal text-[#666]">
+                                도서산간 제외
+                              </p>
                             </>
                           }
-                        </TableBody>
+                        </td>
                         <td>
-                          <ButtonBox>
+                          <div className={buttonBoxClasses}>
                             <button
-                              className="buy_btn"
+                              className="buy_btn mb-1.5 border border-olive-green bg-white text-olive-green"
                               onClick={(event) => {
                                 event.preventDefault();
                                 if (product?.objects?.soldOut) {
@@ -527,7 +576,7 @@ const StoreUserCart = () => {
                               바로구매
                             </button>
                             <button
-                              className="delete_btn gray_btn"
+                              className="delete_btn gray_btn border border-[#aaa] text-[#666]"
                               onClick={(event) => {
                                 event.preventDefault();
                                 handleDelete([product?.object_seq || 0]);
@@ -535,7 +584,7 @@ const StoreUserCart = () => {
                             >
                               삭제
                             </button>
-                          </ButtonBox>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -553,17 +602,17 @@ const StoreUserCart = () => {
                   </tbody>
                 )}
               </table>
-            </ProductBox>
+            </TableWrapper>
 
             {cartItems?.length > 0 && (
               <>
-                <TotalPriceInfo>
+                <div className="mt-[50px] grid w-full grid-cols-3 border-y-2 border-[#ccc] [&>div]:relative [&>div]:flex [&>div]:h-[110px] [&>div]:flex-col [&>div]:items-center [&>div]:justify-center [&>div]:gap-[5px] [&>div]:border-r [&>div]:border-[#ededed] [&>div:nth-child(3)]:border-r-0 [&>div:nth-child(4)]:border-r-0 [&>div_p]:text-base [&>div_p]:text-[#666] [&>div_span]:text-2xl [&>div_span]:text-[#333] [&>div_em]:absolute [&>div_em]:-right-5 [&>div_em]:top-1/2 [&>div_em]:flex [&>div_em]:h-10 [&>div_em]:w-10 [&>div_em]:-translate-y-1/2 [&>div_em]:items-center [&>div_em]:justify-center [&>div_em]:rounded-full [&>div_em]:border [&>div_em]:border-[#ccc] [&>div_em]:bg-white [&>div_em]:text-[44px] [&>div_em]:text-[#333]">
                   <div className="total">
                     <p>총 판매가</p>
                     <span>{(price?.totalCount ?? 0).toLocaleString()}원</span>
                     <em>-</em>
                   </div>
-                  <div className="discount">
+                  <div className="discount [&_span]:text-star">
                     <p>총 할인금액</p>
                     <span>{(price?.disCount ?? 0).toLocaleString()}원</span>
                     <em>+</em>
@@ -574,7 +623,7 @@ const StoreUserCart = () => {
                       {(price?.totalPrice ?? 0) < 20000 ? "2,500" : "0"}원
                     </span>
                   </div>
-                  <div className="totalPrice">
+                  <div className="totalPrice col-span-3 flex-row justify-end border-t border-[#ededed] bg-[#f6f6f6] px-[50px] [&_p]:text-[26px] [&_p]:text-black [&_span]:ml-5 [&_span]:text-star">
                     <p>총 결제예상금액</p>
                     <span>
                       {(
@@ -584,11 +633,10 @@ const StoreUserCart = () => {
                       원
                     </span>
                   </div>
-                </TotalPriceInfo>
-                <PaymentBox>
+                </div>
+                <div className="mx-auto my-10 text-center [&_button]:h-[50px] [&_button]:w-[180px] [&_button]:rounded-[5px] [&_button]:border [&_button]:border-star [&_button]:px-0 [&_button]:py-[11px] [&_button]:text-base [&_button]:font-bold [&_button]:leading-7 [&_button]:text-star [&_.all-payment]:bg-star [&_.all-payment]:text-white">
                   <button
-                    className=""
-                    style={{ marginRight: "10px" }}
+                    className="mr-2.5"
                     onClick={(event) => {
                       event.preventDefault();
                       const selectedProduct = products?.filter((product) =>
@@ -625,10 +673,10 @@ const StoreUserCart = () => {
                   >
                     전체주문
                   </button>
-                </PaymentBox>
+                </div>
               </>
             )}
-          </Container>
+          </div>
         )}
 
         {/*  주문 결제 */}
@@ -642,289 +690,3 @@ const StoreUserCart = () => {
 };
 
 export default StoreUserCart;
-const PaymentBox = styled.div`
-  margin: 40px auto;
-  text-align: center;
-  button {
-    height: 50px;
-    font-size: 16px;
-    width: 180px;
-    background-color: #fff;
-    background-color: #fff;
-    border: 1px solid #f27370;
-    padding: 11px 0 9px;
-    font-size: 16px;
-    line-height: 28px;
-    color: #f27370;
-    border-radius: 5px;
-    font-weight: 700;
-  }
-
-  .all-payment {
-    color: #fff;
-    background-color: #f27370;
-  }
-`;
-const TotalPriceInfo = styled.div`
-  display: grid;
-  margin-top: 50px;
-  width: 100%;
-  border-top: 2px solid #ccc;
-  border-bottom: 2px solid #ccc;
-  grid-template-columns: repeat(3, 1fr);
-  > div {
-    height: 110px;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    position: relative;
-    justify-content: center;
-    row-gap: 5px;
-    border-right: 1px solid #ededed;
-    &:nth-child(3),
-    &:nth-child(4) {
-      border-right: none;
-    }
-    p {
-      font-size: 16px;
-      color: #666;
-    }
-    span {
-      color: #333;
-      font-size: 24px;
-    }
-    em {
-      color: #333;
-      display: block;
-      width: 40px;
-      height: 40px;
-      text-align: center;
-      line-height: 46px;
-      border-radius: 50%;
-      position: absolute;
-      right: -20px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #fff;
-      border: 1px solid #ccc;
-      font-size: 44px;
-    }
-    &.discount {
-      span {
-        color: #f27370;
-      }
-    }
-  }
-
-  .totalPrice {
-    border-top: 1px solid #ededed;
-    background-color: #f6f6f6;
-    grid-column: 1 / 4;
-    flex-direction: row;
-    padding: 0 50px;
-    justify-content: flex-end;
-    p {
-      font-size: 26px;
-      color: #000;
-    }
-    span {
-      margin-left: 20px;
-      color: #f27370;
-    }
-  }
-`;
-const ButtonBox = styled.div`
-  text-align: center;
-  button {
-    height: 28px;
-    padding: 0 5px;
-    font-size: 12px !important;
-    line-height: 28px;
-    border-radius: 5px;
-    width: 95px;
-    &.buy_btn {
-      border: 1px solid #9bce26;
-      color: #9bce26;
-      background: #fff;
-      margin-bottom: 6px;
-    }
-
-    &.gray_btn {
-      border: 1px solid #aaa;
-      color: #666;
-    }
-  }
-`;
-const TableBody = styled.td`
-  border-right: 1px solid #ccc;
-  &.count {
-    text-align: center;
-    /* display: block; */
-    color: #222;
-    font-weight: 500;
-  }
-
-  &.discount {
-    text-align: center;
-    /* display: block; */
-    /* color: #222; */
-    /* font-weight: 500; */
-    em {
-      display: block;
-      font-size: 12px;
-      color: #b5b5b5;
-      text-decoration: line-through;
-    }
-    p {
-      display: block;
-      color: #e02020;
-      font-weight: 500;
-      margin-top: 3px;
-    }
-  }
-
-  &.delivery {
-    text-align: center;
-    color: #333;
-    font-size: 14px;
-    font-weight: 800;
-    p {
-      color: #666;
-      font-size: 12px;
-      font-weight: 400;
-      margin-top: 3px;
-    }
-  }
-`;
-const Information = styled.div`
-  column-gap: 20px;
-  display: flex;
-  align-items: center;
-  .img-wrapper {
-    position: relative;
-    border-radius: 10px;
-    overflow: hidden;
-    width: 85px;
-    height: 85px;
-    img {
-      width: 85px;
-      height: 85px;
-    }
-    span {
-      position: absolute;
-      width: 100%;
-      line-height: 22px;
-      height: 22px;
-      font-size: 12px;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: #fff;
-      bottom: 0;
-      left: 0;
-      text-align: center;
-      right: 0;
-    }
-  }
-  > div.infor-wrapper {
-    max-width: 228px;
-    /* display: flex;
-    flex-direction: column;
-    row-gap: 5px; */
-    > span,
-    em {
-      display: block;
-      margin-bottom: 4px;
-      color: #777;
-      font-weight: 700;
-    }
-    p {
-      overflow: hidden;
-      max-height: 36px;
-      -webkit-box-orient: vertical;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      word-break: normal;
-      font-size: 14px;
-      line-height: 18px;
-      margin-bottom: 5px;
-      color: #000;
-    }
-    em {
-      font-size: 12px;
-    }
-  }
-`;
-
-const ProductBox = styled(TableStyle)`
-  tbody {
-    tr.soldOut {
-      .buy_btn {
-        border: 1px solid #aaa;
-        color: #666;
-        background-color: #dedede;
-      }
-    }
-  }
-`;
-
-const MainLine = styled(MainTitle)`
-  height: 100px;
-  background: url("/public/assets/images/icons/bg_sale_top.png") 50% 0 no-repeat;
-
-  > div {
-    height: 100px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    > div.top-l {
-      padding-top: 0px;
-      align-items: center;
-      span {
-        color: #000;
-      }
-
-      em {
-        display: block;
-        width: 45px;
-        height: 45px;
-        line-height: 47px;
-        text-align: center;
-        background: red;
-        color: #fff;
-        border-radius: 50%;
-        font-size: 28px;
-        font-weight: bold;
-      }
-    }
-
-    > div.top-r {
-      padding-top: 0px;
-      span {
-        color: #8b8176;
-        font-size: 20px;
-        font-weight: 400;
-        &.on {
-          color: #000;
-        }
-      }
-    }
-  }
-`;
-const Container = styled.div`
-  padding: 20px;
-  margin-top: -20px;
-  background-color: #fff;
-  z-index: 9;
-  position: relative;
-  border-radius: 5px;
-  div.title-box {
-    border-top: 2px solid #000;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 0;
-    .gray_btn {
-      width: 90px;
-    }
-  }
-`;
