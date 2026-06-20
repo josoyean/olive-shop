@@ -56,7 +56,7 @@ const Search = ({
     };
   }, [componentRef]);
   return (
-    <Container>
+    <Container role="search" aria-label="상품 검색">
       <Paper
         component="form"
         onSubmit={handleSubmit}

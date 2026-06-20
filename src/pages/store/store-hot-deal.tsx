@@ -17,7 +17,8 @@ const StoreHotDeal = () => {
       .from("objects")
       .select("*, saleItem(*)")
       .not("saleItem", "is", null)
-      .eq("saleItem.today_sale_date", today);
+      .filter("saleItem.start_today_sale_date", "lte", today)
+      .filter("saleItem.end_today_sale_date", "gte", today);
 
     if (!data) return;
     setObjects(data ?? []);
@@ -38,7 +39,7 @@ const StoreHotDeal = () => {
     );
   };
   return (
-    <div>
+    <section role="region" aria-label="오늘의 특가">
       <MainLine>
         <Center>
           <div>
@@ -55,14 +56,14 @@ const StoreHotDeal = () => {
             renderer={renderer}
           ></Countdown>
         </div>
-        <div className="items">
+        <div className="items" role="list" aria-label="특가 상품 목록">
           {objects &&
             objects?.map((item) => (
               <HotDealCard key={item.object_seq} data={item}></HotDealCard>
             ))}
         </div>
       </ObjectBox>
-    </div>
+    </section>
   );
 };
 

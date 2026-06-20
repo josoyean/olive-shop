@@ -58,13 +58,14 @@ const StoreList = () => {
 
   return (
     <Center>
-      <Wrapper>
-        <ContainerLeft>
+      <Wrapper role="region" aria-label="상품 목록">
+        <ContainerLeft role="navigation" aria-label="카테고리 메뉴">
           <h2>{!searchTitle ? searchItem : searchTitle}</h2>
           {!searchTitle && (
-            <ul>
+            <ul role="menu" aria-label="서브 카테고리">
               {menu.map((item) => (
                 <li
+                  role="menuitem"
                   key={item.path}
                   onClick={(event) => {
                     event.preventDefault();
@@ -111,7 +112,7 @@ const StoreList = () => {
               </span>
             ))}
           </div>
-          <Object>
+          <Object role="list" aria-label="상품 목록">
             {objectsList &&
               objectsList?.map((list, index) => (
                 <ObjectCardColumn

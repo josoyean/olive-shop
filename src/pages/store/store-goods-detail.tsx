@@ -28,7 +28,6 @@ import moment from "moment";
 import ModalContainer from "../../compontents/ModalContainer";
 
 const StoreGoodsDetail = () => {
-  const today = new Date().toISOString().split("T")[0]; // 오늘 날짜 (YYYY-MM-DD 형식)
   const userData = useSelector((state: RootState) => state?.user.token);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -221,7 +220,7 @@ const StoreGoodsDetail = () => {
   };
   return (
     <Center>
-      <div>
+      <article role="article" aria-label="상품 상세 정보">
         <BoxContainer>
           <div className="img_box">
             <img
@@ -290,9 +289,10 @@ const StoreGoodsDetail = () => {
                 {handlePrice(objects?.saleItem, objects?.count) >= 20000 && (
                   <span className="free">무배</span>
                 )}
-                {today === objects?.saleItem?.today_sale_date && (
-                  <span className="today_sale">오특</span>
-                )}
+                {moment().isBetween(
+                  objects?.saleItem?.start_today_sale_date,
+                  objects?.saleItem?.end_today_sale_date
+                ) && <span className="today_sale">오특</span>}
               </TagWrapper>
             </div>
             <div>
@@ -463,8 +463,10 @@ const StoreGoodsDetail = () => {
           </div>
         </BoxContainer>
         <TabContainer>
-          <div className="tabs">
+          <div className="tabs" role="tablist" aria-label="상품 정보 탭">
             <span
+              role="tab"
+              aria-selected={openedTabs === 1}
               className={`${openedTabs === 1 && "active"}`}
               onClick={(event) => {
                 event.preventDefault();
@@ -475,6 +477,8 @@ const StoreGoodsDetail = () => {
               상세보기
             </span>
             <span
+              role="tab"
+              aria-selected={openedTabs === 2}
               className={`${openedTabs === 2 && "active"}`}
               onClick={(event) => {
                 event.preventDefault();
@@ -808,7 +812,7 @@ const StoreGoodsDetail = () => {
             </div>
           </DetailReview>
         </ModalContainer>
-      </div>
+      </article>
     </Center>
   );
 };

@@ -97,8 +97,8 @@ const MypageReviews = () => {
   return (
     <>
       <div>
-        <Tabs grid={2}>
-          <div className={type === "1" ? "on" : ""}>
+        <Tabs grid={2} role="tablist" aria-label="리뷰 탭">
+          <div className={type === "1" ? "on" : ""} role="tab" aria-selected={type === "1"}>
             <button
               type="button"
               onClick={(event) => {
@@ -113,7 +113,7 @@ const MypageReviews = () => {
               리뷰 작성
             </button>
           </div>
-          <div className={type === "2" ? "on" : ""}>
+          <div className={type === "2" ? "on" : ""} role="tab" aria-selected={type === "2"}>
             <button
               type="button"
               onClick={(event) => {

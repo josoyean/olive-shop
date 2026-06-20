@@ -30,7 +30,7 @@ export interface BrandType {
   name: string; // 동적으로 속성 키와 값을 추가
   infoText?: string; // 동적으로 속성 키와 값을 추가
   created_at?: string;
-  videoLink?: string;
+  videoLink?: string | null;
   videoText?: string;
   id: number;
   infoMainText?: string;
@@ -93,7 +93,8 @@ export interface SaleType {
   start_sale_date: string | undefined;
   end_sale_date: string | undefined;
   one_more: number | null;
-  today_sale_date: string | undefined;
+  start_today_sale_date: string | undefined;
+  end_today_sale_date: string | undefined;
 }
 
 export interface CartType {

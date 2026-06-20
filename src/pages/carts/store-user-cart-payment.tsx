@@ -17,7 +17,7 @@ import FormControl from "@mui/material/FormControl";
 import { useDaumPostcodePopup } from "react-daum-postcode";
 import Select from "@mui/material/Select";
 import moment from "moment";
-import type { CartType, PaymentObjectType } from "compontents/card/card.type";
+import type { CartType, PaymentObjectType, UserInfoType } from "compontents/card/card.type";
 import {
   calculatePrice,
   handlePrice,
@@ -72,13 +72,12 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
   const locatiton = useLocation();
   const navigate = useNavigate();
 
-  const today = new Date().toISOString().split("T")[0];
   const product = locatiton.state.products;
   const dispatch = useDispatch();
   const open = useDaumPostcodePopup(postcodeScriptUrl);
   const userToken = useSelector((state: RootState) => state?.user.token);
   const userInfoData = useSelector((state: RootState) => state?.userInfo);
-  const [user, setUser] = useState<UserInfo | null>(null);
+  const [user, setUser] = useState<UserInfoType | null>(null);
   const [payment] = useState(null);
 
   const {
@@ -120,7 +119,6 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
   //   } catch (error) {}
   // };
   useEffect(() => {
-    console.log(priceData);
     if (isEmptyObject(userInfoData)) return;
 
     setValue(
@@ -204,11 +202,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           );
         }
 
-        // const payment = tossPayments.payment({
-        //   customerKey,
-        // });
-
-        // setPayment(payment);
+      
       } catch (error) {
         console.error("Error fetching payment:", error);
       }
@@ -413,7 +407,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
     setValue("addressSub", "");
   };
   return (
-    <Container onSubmit={handleSubmit(onSubmit, onError)}>
+    <Container onSubmit={handleSubmit(onSubmit, onError)} role="form" aria-label="주문/결제 폼">
       <div className="title-box">
         <h2>주문 / 결제</h2>
       </div>
@@ -683,10 +677,10 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                               {item?.objects?.saleItem?.one_more}+1
                             </span>
                           )}
-                          {today ===
-                            product?.objects?.saleItem?.today_sale_date && (
-                            <span className="today_sale">오특</span>
-                          )}
+                          {moment().isBetween(
+                            item?.objects?.saleItem?.start_today_sale_date,
+                            item?.objects?.saleItem?.end_today_sale_date
+                          ) && <span className="today_sale">오특</span>}
                         </Tags>
                       </div>
                     </Information>

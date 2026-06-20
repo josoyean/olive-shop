@@ -88,7 +88,7 @@ const StoreBrandDetail = () => {
   );
   return (
     <Center>
-      <Container>
+      <Container role="region" aria-label="브랜드 상세">
         <TitleContainer>{brandInfo?.name}</TitleContainer>
         <InfoContainer>
           <div className="img-box">
@@ -98,16 +98,18 @@ const StoreBrandDetail = () => {
           <span
             dangerouslySetInnerHTML={{ __html: brandInfo?.infoText ?? "" }}
           ></span>
-          <div className="video-box">
-            <h2>{brandInfo?.videoText}</h2>
-            <YouTube
-              videoId={brandInfo?.videoLink}
-              opts={opts}
-              onEnd={(e) => {
-                e.target.stopVideo(0);
-              }}
-            />
-          </div>
+          {brandInfo?.videoLink && (
+            <div className="video-box">
+              <h2>{brandInfo?.videoText}</h2>
+              <YouTube
+                videoId={brandInfo?.videoLink}
+                opts={opts}
+                onEnd={(e) => {
+                  e.target.stopVideo(0);
+                }}
+              />
+            </div>
+          )}
         </InfoContainer>
         <ObjectsBox style={{ borderBottom: "none" }}>
           <div className="tBox">
@@ -148,7 +150,7 @@ const StoreBrandDetail = () => {
                 </span>
               ))}
           </TypeFilter>
-          <div className="bBox">
+          <div className="bBox" role="list" aria-label="상품 목록">
             {objectsList &&
               objectsList?.map((list, index) => (
                 <ObjectCardColumn

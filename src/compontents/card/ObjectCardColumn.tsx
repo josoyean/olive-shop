@@ -8,6 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { handlePrice, handleSaleTF } from "../../bin/common";
 import { addItemCart } from "../../pages/carts/addItemCart";
+import moment from "moment";
 
 const ObjectCardColumn: React.FC<CardProps> = (props) => {
   const { size, data, onClick } = props;
@@ -45,6 +46,7 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
         <img
           src="https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/sign/images/shopping.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8zYTBjYzg1NC1jMWE5LTQ2MTktYTBiNy1iMTdmMGE2ZGE3MWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvc2hvcHBpbmcucG5nIiwiaWF0IjoxNzYxNTQ5NjIxLCJleHAiOjE3OTMwODU2MjF9.oQy-e0T_PPu_HfDoEaqJx3kVKnLzyeQTS5MuOI8VwqY"
           alt="shopping"
+          aria-label="장바구니 추가"
           onClick={async (event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -82,7 +84,17 @@ const ObjectCardColumn: React.FC<CardProps> = (props) => {
           <TagText className="free">무배</TagText>
         )}
       </TagWrapper>
-      {data?.best && <BestIcon />}
+      {data && (
+        <BestIcon
+          best={data?.best || false}
+          today={
+            moment().isBetween(
+              data?.saleItem?.start_today_sale_date,
+              data?.saleItem?.end_today_sale_date
+            ) || false
+          }
+        />
+      )}
     </CardWapper>
   );
 };

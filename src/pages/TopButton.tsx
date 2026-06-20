@@ -23,6 +23,8 @@ const TopButton = () => {
   }, [handleScroll]);
   return (
     <Container
+      role="button"
+      aria-label="Scroll to Top"
       onClick={(event) => {
         event.preventDefault();
         window.scrollTo({ top: 0, behavior: "smooth" });

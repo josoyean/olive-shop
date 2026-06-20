@@ -28,7 +28,7 @@ const ChatbotContainer: React.FC = () => {
   }, []);
 
   return (
-    <ChatbotWrapper>
+    <ChatbotWrapper role="region" aria-label="Chatbot">
       <Chatbot
         config={config}
         messageParser={MessageParser}

@@ -140,10 +140,14 @@ export const handlePrice = (
       sale?.end_sale_date,
       "day"
     );
-
+    const betweenToday = moment(today).isBetween(
+      sale?.start_today_sale_date,
+      sale?.end_today_sale_date,
+      "day"
+    );
     const percent =
       (betweenDay ? sale?.discount_rate || 0 : 0) +
-      (sale?.today_sale_date === today ? sale?.today_discount_rate || 0 : 0);
+      (betweenToday ? sale?.today_discount_rate || 0 : 0);
 
     return Math.round(count - count * 0.01 * (percent ?? 0));
   }

@@ -73,6 +73,9 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
       isOpen={isOpen}
       ariaHideApp={false}
       onRequestClose={() => onClose()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
       style={{
         overlay: {
           ...customStyles.overlay,
@@ -109,7 +112,7 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
               </div>
               <div>
                 {typeof header === "string" ? (
-                  <h4 style={{ color: "#171923", fontSize: "18px", margin: 0 }}>
+                  <h4 id="modal-title" style={{ color: "#171923", fontSize: "18px", margin: 0 }}>
                     {header}
                   </h4>
                 ) : (
@@ -122,7 +125,7 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
             <>
               <div>
                 {typeof header === "string" ? (
-                  <h4 style={{ color: "#171923", fontSize: "18px", margin: 0 }}>
+                  <h4 id="modal-title" style={{ color: "#171923", fontSize: "18px", margin: 0 }}>
                     {header}
                   </h4>
                 ) : (

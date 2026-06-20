@@ -201,12 +201,12 @@ const FindPassword = () => {
   return (
     <Center>
       <div id="recaptcha-container"></div>
-      <Container style={{ height: "calc(100vh - 311px)", minHeight: "570px" }}>
-        <h1>비밀번호 변경</h1>
+      <Container role="main" style={{ height: "calc(100vh - 311px)", minHeight: "570px" }}>
+        <h1 role="heading" aria-level={1}>비밀번호 변경</h1>
         {isPassword ? (
-          <form action="" onSubmit={handleSubmit2(onSubmit2, onError2)}>
+          <form role="form" action="" onSubmit={handleSubmit2(onSubmit2, onError2)}>
             <InputWrapper className="input-wrapper">
-              <div>
+              <div role="group">
                 <span>비밀번호</span>
                 <input
                   type="password"
@@ -237,7 +237,7 @@ const FindPassword = () => {
                   }
                 />
               </div>
-              <div>
+              <div role="group">
                 <span>비밀번호 확인</span>
                 <input
                   type="password"
@@ -277,6 +277,7 @@ const FindPassword = () => {
 
             <InputWrapper className="button">
               <button
+                role="button"
                 type="submit"
                 style={{ width: "100%" }}
                 onClick={() => {
@@ -288,9 +289,9 @@ const FindPassword = () => {
             </InputWrapper>
           </form>
         ) : (
-          <form action="" onSubmit={handleSubmit1(onSubmit1, onError1)}>
+          <form role="form" action="" onSubmit={handleSubmit1(onSubmit1, onError1)}>
             <InputWrapper className="input-wrapper">
-              <div>
+              <div role="group">
                 <span>아이디</span>
                 <input
                   type="text"
@@ -311,7 +312,7 @@ const FindPassword = () => {
                   }
                 />
               </div>
-              <div>
+              <div role="group">
                 <span>이름</span>
                 <input
                   type="text"
@@ -326,7 +327,7 @@ const FindPassword = () => {
                   }
                 />
               </div>
-              <div>
+              <div role="group">
                 <span>이메일</span>
                 <input
                   type="text"
@@ -347,7 +348,7 @@ const FindPassword = () => {
                   }
                 />
               </div>
-              <div>
+              <div role="group">
                 <span>생년월일</span>
                 <input
                   type="text"
@@ -378,7 +379,7 @@ const FindPassword = () => {
                   }
                 />
               </div>
-              <div>
+              <div role="group">
                 <span>핸드폰번호</span>
                 <button>
                   <input
@@ -399,6 +400,7 @@ const FindPassword = () => {
                     }}
                   />
                   <button
+                    role="button"
                     type="button"
                     className={`${checked.phone && "action"}`}
                     onClick={() => {
@@ -423,7 +425,7 @@ const FindPassword = () => {
                   }
                 />
               </div>
-              <div>
+              <div role="group">
                 <span>인증번호</span>
                 <Buttom>
                   <input
@@ -443,6 +445,7 @@ const FindPassword = () => {
                     }}
                   />
                   <button
+                    role="button"
                     type="button"
                     className={`${checked.code && "action"}`}
                     onClick={() => {
@@ -474,6 +477,7 @@ const FindPassword = () => {
 
             <InputWrapper className="button">
               <button
+                role="button"
                 type="button"
                 onClick={() => {
                   reset1();
@@ -482,6 +486,7 @@ const FindPassword = () => {
                 초기화
               </button>
               <button
+                role="button"
                 type="submit"
                 onClick={() => {
                   handleSubmit1(onSubmit1, onError1);

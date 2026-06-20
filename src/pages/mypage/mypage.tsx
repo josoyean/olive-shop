@@ -98,9 +98,9 @@ const Mypage = () => {
   }, [handleDataLoad]);
 
   return (
-    <div>
+    <section role="region" aria-label="마이페이지">
       {/* 주문/배송 조회 */}
-      <OrderBox>
+      <OrderBox role="region" aria-label="주문/배송 조회">
         <div className="text-box">
           <div>
             <h2>주문/배송 조회</h2>
@@ -117,8 +117,8 @@ const Mypage = () => {
             더보기 &gt;
           </span>
         </div>
-        <ul className="order-box">
-          <li>
+        <ul className="order-box" role="list" aria-label="주문 상태">
+          <li role="listitem">
             <em className={`${orderData[1]?.length > 0 && "on"}`}>
               {orderData[1]?.length || 0}
             </em>
@@ -151,7 +151,7 @@ const Mypage = () => {
         </ul>
       </OrderBox>
       {/* 리뷰 */}
-      <OrderBox>
+      <OrderBox role="region" aria-label="리뷰 조회">
         <div className="text-box">
           <div>
             <h2>리뷰 조회</h2>
@@ -168,8 +168,9 @@ const Mypage = () => {
             더보기 &gt;
           </span>
         </div>
-        <ul className="review-box">
+        <ul className="review-box" role="list" aria-label="리뷰 상태">
           <li
+            role="listitem"
             onClick={(event) => {
               event.preventDefault();
               setSearchParams({
@@ -182,6 +183,7 @@ const Mypage = () => {
             <span>작성 가능</span>
           </li>
           <li
+            role="listitem"
             onClick={(event) => {
               event.preventDefault();
               setSearchParams({
@@ -195,7 +197,7 @@ const Mypage = () => {
           </li>
         </ul>
       </OrderBox>
-    </div>
+    </section>
   );
 };
 

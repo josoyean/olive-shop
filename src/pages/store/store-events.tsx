@@ -30,7 +30,7 @@ const StoreEvents = () => {
     handleLoadData();
   }, [handleLoadData]);
   return (
-    <div>
+    <section role="region" aria-label="이벤트">
       <MainLine>
         <Center>
           <div>
@@ -41,8 +41,8 @@ const StoreEvents = () => {
       </MainLine>
       <Center>
         <div>
-          <Tabs>
-            <div className={tabsType === "모든회원" ? "on" : ""}>
+          <Tabs role="tablist" aria-label="이벤트 필터">
+            <div className={tabsType === "모든회원" ? "on" : ""} role="tab" aria-selected={tabsType === "모든회원"}>
               <button
                 type="button"
                 onClick={(event) => {
@@ -55,7 +55,7 @@ const StoreEvents = () => {
                 모든회원
               </button>
             </div>
-            <div className={tabsType === "구매회원" ? "on" : ""}>
+            <div className={tabsType === "구매회원" ? "on" : ""} role="tab" aria-selected={tabsType === "구매회원"}>
               <button
                 type="button"
                 onClick={(event) => {
@@ -68,7 +68,7 @@ const StoreEvents = () => {
                 구매회원
               </button>
             </div>
-            <div className={tabsType === "체험단" ? "on" : ""}>
+            <div className={tabsType === "체험단" ? "on" : ""} role="tab" aria-selected={tabsType === "체험단"}>
               <button
                 type="button"
                 onClick={(event) => {
@@ -138,7 +138,7 @@ const StoreEvents = () => {
           </Container>
         </div>
       </Center>
-    </div>
+    </section>
   );
 };
 

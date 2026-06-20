@@ -61,8 +61,8 @@ const BannerContainer: React.FC = () => {
     navigate(`/store/brand-detail?getBrand=${seq}`);
   };
   return (
-    <div>
-      <BannerWrapper>
+    <section role="region" aria-label="메인 배너">
+      <BannerWrapper role="group" aria-roledescription="슬라이드">
         <Slider className="slider-container" {...settings}>
           {banner?.map((item, index) => (
             <SliderBox
@@ -81,7 +81,7 @@ const BannerContainer: React.FC = () => {
           {slideIndex + 1} / {banner?.length}
         </ButtonWrapper>
       </BannerWrapper>
-    </div>
+    </section>
   );
 };
 

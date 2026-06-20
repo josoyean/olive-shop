@@ -194,7 +194,7 @@ const SignUp = () => {
       <div id="recaptcha-container"></div>
       <Container>
         <h1>회원가입</h1>
-        <FormControl onSubmit={handleSubmit(onSubmit, onError)}>
+        <FormControl onSubmit={handleSubmit(onSubmit, onError)} role="form" aria-label="회원가입 폼">
           <InputWrapper className="input-wrapper">
             <div>
               <span>아이디</span>

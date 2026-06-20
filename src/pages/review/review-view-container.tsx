@@ -16,19 +16,19 @@ const ReviewViewContainer = forwardRef<
   const { viewReview } = props?.data || {};
 
   return (
-    <div ref={ref}>
-      <ObjectBox>
-        <img src={viewReview?.objectInfo?.img} alt="상품" />
-        <div>
-          <strong>{viewReview?.objectInfo?.brand}</strong>
+    <div role="region" aria-label="Review Details" ref={ref}>
+      <ObjectBox role="group">
+        <img role="img" src={viewReview?.objectInfo?.img} alt="상품" />
+        <div role="group">
+          <strong role="heading" aria-level={3}>{viewReview?.objectInfo?.brand}</strong>
           <em>{viewReview?.objectInfo?.name}</em>
         </div>
       </ObjectBox>
-      <RatingBox>
+      <RatingBox role="group" aria-label="Product Rating">
         <strong>상품 평점</strong>
-        <StarBox size="25px">
+        <StarBox role="list" size="25px">
           {[0, 1, 2, 3, 4].map((i) => (
-            <li key={i}>
+            <li role="listitem" key={i}>
               <span
                 className="rating"
                 style={{
@@ -43,9 +43,9 @@ const ReviewViewContainer = forwardRef<
           ))}
         </StarBox>
       </RatingBox>
-      <ReviewBox>
+      <ReviewBox role="group" aria-label="Review Content">
         <strong>상품 리뷰</strong>
-        <div>
+        <div role="article">
           <span
             dangerouslySetInnerHTML={{
               __html: viewReview?.reviewText?.replace(/\n/g, "<br />") ?? "",
@@ -54,11 +54,11 @@ const ReviewViewContainer = forwardRef<
         </div>
       </ReviewBox>
       {(viewReview?.reviewImg || [])?.length > 0 && (
-        <ReviewImgBox>
+        <ReviewImgBox role="group" aria-label="Review Photos">
           <strong>포토</strong>
-          <div>
+          <div role="list">
             {viewReview?.reviewImg?.map((img, index) => (
-              <img key={index} src={img} alt="포토" />
+              <img role="img" key={index} src={img} alt="포토" />
             ))}
           </div>
         </ReviewImgBox>

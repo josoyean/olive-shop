@@ -3,6 +3,8 @@ import styled from "styled-components";
 const ChatButton = () => {
   return (
     <Container
+      role="button"
+      aria-label="Open Chatbot"
       onClick={(event) => {
         event.preventDefault();
         window.open(
@@ -13,6 +15,7 @@ const ChatButton = () => {
       }}
     >
       <img
+        role="img"
         src="https://kcucdvvligporsynuojc.supabase.co/storage/v1/object/sign/images/floating_open.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV8zYTBjYzg1NC1jMWE5LTQ2MTktYTBiNy1iMTdmMGE2ZGE3MWIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvZmxvYXRpbmdfb3Blbi5wbmciLCJpYXQiOjE3NjE1NTE5MjUsImV4cCI6MTc5MzA4NzkyNX0.UQsk8tzy_EcEMqAOKuZgIcnm-H47qMzCQv7Ac8dPsQ4"
         alt="floating_open"
       />

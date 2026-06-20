@@ -4,9 +4,9 @@ import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
 const newObject = () => {
   return (
     <Center>
-      <Wapper>
+      <Wapper role="region" aria-label="New Products">
         {/* <h2>{title}</h2> */}
-        <span>
+        <span role="button">
           다른 상품보기 <RestartAltOutlinedIcon />
         </span>
       </Wapper>
