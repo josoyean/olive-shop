@@ -54,8 +54,8 @@ export function InputWrapper({ children, className, variant = "default" }: Input
       className={cn(
         "flex flex-col items-center gap-[25px]",
         "[&_button]:border-transparent [&_button]:text-[15px]",
-        "[&_button[type=submit]]:bg-primary [&_button[type=submit]]:text-white",
-        "[&_button[type=button]]:bg-black [&_button[type=button]]:text-white",
+        "[&_button[type=submit]]:bg-primary [&_button[type=submit]]:!text-white",
+        "[&_button[type=button]]:bg-black [&_button[type=button]]:!text-white",
         "[&_span]:block [&_span]:w-20 [&_span]:text-sm",
         "[&>div]:relative [&>div]:flex [&>div]:w-[500px] [&>div]:items-center [&>div]:justify-between [&>div]:gap-5",
         "[&>div_em]:absolute [&>div_em]:bottom-[-16px] [&>div_em]:left-[105px] [&>div_em]:text-xs [&>div_em]:text-text-red",

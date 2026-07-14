@@ -1,10 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Center } from "@/components/ui/Center";
 import { Container, InputWrapper } from "@/components/ui/FormElements";
-import { cn } from "@/lib/cn";
 import { useForm, FieldErrors } from "react-hook-form";
-import { db } from "../firebase";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "../firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 import { useCookies } from "react-cookie";
@@ -25,65 +24,109 @@ interface DataType {
   captcha: string;
 }
 
+const DEMO_ACCOUNT = {
+  id: "sykor1016",
+  password: "@uw7905vf@",
+} as const;
+
 const Login = () => {
   const [, setCookie] = useCookies(["token"]);
-  const auth = getAuth();
   const user = useSelector((state: RootState) => state?.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const { register, handleSubmit, setFocus, setValue } = useForm<DataType>({
     defaultValues: { saveId: user.saveId },
   });
 
   const handleSignin = async (email: string, data: DataType) => {
-    await signInWithEmailAndPassword(auth, email, data.password)
-      .then((userCredential) => {
-        const token = userCredential.user.uid;
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        data.password
+      );
+      const token = userCredential.user.uid;
 
-        getUserInfo(token, dispatch)
-          .then(() => {
-            dispatch(
-              add({
-                token: token,
-                saveId: data.saveId,
-                ...(data.saveId ? { userId: data.id } : {}),
-              })
-            );
-            setCookie("token", token, { maxAge: 1 * 24 * 60 * 60 });
-            handleCartItems(token, dispatch, false);
-            navigate(-1);
-          })
-          .catch((error) => {
-            console.log(error);
-            return;
-          });
-      })
-      .catch((error) => {
-        console.log(error);
-        alert("일치한 회원정보가 없습니다.");
-        return;
-      });
+      await getUserInfo(token, dispatch);
+      dispatch(
+        add({
+          token: token,
+          saveId: data.saveId,
+          ...(data.saveId ? { userId: data.id } : {}),
+        })
+      );
+      setCookie("token", token, { maxAge: 1 * 24 * 60 * 60 });
+      handleCartItems(token, dispatch, false);
+      navigate(-1);
+    } catch (error) {
+      console.error(error);
+      alert("일치한 회원정보가 없습니다.");
+    }
   };
 
-  const onSubmit = async (data: DataType) => {
-    if (!validateCaptcha(data.captcha)) {
+  const loginWithCredentials = async (
+    data: Pick<DataType, "id" | "password" | "saveId">
+  ) => {
+    const usersRef = collection(db, "users");
+    const idQuery = query(usersRef, where("id", "==", data.id));
+    const idSnapshot = await getDocs(idQuery);
+
+    if (idSnapshot.empty) {
+      alert("일치한 회원정보가 없습니다.");
+      return;
+    }
+
+    const email = idSnapshot.docs[0].data().email as string;
+    await handleSignin(email, {
+      ...data,
+      captcha: "",
+    });
+  };
+
+  const performLogin = async (
+    data: Pick<DataType, "id" | "password" | "saveId" | "captcha">,
+    options?: { skipCaptcha?: boolean }
+  ) => {
+    if (!options?.skipCaptcha && !validateCaptcha(data.captcha)) {
       alert("자동입력 방지문자를 확인해주세요.");
       setValue("captcha", "");
       return;
     }
 
-    try {
-      const usersRef = collection(db, "users");
-      const id = query(usersRef, where("id", "==", data.id));
+    await loginWithCredentials(data);
+  };
 
-      const idSnapshot = await getDocs(id);
-      if (!idSnapshot.empty) {
-        const email = idSnapshot.docs[0].data().email;
-        handleSignin(email, data);
-      }
+  const onSubmit = async (data: DataType) => {
+    try {
+      await performLogin(data);
     } catch (error) {
-      console.log(error);
       console.error(error);
+      alert("로그인 요청에 실패했습니다. Firebase 설정을 확인해주세요.");
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setValue("id", DEMO_ACCOUNT.id);
+    setValue("password", DEMO_ACCOUNT.password);
+
+    setIsDemoLoading(true);
+    try {
+      // 데모 로그인은 captcha(react-simple-captcha) 검증을 건너뜁니다.
+      await performLogin(
+        {
+          id: DEMO_ACCOUNT.id,
+          password: DEMO_ACCOUNT.password,
+          saveId: false,
+          captcha: "",
+        },
+        { skipCaptcha: true }
+      );
+    } catch (error) {
+      console.error(error);
+      alert("데모 로그인에 실패했습니다. Firebase 설정을 확인해주세요.");
+    } finally {
+      setIsDemoLoading(false);
     }
   };
 
@@ -137,6 +180,28 @@ const Login = () => {
           role="form"
           aria-label="로그인 폼"
         >
+          <div className="mb-6 w-[400px] rounded-md border border-[#c5e08a] bg-[#f7fbee] px-4 py-3.5 text-left [&_button.demo-login-btn]:!w-full">
+            <p className="mb-2 text-sm font-semibold text-text-main">
+              💡 포트폴리오 확인용 계정
+            </p>
+            <p className="text-xs leading-5 text-text-sub">
+              ID : {DEMO_ACCOUNT.id}
+              <br />
+              PW : {DEMO_ACCOUNT.password}
+            </p>
+            <p className="mt-2 text-xs leading-5 text-text-sub">
+              ※ 회원가입 없이 바로 테스트하실 수 있도록 데모 계정을 제공합니다.
+            </p>
+            <button
+              type="button"
+              disabled={isDemoLoading}
+              className="demo-login-btn mt-3 !h-10 !w-full !border-primary !bg-white !text-sm !font-semibold !text-primary disabled:!opacity-60"
+              onClick={handleDemoLogin}
+            >
+              {isDemoLoading ? "로그인 중..." : "데모 계정으로 로그인"}
+            </button>
+          </div>
+
           <InputWrapper className="!gap-2.5">
             <input
               type="text"
@@ -147,6 +212,7 @@ const Login = () => {
               type="password"
               placeholder="비밀번호 (8~12자, 영문+숫자+특수문자)"
               {...register("password", {
+                required: "비밀번호를 입력하세요.",
                 pattern: {
                   value: /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,15}$/,
                   message:
@@ -174,9 +240,6 @@ const Login = () => {
               {...register("captcha", {
                 required: "자동입력 방지문자를 입력하세요.",
               })}
-              onChange={(event) => {
-                setValue("captcha", event.target.value);
-              }}
               maxLength={6}
             />
           </div>
@@ -193,7 +256,7 @@ const Login = () => {
               />
               아이디 저장
             </label>
-            <div>
+            <div className="flex flex-row items-center">
               <span
                 className="relative ml-[15px] block cursor-pointer text-xs text-text-sub after:absolute after:-right-2 after:top-0 after:content-['_|_'] last:after:hidden"
                 onClick={() => {
@@ -213,10 +276,13 @@ const Login = () => {
             </div>
           </div>
 
-          <InputWrapper className="!gap-2.5">
-            <button type="submit">로그인</button>
+          <InputWrapper className="gap-2.5">
+            <button type="submit" className="w-full">
+              로그인
+            </button>
             <button
               type="button"
+              className="w-full"
               onClick={() => {
                 navigate("/signup");
               }}
