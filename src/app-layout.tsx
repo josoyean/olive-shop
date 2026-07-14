@@ -28,7 +28,7 @@ const guestNav: NavItem[] = [
   { name: "회원가입", path: "/signup" },
   { name: "로그인", path: "/login" },
   { name: "장바구니", path: "/login" },
-  { name: "최근 본 상품", path: "" },
+  { name: "최근 본 상품", path: "//" },
 ];
 
 const memberNav: NavItem[] = [
