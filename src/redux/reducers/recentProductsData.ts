@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { CardImageType } from "components/card/card.type";
 
+const MAX_RECENT_PRODUCTS = 12;
+
 const initialState: CardImageType[] = [];
 
 const recentProductsState = createSlice({
@@ -8,22 +10,22 @@ const recentProductsState = createSlice({
   initialState,
   reducers: {
     addProducts: (state, action: PayloadAction<CardImageType>) => {
-      const updatedProducts = [
+      const next = [
         action.payload,
-        ...state.filter((id) => id?.object_seq !== action?.payload?.object_seq),
+        ...state.filter(
+          (item) => item?.object_seq !== action.payload?.object_seq
+        ),
       ];
-      // if (updatedProducts.length > 5) {
-      //   updatedProducts.length = 5;
-      // }
-
-      return updatedProducts;
+      return next.slice(0, MAX_RECENT_PRODUCTS);
     },
-    clearProducts: () => {
-      return []; // 상태 초기값
+    removeProduct: (state, action: PayloadAction<number | undefined>) => {
+      if (action.payload == null) return state;
+      return state.filter((item) => item?.object_seq !== action.payload);
     },
+    clearProducts: () => [],
   },
 });
 
-// 액션 생성자와 리듀서를 내보냄
-export const { addProducts, clearProducts } = recentProductsState.actions;
+export const { addProducts, removeProduct, clearProducts } =
+  recentProductsState.actions;
 export default recentProductsState.reducer;

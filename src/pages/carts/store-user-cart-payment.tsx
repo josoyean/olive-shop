@@ -34,8 +34,8 @@ const informationClasses = cn(
   "[&_.img-wrapper]:relative [&_.img-wrapper]:h-[85px] [&_.img-wrapper]:w-[85px] [&_.img-wrapper]:overflow-hidden [&_.img-wrapper]:rounded-[10px]",
   "[&_.img-wrapper_img]:h-[85px] [&_.img-wrapper_img]:w-[85px]",
   "[&_.img-wrapper_span]:absolute [&_.img-wrapper_span]:bottom-0 [&_.img-wrapper_span]:left-0 [&_.img-wrapper_span]:right-0 [&_.img-wrapper_span]:h-[22px] [&_.img-wrapper_span]:bg-black/50 [&_.img-wrapper_span]:text-center [&_.img-wrapper_span]:text-xs [&_.img-wrapper_span]:leading-[22px] [&_.img-wrapper_span]:text-white",
-  "[&_.infor-wrapper]:max-w-[228px] [&_.infor-wrapper_span]:mb-1 [&_.infor-wrapper_span]:block [&_.infor-wrapper_span]:font-bold [&_.infor-wrapper_span]:text-[#777]",
-  "[&_.infor-wrapper_em]:mb-1 [&_.infor-wrapper_em]:block [&_.infor-wrapper_em]:text-xs [&_.infor-wrapper_em]:font-bold [&_.infor-wrapper_em]:text-[#777]",
+  "[&_.infor-wrapper]:max-w-[228px] [&_.infor-wrapper_span]:mb-1 [&_.infor-wrapper_span]:block [&_.infor-wrapper_span]:font-bold [&_.infor-wrapper_span]:text-[#fff]",
+  "[&_.infor-wrapper_em]:mb-1 [&_.infor-wrapper_em]:block [&_.infor-wrapper_em]:text-xs [&_.infor-wrapper_em]:font-bold [&_.infor-wrapper_em]:text-[#fff]",
   "[&_.infor-wrapper_p]:mb-[5px] [&_.infor-wrapper_p]:line-clamp-2 [&_.infor-wrapper_p]:max-h-9 [&_.infor-wrapper_p]:overflow-hidden [&_.infor-wrapper_p]:text-sm [&_.infor-wrapper_p]:leading-[18px] [&_.infor-wrapper_p]:text-black"
 );
 const tableBoxClasses = cn(
@@ -104,7 +104,9 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
   const userToken = useSelector((state: RootState) => state?.user.token);
   const userInfoData = useSelector((state: RootState) => state?.userInfo);
   const [user, setUser] = useState<UserInfoType | null>(null);
-  const [payment] = useState(null);
+  const [payment, setPayment] = useState<ReturnType<
+    Awaited<ReturnType<typeof loadTossPayments>>["payment"]
+  > | null>(null);
 
   const {
     register,
@@ -220,7 +222,6 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
     async function fetchPayment() {
       try {
         const tossPayments = await loadTossPayments(clientKey);
-        console.log("tossPayments 객체:", tossPayments);
 
         if (typeof tossPayments.payment !== "function") {
           throw new Error(
@@ -228,13 +229,15 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           );
         }
 
-      
+        // 결제창 인스턴스를 만들고 state에 저장해야 requestPayment가 동작합니다.
+        const paymentInstance = tossPayments.payment({ customerKey });
+        setPayment(paymentInstance);
       } catch (error) {
         console.error("Error fetching payment:", error);
       }
     }
     fetchPayment();
-  }, [clientKey, customerKey]);
+  }, []);
 
   const productDate = product?.map((item: CartType) => {
     return {
@@ -257,9 +260,15 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
     };
   }) as PaymentObjectType[];
   const onSubmit = async (data: DataType) => {
-    // test(data);
-    //console.log(data);
-    // return;
+    alert(
+      "테스트(포트폴리오) 환경에서는 실제 결제가 완료되지 않을 수 있습니다.\n확인을 누르면 결제창으로 이동합니다."
+    );
+
+    if (!payment) {
+      alert("결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
     const orderId = moment().format("YYYYMMDDhhmmss");
 
     const PaymentMethod =
@@ -269,55 +278,62 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
         ? "TRANSFER"
         : "CARD";
 
-    await payment?.requestPayment({
-      method: PaymentMethod, // 카드 및 간편결제
-      amount: {
-        currency: "KRW",
-        value:
-          (priceData?.totalPrice ?? 0) >= 20000
-            ? priceData?.totalPrice
-            : (priceData?.totalPrice ?? 0) + 2500,
-        //100,
-      },
-      orderId: orderId, // 고유 주문번호
-      orderName:
-        product[0].name +
-        (product?.length === 1 ? "" : ` 외 ${product?.length - 1}건`),
-      customerEmail: user?.email,
-      customerName: data?.getName,
-      customerMobilePhone: data?.phoneNumber,
-      ...(data.paymentType === "P"
-        ? {}
-        : data.paymentType === "AT"
-        ? {
-            transfer: {
-              cashReceipt: {
-                type: "소득공제",
-              },
-              useEscrow: false,
-            },
-          }
-        : {
-            card: {
-              useEscrow: true,
-              flowMode: "DIRECT", // 자체창 여는 옵션
-              useCardPoint: false,
-              cardInstallmentPlan: !data?.installment ? 0 : data?.installment,
-              useAppCardOnly: false,
-              ...(data.paymentType === "C"
-                ? { cardCompany: data.cardType }
-                : {}),
-              ...(data.paymentType === "N" ? { easyPay: "네이버페이" } : {}),
-              ...(data.paymentType === "T" ? { easyPay: "토스페이" } : {}),
-            },
-          }),
-      metadata: {
-        userId: user.userId,
-        paymentDt: new Date(),
-        orderId: "Y" + orderId,
-      },
-    });
+    const amountValue =
+      (priceData?.totalPrice ?? 0) >= 20000
+        ? priceData?.totalPrice ?? 0
+        : (priceData?.totalPrice ?? 0) + 2500;
 
+    try {
+      await payment.requestPayment({
+        method: PaymentMethod, // 카드 및 간편결제
+        amount: {
+          currency: "KRW",
+          value: amountValue,
+        },
+        orderId: orderId, // 고유 주문번호
+        orderName:
+          (product[0]?.objects?.name ?? product[0]?.name ?? "상품") +
+          (product?.length === 1 ? "" : ` 외 ${product?.length - 1}건`),
+        customerEmail: user?.email,
+        customerName: data?.getName,
+        customerMobilePhone: data?.phoneNumber?.replace(/[^0-9]/g, ""),
+        ...(data.paymentType === "P"
+          ? {}
+          : data.paymentType === "AT"
+          ? {
+              transfer: {
+                cashReceipt: {
+                  type: "소득공제",
+                },
+                useEscrow: false,
+              },
+            }
+          : {
+              card: {
+                useEscrow: true,
+                flowMode: "DIRECT", // 자체창 여는 옵션
+                useCardPoint: false,
+                cardInstallmentPlan: !data?.installment ? 0 : data?.installment,
+                useAppCardOnly: false,
+                ...(data.paymentType === "C"
+                  ? { cardCompany: data.cardType }
+                  : {}),
+                ...(data.paymentType === "N" ? { easyPay: "네이버페이" } : {}),
+                ...(data.paymentType === "T" ? { easyPay: "토스페이" } : {}),
+              },
+            }),
+        metadata: {
+          userId: user?.userId,
+          paymentDt: new Date().toISOString(),
+          orderId: "Y" + orderId,
+        },
+        // 결제수단별 파라미터가 union으로 묶여 SDK 오버로드와 맞지 않아 캐스팅합니다.
+      } as unknown as Parameters<typeof payment.requestPayment>[0]);
+    } catch (error) {
+      console.error("결제 요청 실패:", error);
+      alert("결제가 취소되었거나 실패했습니다.");
+      return;
+    }
     const insertDate = {
       id: undefined, // 넣지 않아도 uuid 자동 생성됨
       userId: userToken,
@@ -698,7 +714,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                         )}
                         <span>{item?.objects?.brand}</span>
                         <p>{item?.objects?.name}</p>
-                        <div className="!justify-normal gap-px">
+                        <div className="!justify-normal gap-px flex flex-row">
                           {item?.objects?.saleItem !== null && (
                             <span className={cn(tagClasses, "bg-sale")}>세일</span>
                           )}
@@ -955,6 +971,9 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           </div>
           <div style={{ width: "40%" }}>
             <h3>최종 결제정보</h3>
+            <p className="mt-2 text-xs leading-5 text-text-sub">
+              ※ 테스트(포트폴리오) 환경에서는 실제 결제가 완료되지 않을 수 있습니다.
+            </p>
             <div className="my-2.5 w-full rounded-sm border-2 border-black p-[15px] [&_li]:flex [&_li]:justify-between [&_li]:py-2 [&_li>*]:text-sm [&_li>*]:text-[#222] [&_li_span]:font-semibold [&_li_span.color]:text-star [&_.total]:mt-2.5 [&_.total]:border-t [&_.total]:border-black [&_.total_li]:p-3 [&_.total_li>*]:text-[17px] [&_.total_li>*]:font-semibold [&_.total_button]:block [&_.total_button]:w-full [&_.total_button]:rounded-[5px] [&_.total_button]:bg-star [&_.total_button]:p-[15px] [&_.total_button]:text-[19px] [&_.total_button]:text-white">
               <ul>
                 <li>

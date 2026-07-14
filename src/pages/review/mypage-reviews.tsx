@@ -297,7 +297,7 @@ const MypageReviews = () => {
                                     }}
                                   />
                                   <img
-                                    src="/public/assets/images/icons/bg_rating_star.png"
+                                    src="/assets/images/icons/bg_rating_star.png"
                                     alt="bg_rating_star"
                                   />
                                 </li>

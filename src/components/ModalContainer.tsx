@@ -34,23 +34,34 @@ const customStyles: ReactModal.Styles = {
     position: "relative",
     maxWidth: "90%",
     width: "60%",
-    height: "fit-content",
-    maxHeight: "90%",
+    height: "auto",
+    maxHeight: "90vh",
     borderRadius: "6px",
     padding: 0,
     inset: 0,
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
   },
 };
+
+type ModalButtonVariant = "default" | "primary";
 
 export function ModalButton({
   className,
   children,
+  variant = "default",
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: ModalButtonVariant;
+}) {
   return (
     <button
       className={cn(
-        "ml-[17px] flex h-9 w-auto cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md border-none bg-[#edf2f7] px-3 py-1.5 text-sm font-semibold leading-4 text-[#1a202c] outline-none hover:bg-[#e2e8f0] [&_img]:w-3.5",
+        "inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-semibold transition-colors outline-none",
+        variant === "primary"
+          ? "bg-primary text-white hover:bg-[#0e5fe0]"
+          : "bg-[#edf2f7] text-text-main hover:bg-[#e2e8f0]",
         className
       )}
       {...props}
@@ -66,6 +77,7 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
   onClose,
   overlayStyle,
   widthCheck,
+  heightCheck,
   header,
   style,
   handleOk,
@@ -84,7 +96,12 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
     } else {
       document.body.style.overflowY = "auto";
     }
+
+    return () => {
+      document.body.style.overflowY = "auto";
+    };
   }, [isOpen]);
+
   return (
     <Modal
       isOpen={isOpen}
@@ -101,13 +118,15 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
         content: {
           ...customStyles.content,
           width: widthCheck,
+          height: heightCheck || "auto",
+          maxHeight: heightCheck || "90vh",
           ...style,
         },
       }}
       shouldCloseOnOverlayClick={false}
     >
-      <div className="flex flex-col px-6">
-        <div className="flex items-center justify-between border-b-2 border-black py-3 [&>div]:w-1/3 [&>div:nth-of-type(2)]:text-center [&_h4]:whitespace-nowrap">
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex shrink-0 items-center justify-between border-b-2 border-black px-6 py-3 [&>div]:w-1/3 [&>div:nth-of-type(2)]:text-center [&_h4]:whitespace-nowrap">
           {(width ?? 0) < 992 ? (
             <>
               <div>
@@ -120,7 +139,10 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
               </div>
               <div>
                 {typeof header === "string" ? (
-                  <h4 id="modal-title" style={{ color: "#171923", fontSize: "18px", margin: 0 }}>
+                  <h4
+                    id="modal-title"
+                    style={{ color: "#171923", fontSize: "18px", margin: 0 }}
+                  >
                     {header}
                   </h4>
                 ) : (
@@ -133,7 +155,10 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
             <>
               <div>
                 {typeof header === "string" ? (
-                  <h4 id="modal-title" style={{ color: "#171923", fontSize: "18px", margin: 0 }}>
+                  <h4
+                    id="modal-title"
+                    style={{ color: "#171923", fontSize: "18px", margin: 0 }}
+                  >
                     {header}
                   </h4>
                 ) : (
@@ -143,28 +168,39 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
 
               <div></div>
 
-              <div className="flex items-center justify-end">
+              <div className="flex items-center justify-end gap-2">
                 {buttons}
-                <ModalButton onClick={() => onClose()}>
-                  <img
-                    alt={"XButton"}
-                    src="/public/assets/images/icons/left-icon.svg"
-                  />
-                </ModalButton>
+                <button
+                  type="button"
+                  aria-label="닫기"
+                  onClick={() => onClose()}
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-text-sub transition-colors hover:bg-[#f1f3f5] hover:text-text-main"
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                    <path
+                      d="M1 1l10 10M11 1L1 11"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
               </div>
             </>
           )}
         </div>
 
-        <div className={cn("h-full", handleOk === undefined && "remove_scrollbar")}>
+        <div className="min-h-0 flex-1 overflow-y-auto px-6">
           {children}
         </div>
-        <div className="footer flex items-center justify-between py-3">
+
+        <div className="footer flex shrink-0 items-center justify-between border-t border-line-sub px-6 py-3">
           {footerText ? <div>{footerText}</div> : <div></div>}
           <div className="flex items-center justify-end">
             <ModalButton
               type="submit"
-              style={{ color: "#fff", background: "#3279F5" }}
+              variant="primary"
               onClick={(event) => {
                 if (formRef?.current) {
                   formRef?.current.requestSubmit();
@@ -183,4 +219,5 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
     </Modal>
   );
 };
+
 export default ModalContainer;

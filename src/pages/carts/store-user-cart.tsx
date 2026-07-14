@@ -25,7 +25,7 @@ export interface PriceType {
   [key: string]: number;
 }
 
-const tagClasses = "text-white px-1.5 py-0.5 rounded-[10px] text-xs mr-0.5";
+const tagClasses = "text-white px-1.5 py-0.5 rounded-[10px] text-xs mr-0.5 text-white";
 const buttonBoxClasses =
   "text-center [&_button]:h-7 [&_button]:w-[95px] [&_button]:rounded-[5px] [&_button]:px-[5px] [&_button]:text-xs [&_button]:leading-7";
 const informationClasses = cn(
@@ -33,8 +33,8 @@ const informationClasses = cn(
   "[&_.img-wrapper]:relative [&_.img-wrapper]:h-[85px] [&_.img-wrapper]:w-[85px] [&_.img-wrapper]:overflow-hidden [&_.img-wrapper]:rounded-[10px]",
   "[&_.img-wrapper_img]:h-[85px] [&_.img-wrapper_img]:w-[85px]",
   "[&_.img-wrapper_span]:absolute [&_.img-wrapper_span]:bottom-0 [&_.img-wrapper_span]:left-0 [&_.img-wrapper_span]:right-0 [&_.img-wrapper_span]:h-[22px] [&_.img-wrapper_span]:bg-black/50 [&_.img-wrapper_span]:text-center [&_.img-wrapper_span]:text-xs [&_.img-wrapper_span]:leading-[22px] [&_.img-wrapper_span]:text-white",
-  "[&_.infor-wrapper]:max-w-[228px] [&_.infor-wrapper_span]:mb-1 [&_.infor-wrapper_span]:block [&_.infor-wrapper_span]:font-bold [&_.infor-wrapper_span]:text-[#777]",
-  "[&_.infor-wrapper_em]:mb-1 [&_.infor-wrapper_em]:block [&_.infor-wrapper_em]:text-xs [&_.infor-wrapper_em]:font-bold [&_.infor-wrapper_em]:text-[#777]",
+  "[&_.infor-wrapper]:max-w-[228px] [&_.infor-wrapper_span]:mb-1 [&_.infor-wrapper_span]:block [&_.infor-wrapper_span]:font-bold [&_.infor-wrapper_span]:text-[#fff]",
+  "[&_.infor-wrapper_em]:mb-1 [&_.infor-wrapper_em]:block [&_.infor-wrapper_em]:text-xs [&_.infor-wrapper_em]:font-bold [&_.infor-wrapper_em]:text-[#fff]",
   "[&_.infor-wrapper_p]:mb-[5px] [&_.infor-wrapper_p]:line-clamp-2 [&_.infor-wrapper_p]:max-h-9 [&_.infor-wrapper_p]:overflow-hidden [&_.infor-wrapper_p]:text-sm [&_.infor-wrapper_p]:leading-[18px] [&_.infor-wrapper_p]:text-black"
 );
 
@@ -362,7 +362,7 @@ const StoreUserCart = () => {
                               <span>{product?.brand}</span>
 
                               <p>{product?.name}</p>
-                              <div className="!justify-normal gap-px">
+                              <div className="!justify-normal gap-px flex flex-row">
                                 {product?.sale && (
                                   <span className={cn(tagClasses, "bg-sale")}>
                                     세일

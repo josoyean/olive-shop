@@ -14,8 +14,7 @@ const objectBoxClass = cn(
   "flex gap-5 border-b border-line-main py-5",
   "[&>div]:flex [&>div]:flex-col [&>div]:gap-[7px] [&>div]:pt-[5px]",
   "[&>div_em]:block [&>div_em]:overflow-hidden [&>div_em]:text-sm",
-  "[&>div_strong]:text-sm [&>div_span]:text-sm [&>div_span]:font-semibold",
-  "[&>img]:h-[90px] [&>img]:w-[90px] [&>img]:rounded-[3px]"
+  "[&>div_strong]:text-sm [&>div_span]:text-sm [&>div_span]:font-semibold"
 );
 
 const ratingBoxClass = cn(
@@ -26,23 +25,46 @@ const ratingBoxClass = cn(
 const reviewBoxClass =
   "py-5 [&>div]:min-h-[150px] [&>div]:rounded-[7px] [&>div]:border [&>div]:border-line-main [&>div]:p-[5px] [&>div_span]:text-[13px] [&>strong]:mb-[15px] [&>strong]:block";
 
-const reviewImgBoxClass = cn(
-  "[&>div]:mt-[15px] [&>div]:grid [&>div]:grid-cols-[repeat(5,120px)] [&>div]:justify-between",
-  "[&>div_img]:h-[120px] [&>div_img]:w-[120px] [&>div_img]:rounded-[5px] [&>div_img]:border [&>div_img]:border-line-main"
-);
+function getReviewPhotos(reviewImg?: string[] | string | null): string[] {
+  if (!reviewImg) return [];
+  if (Array.isArray(reviewImg)) {
+    return reviewImg.filter((img): img is string => typeof img === "string" && img.length > 0);
+  }
+  if (typeof reviewImg === "string") {
+    try {
+      const parsed = JSON.parse(reviewImg);
+      return Array.isArray(parsed)
+        ? parsed.filter((img): img is string => typeof img === "string" && img.length > 0)
+        : [];
+    } catch {
+      return reviewImg.startsWith("data:") || reviewImg.startsWith("http")
+        ? [reviewImg]
+        : [];
+    }
+  }
+  return [];
+}
 
 const ReviewViewContainer = forwardRef<
   HTMLFormElement | HTMLInputElement,
   ReviewProps
 >((props, ref) => {
   const { viewReview } = props?.data || {};
+  const photos = getReviewPhotos(viewReview?.reviewImg);
 
   return (
     <div role="region" aria-label="Review Details" ref={ref}>
       <div className={objectBoxClass} role="group">
-        <img role="img" src={viewReview?.objectInfo?.img} alt="상품" />
+        <img
+          role="img"
+          src={viewReview?.objectInfo?.img}
+          alt="상품"
+          className="h-[90px] w-[90px] shrink-0 rounded-[3px] object-cover"
+        />
         <div role="group">
-          <strong role="heading" aria-level={3}>{viewReview?.objectInfo?.brand}</strong>
+          <strong role="heading" aria-level={3}>
+            {viewReview?.objectInfo?.brand}
+          </strong>
           <em>{viewReview?.objectInfo?.name}</em>
         </div>
       </div>
@@ -58,7 +80,7 @@ const ReviewViewContainer = forwardRef<
                 }}
               />
               <img
-                src="/public/assets/images/icons/bg_rating_star.png"
+                src="/assets/images/icons/bg_rating_star.png"
                 alt="bg_rating_star"
               />
             </li>
@@ -75,12 +97,29 @@ const ReviewViewContainer = forwardRef<
           ></span>
         </div>
       </div>
-      {(viewReview?.reviewImg || [])?.length > 0 && (
-        <div className={reviewImgBoxClass} role="group" aria-label="Review Photos">
-          <strong>포토</strong>
-          <div role="list">
-            {viewReview?.reviewImg?.map((img, index) => (
-              <img role="img" key={index} src={img} alt="포토" />
+      {photos.length > 0 && (
+        <div className="pb-5" role="group" aria-label="Review Photos">
+          <strong className="mb-[15px] block">포토</strong>
+          <div role="list" className="grid grid-cols-5 gap-3">
+            {photos.map((img, index) => (
+              <div
+                role="listitem"
+                key={`${img.slice(0, 24)}-${index}`}
+                className="overflow-hidden rounded-[5px] border border-line-main bg-[#f6f7f8]"
+                style={{ width: 120, height: 120 }}
+              >
+                <img
+                  role="img"
+                  src={img}
+                  alt={`리뷰 포토 ${index + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+              </div>
             ))}
           </div>
         </div>

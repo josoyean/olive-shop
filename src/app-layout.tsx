@@ -36,7 +36,7 @@ const memberNav: NavItem[] = [
   { name: "마이페이지", path: "/store/mypage?t_page=마이페이지" },
   { name: "주문배송", path: "/store/mypage?t_page=주문배송" },
   { name: "장바구니", path: "/store/mypage/user-cart?t_header_type=1" },
-  { name: "최근 본 상품", path: "" },
+  { name: "최근 본 상품", path: "//" },
 ];
 
 const gnbNav: NavItem[] = [

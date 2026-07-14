@@ -26,8 +26,7 @@ const objectBoxClass = cn(
   "flex cursor-pointer gap-5 border-b border-line-main py-5",
   "[&>div]:flex [&>div]:flex-col [&>div]:gap-[7px] [&>div]:pt-[5px]",
   "[&>div_em]:block [&>div_em]:overflow-hidden [&>div_em]:text-sm",
-  "[&>div_strong]:text-sm [&>div_span]:text-sm [&>div_span]:font-semibold",
-  "[&>img]:h-[90px] [&>img]:w-[90px] [&>img]:rounded-[3px]"
+  "[&>div_strong]:text-sm [&>div_span]:text-sm [&>div_span]:font-semibold"
 );
 
 const ratingBoxClass = cn(
@@ -37,14 +36,6 @@ const ratingBoxClass = cn(
 
 const reviewBoxClass =
   "py-5 pb-10 [&>em]:mt-[5px] [&>em]:block [&>em]:float-right [&>em]:text-[13px] [&>em]:text-[#ff3d47] [&>strong]:mb-[15px] [&>strong]:block";
-
-const reviewImgBoxClass = cn(
-  "[&>div]:mt-[15px] [&>div]:grid [&>div]:grid-cols-[repeat(5,120px)] [&>div]:justify-between",
-  "[&_.review-preview-img__btns]:relative [&_.review-preview-img__btns]:h-[120px] [&_.review-preview-img__btns]:w-[120px] [&_.review-preview-img__btns]:border [&_.review-preview-img__btns]:border-line-main",
-  "[&_.review-preview-img__btns_img]:h-full [&_.review-preview-img__btns_img]:w-full",
-  "[&_.thumbnailClearBtn]:absolute [&_.thumbnailClearBtn]:right-[5px] [&_.thumbnailClearBtn]:top-[5px] [&_.thumbnailClearBtn]:block [&_.thumbnailClearBtn]:h-5 [&_.thumbnailClearBtn]:w-5 [&_.thumbnailClearBtn]:cursor-pointer",
-  "[&_.thumbnailFile]:flex [&_.thumbnailFile]:h-full [&_.thumbnailFile]:w-full [&_.thumbnailFile]:items-center [&_.thumbnailFile]:justify-center [&_.thumbnailFile]:rounded-[5px] [&_.thumbnailFile_img]:h-10 [&_.thumbnailFile_img]:w-10"
-);
 
 const ReviewWriteContainer = forwardRef<
   HTMLFormElement | HTMLInputElement,
@@ -105,14 +96,18 @@ const ReviewWriteContainer = forwardRef<
   useEffect(() => {}, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e?.target?.files?.[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setReviewImages((prevState) => [...prevState, reader.result as string]);
+      if (typeof reader.result !== "string") return;
+      setReviewImages((prev) =>
+        prev.length >= 5 ? prev : [...prev, reader.result as string]
+      );
     };
     reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
   const onSubmit = async (data: DataType) => {
@@ -162,9 +157,16 @@ const ReviewWriteContainer = forwardRef<
   return (
     <form role="form" ref={ref} onSubmit={handleSubmit(onSubmit, onError)}>
       <div className={objectBoxClass} role="group">
-        <img role="img" src={selectReview?.img} alt="상품" />
+        <img
+          role="img"
+          src={selectReview?.img}
+          alt="상품"
+          className="h-[90px] w-[90px] shrink-0 rounded-[3px] object-cover"
+        />
         <div role="group">
-          <strong role="heading" aria-level={3}>{selectReview?.brand}</strong>
+          <strong role="heading" aria-level={3}>
+            {selectReview?.brand}
+          </strong>
           <em>{selectReview?.name}</em>
         </div>
       </div>
@@ -231,55 +233,82 @@ const ReviewWriteContainer = forwardRef<
           {(watchTextValue && getValues("textValue")?.length) || 0} / 1,000
         </em>
       </div>
-      <div className={reviewImgBoxClass} role="group" aria-label="Review Photos">
-        <strong>포토</strong>
-        <div role="list">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div className="review-preview-img__btns" role="listitem" key={index}>
-              <input
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleImageUpload}
-                ref={fileInputRef}
-              />
-              {!reviewImages[index] ? (
-                <span
-                  role="button"
-                  className="thumbnailFile"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    fileInputRef?.current?.click();
-                  }}
-                >
-                  <img
-                    src="/public/assets/images/icons/ico_preview_cancel.png"
-                    alt="삭제 버튼 이미지"
-                    style={{ transform: "rotate(45deg)" }}
-                  />
-                </span>
-              ) : (
-                <img role="img" src={reviewImages[index]} alt="" />
-              )}
-              {!reviewImages[index] || (
-                <span
-                  role="button"
-                  className="thumbnailClearBtn"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setReviewImages(
-                      reviewImages.filter((_, idx) => idx !== index)
-                    );
-                  }}
-                >
-                  <img
-                    src="/public/assets/images/icons/ico_preview_cancel.png"
-                    alt="삭제 버튼 이미지"
-                  />
-                </span>
-              )}
-            </div>
-          ))}
+      <div className="pb-2" role="group" aria-label="Review Photos">
+        <strong className="mb-[15px] block">포토</strong>
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageUpload}
+          ref={fileInputRef}
+        />
+        <div role="list" className="grid grid-cols-5 gap-3">
+          {Array.from({ length: 5 }).map((_, index) => {
+            const image = reviewImages[index];
+
+            return (
+              <div
+                className="relative overflow-hidden rounded-[5px] border border-line-main bg-[#f6f7f8]"
+                role="listitem"
+                key={index}
+                style={{ width: 120, height: 120 }}
+              >
+                {!image ? (
+                  <button
+                    type="button"
+                    className="flex h-full w-full items-center justify-center"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      if (reviewImages.length >= 5) return;
+                      fileInputRef.current?.click();
+                    }}
+                  >
+                    <img
+                      src="/assets/images/icons/ico_preview_cancel.png"
+                      alt="포토 추가"
+                      style={{
+                        width: 40,
+                        height: 40,
+                        transform: "rotate(45deg)",
+                        display: "block",
+                      }}
+                    />
+                  </button>
+                ) : (
+                  <>
+                    <img
+                      role="img"
+                      src={image}
+                      alt={`리뷰 포토 ${index + 1}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-1 top-1 flex items-center justify-center"
+                      style={{ width: 20, height: 20 }}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setReviewImages((prev) =>
+                          prev.filter((_, idx) => idx !== index)
+                        );
+                      }}
+                    >
+                      <img
+                        src="/assets/images/icons/ico_preview_cancel.png"
+                        alt="포토 삭제"
+                        style={{ width: 20, height: 20, display: "block" }}
+                      />
+                    </button>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </form>
