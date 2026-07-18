@@ -12,6 +12,7 @@ import {
   allDeleteSearchText,
   saveToggle,
 } from "../redux/reducers/userSearch";
+import { X } from "lucide-react";
 
 const Search = ({
   searchValue,
@@ -103,6 +104,8 @@ const Search = ({
                         {item}
                       </span>
                       <em
+                        role="button"
+                        aria-label="검색어 삭제"
                         onClick={(event) => {
                           event.preventDefault();
                           event.stopPropagation();
@@ -116,7 +119,7 @@ const Search = ({
                           setOpenedSearch(false);
                         }}
                       >
-                        X
+                        <X className="h-4 w-4" aria-hidden />
                       </em>
                     </div>
                   ))}

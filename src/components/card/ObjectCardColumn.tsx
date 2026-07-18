@@ -8,7 +8,7 @@ import { ProductTags } from "../product/ProductTags";
 import { useAddToCart } from "@/hooks/useAddToCart";
 import { cn } from "@/lib/cn";
 
-const ObjectCardColumn: React.FC<CardProps> = ({ size, data, onClick }) => {
+const ObjectCardColumn: React.FC<CardProps & { position?: 'right' | 'left' }> = ({ size, data, onClick ,position = 'left'}) => {
   const navigate = useNavigate();
   const { handleAddToCart, cartIconUrl } = useAddToCart();
 
@@ -68,6 +68,7 @@ const ObjectCardColumn: React.FC<CardProps> = ({ size, data, onClick }) => {
       {data && (
         <BestIcon
           best={data.best || false}
+          position={position}
           today={
             moment().isBetween(
               data.saleItem?.start_today_sale_date,

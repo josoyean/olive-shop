@@ -26,6 +26,7 @@ import ModalContainer from "../../components/ModalContainer";
 import { Center } from "@/components/ui/Center";
 import { StarBox } from "@/components/ui/FormElements";
 import { cn } from "@/lib/cn";
+import { Minus, Plus } from "lucide-react";
 
 function GraphBar({ height }: { height: string }) {
   return (
@@ -344,7 +345,7 @@ const StoreGoodsDetail = () => {
                       setBuyCount((preState) => preState - 1);
                     }}
                   >
-                    <em>-</em>
+                    <Minus className="h-5 w-5" aria-hidden />
                   </button>
                   <span
                     className={cn(
@@ -365,7 +366,7 @@ const StoreGoodsDetail = () => {
                       setBuyCount((preState) => preState + 1);
                     }}
                   >
-                    <em>+</em>
+                    <Plus className="h-5 w-5" aria-hidden />
                   </button>
                 </div>
               </div>

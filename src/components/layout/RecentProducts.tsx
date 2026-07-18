@@ -9,6 +9,7 @@ import {
 import { handlePrice, handleSaleTF } from "@/utils/common";
 import type { CardImageType } from "@/components/card/card.type";
 import { ClickAwayListener, ClickAwayListenerProps } from "@mui/material";
+import { X } from "lucide-react";
 
 const RecentProducts = ({
   onClickAway,
@@ -65,7 +66,7 @@ const RecentProducts = ({
                 onClose();
               }}
             >
-              ×
+              <X className="h-4 w-4" aria-hidden />
             </button>
           </div>
         </div>
@@ -135,7 +136,7 @@ const RecentProducts = ({
                       dispatch(removeProduct(item.object_seq));
                     }}
                   >
-                    ×
+                    <X className="h-3 w-3" aria-hidden />
                   </button>
                 </li>
               );

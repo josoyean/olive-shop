@@ -17,6 +17,7 @@ import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import { GUB_MENU } from "@/constants/navigation";
 import { cn } from "@/lib/cn";
+import { ChevronRight } from "lucide-react";
 
 interface NavItem {
   name: string;
@@ -140,9 +141,9 @@ const AppLayout: React.FC = () => {
           <div
             className={cn(
               "[&_.subNav]:flex [&_.subNav]:justify-end [&_.subNav]:gap-[15px]",
-              "[&_.subNav_img]:cursor-pointer [&_.subNav_img:focus]:outline [&_.subNav_img:focus]:outline-2 [&_.subNav_img:focus]:outline-primary [&_.subNav_img:focus]:outline-offset-2",
+              "[&_.subNav_img]:cursor-pointer",
               "[&_.subNav>span]:relative [&_.subNav>span]:block [&_.subNav>span]:cursor-pointer [&_.subNav>span]:text-xs [&_.subNav>span]:text-text-sub",
-              "[&_.subNav>span:focus]:outline [&_.subNav>span:focus]:outline-2 [&_.subNav>span:focus]:outline-primary [&_.subNav>span:focus]:outline-offset-2",
+              "[&_.subNav>span:focus]:outline ",
               "[&_.subNavBtn]:after:absolute [&_.subNavBtn]:after:right-[-8px] [&_.subNavBtn]:after:top-0 [&_.subNavBtn]:after:content-['_|_']",
               "[&_.nav]:mt-5 [&_.nav]:flex [&_.nav]:items-end [&_.nav]:justify-between",
               "[&_#my-tooltip-click]:left-0 [&_#my-tooltip-click]:top-5 [&_#my-tooltip-click]:opacity-100"
@@ -221,7 +222,7 @@ const AppLayout: React.FC = () => {
         </Center>
 
         <div className="mt-[30px] h-[47px] border-t border-line-main border-b-2 border-b-[#555]">
-          <Center className="relative z-[900] flex h-full items-center border-x border-line-main [&_.gub-btn]:flex [&_.gub-btn]:w-[170px] [&_.gub-btn]:cursor-pointer [&_.gub-btn]:items-center [&_.gub-btn]:justify-center [&_.gub-btn]:gap-2.5 [&_.gub-btn]:text-base [&_.gub-btn]:text-black [&_.gub-btn_span]:text-base [&_.gub-btn_span]:font-bold [&_.gub-btn_span]:text-black [&_.gub-btn:focus]:outline [&_.gub-btn:focus]:outline-2 [&_.gub-btn:focus]:outline-primary [&_.gub-btn:focus]:outline-offset-[-2px] [&_.gub-menu]:flex [&_.gub-menu]:h-[47px] [&_.gub-menu]:w-[calc(100%-170px)] [&_.gub-menu]:cursor-pointer [&_.gub-menu]:gap-[15px] [&_.gub-menu_li]:flex [&_.gub-menu_li]:items-center [&_.gub-menu_li]:gap-2.5 [&_.gub-menu_li]:px-[15px] [&_.gub-menu_li:focus]:outline [&_.gub-menu_li:focus]:outline-2 [&_.gub-menu_li:focus]:outline-primary [&_.gub-menu_li:focus]:outline-offset-[-2px] [&_.gub-menu_li:first-child]:border-l [&_.gub-menu_li:first-child]:border-line-main [&_.gub-menu_li:hover_span]:!text-primary [&_.gub-menu_li:focus_span]:!text-primary [&_.gub-menu_li_span]:relative [&_.gub-menu_li_span]:text-base [&_.gub-menu_li_span]:font-bold [&_.gub-menu_li_span]:text-black [&_.gub-menu_li_span]:after:absolute [&_.gub-menu_li_span]:after:bottom-[-1px] [&_.gub-menu_li_span]:after:left-1/2 [&_.gub-menu_li_span]:after:block [&_.gub-menu_li_span]:after:h-0.5 [&_.gub-menu_li_span]:after:w-0 [&_.gub-menu_li_span]:after:-translate-x-1/2 [&_.gub-menu_li_span]:after:bg-primary [&_.gub-menu_li_span]:after:transition-[width] [&_.gub-menu_li_span]:after:duration-150 [&_.gub-menu_li_span]:after:content-[''] [&_.gub-menu_li:hover_span]:after:w-full [&_.gub-menu_li:focus_span]:after:w-full [&_.gub-menu_img]:h-5 [&_.gub-menu_img]:w-5 [&_.open-gub]:absolute [&_.open-gub]:top-[46px] [&_.open-gub]:left-0 [&_.open-gub]:right-0 [&_.open-gub]:z-[999] [&_.open-gub]:grid [&_.open-gub]:w-full [&_.open-gub]:grid-cols-7 [&_.open-gub]:border [&_.open-gub]:border-line-main [&_.open-gub]:bg-white [&_.open-gub]:p-[18px] [&_.open-gub_h2]:mb-[15px] [&_.open-gub_h2]:pb-[5px] [&_.open-gub_h3]:cursor-pointer [&_.open-gub_h3:focus]:outline [&_.open-gub_h3:focus]:outline-2 [&_.open-gub_h3:focus]:outline-primary [&_.open-gub_h3:focus]:outline-offset-2 [&_.open-gub_li]:cursor-pointer [&_.open-gub_li]:text-sm [&_.open-gub_li]:whitespace-normal [&_.open-gub_li:focus]:outline [&_.open-gub_li:focus]:outline-2 [&_.open-gub_li:focus]:outline-primary [&_.open-gub_li:focus]:outline-offset-2 [&_.open-gub_ul]:mt-[5px] [&_.open-gub_ul]:flex [&_.open-gub_ul]:flex-col [&_.open-gub_ul]:gap-[5px] [&_.main-title]:w-[95%] [&_.main-title]:border-b [&_.main-title]:border-line-main [&_.main-title]:text-2xl [&_.sub-menu]:grid [&_.sub-menu]:gap-[15px]">
+          <Center className="relative z-[900] flex h-full items-center border-x border-line-main [&_.gub-btn]:flex [&_.gub-btn]:w-[170px] [&_.gub-btn]:cursor-pointer [&_.gub-btn]:items-center [&_.gub-btn]:justify-center [&_.gub-btn]:gap-2.5 [&_.gub-btn]:text-base [&_.gub-btn]:text-black [&_.gub-btn_span]:text-base [&_.gub-btn_span]:font-bold [&_.gub-btn_span]:text-black  [&_.gub-btn:focus]:outline-offset-[-2px] [&_.gub-menu]:flex [&_.gub-menu]:h-[47px] [&_.gub-menu]:w-[calc(100%-170px)] [&_.gub-menu]:cursor-pointer [&_.gub-menu]:gap-[15px] [&_.gub-menu_li]:flex [&_.gub-menu_li]:items-center [&_.gub-menu_li]:gap-2.5 [&_.gub-menu_li]:px-[15px] [&_.gub-menu_li:first-child]:border-l [&_.gub-menu_li:first-child]:border-line-main [&_.gub-menu_li:hover_span]:!text-primary [&_.gub-menu_li:focus_span]:!text-primary [&_.gub-menu_li_span]:relative [&_.gub-menu_li_span]:text-base [&_.gub-menu_li_span]:font-bold [&_.gub-menu_li_span]:text-black [&_.gub-menu_li_span]:after:absolute [&_.gub-menu_li_span]:after:bottom-[-1px] [&_.gub-menu_li_span]:after:left-1/2 [&_.gub-menu_li_span]:after:block [&_.gub-menu_li_span]:after:h-0.5 [&_.gub-menu_li_span]:after:w-0 [&_.gub-menu_li_span]:after:-translate-x-1/2 [&_.gub-menu_li_span]:after:bg-primary [&_.gub-menu_li_span]:after:transition-[width] [&_.gub-menu_li_span]:after:duration-150 [&_.gub-menu_li_span]:after:content-[''] [&_.gub-menu_li:hover_span]:after:w-full [&_.gub-menu_li:focus_span]:after:w-full [&_.gub-menu_img]:h-5 [&_.gub-menu_img]:w-5 [&_.open-gub]:absolute [&_.open-gub]:top-[46px] [&_.open-gub]:left-0 [&_.open-gub]:right-0 [&_.open-gub]:z-[999] [&_.open-gub]:grid [&_.open-gub]:w-full [&_.open-gub]:grid-cols-7 [&_.open-gub]:border [&_.open-gub]:border-line-main [&_.open-gub]:bg-white [&_.open-gub]:p-[18px] [&_.open-gub_h2]:mb-[15px] [&_.open-gub_h2]:pb-[5px] [&_.open-gub_h3]:cursor-pointer [&_.open-gub_li]:cursor-pointer [&_.open-gub_li]:text-sm [&_.open-gub_li]:whitespace-normal [&_.open-gub_ul]:mt-[5px] [&_.open-gub_ul]:flex [&_.open-gub_ul]:flex-col [&_.open-gub_ul]:gap-[5px] [&_.main-title]:w-[95%] [&_.main-title]:border-b [&_.main-title]:border-line-main [&_.main-title]:text-2xl [&_.sub-menu]:grid [&_.sub-menu]:gap-[15px]">
             <div
               ref={gubRef}
               className="gub-btn"
@@ -310,7 +311,10 @@ const AppLayout: React.FC = () => {
                               }
                             }}
                           >
-                            {items.title.name} &gt;
+                            <span className="inline-flex items-center gap-0.5">
+                              {items.title.name}
+                              <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
+                            </span>
                           </h3>
                           <ul role="menu">
                             {items.sub.map((item) => (

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Center } from "@/components/ui/Center";
 import { TableWrapper } from "@/components/ui/FormElements";
 import { cn } from "@/lib/cn";
+import { ChevronRight, Minus, Plus } from "lucide-react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/redux/store";
@@ -181,7 +182,10 @@ const StoreUserCart = () => {
                 headerType === "1" && "text-black"
               )}
             >
-              01 장바구니 &gt;
+              <span className="inline-flex items-center gap-0.5">
+                01 장바구니
+                <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
+              </span>
             </span>
             <span
               className={cn(
@@ -189,7 +193,10 @@ const StoreUserCart = () => {
                 headerType === "2" && "text-black"
               )}
             >
-              02 주문/결제 &gt;
+              <span className="inline-flex items-center gap-0.5">
+                02 주문/결제
+                <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
+              </span>
             </span>
             <span
               className={cn(
@@ -610,12 +617,16 @@ const StoreUserCart = () => {
                   <div className="total">
                     <p>총 판매가</p>
                     <span>{(price?.totalCount ?? 0).toLocaleString()}원</span>
-                    <em>-</em>
+                    <em>
+                      <Minus className="h-6 w-6" aria-hidden />
+                    </em>
                   </div>
                   <div className="discount [&_span]:text-star">
                     <p>총 할인금액</p>
                     <span>{(price?.disCount ?? 0).toLocaleString()}원</span>
-                    <em>+</em>
+                    <em>
+                      <Plus className="h-6 w-6" aria-hidden />
+                    </em>
                   </div>
                   <div className="delivery">
                     <p>총 배송비</p>

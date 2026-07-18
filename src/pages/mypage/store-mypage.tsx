@@ -6,6 +6,7 @@ import {
   WhiteButton,
 } from "@/components/ui/FormElements";
 import { cn } from "@/lib/cn";
+import { ChevronRight } from "lucide-react";
 import Nav from "./nav";
 import { useSearchParams } from "react-router-dom";
 import type { RootState } from "../../redux/store";
@@ -137,7 +138,10 @@ const StoreMypage = () => {
                   setOpenedMyInfo(true);
                 }}
               >
-                나의 프로필 변경 &gt;
+                <span className="inline-flex items-center gap-0.5">
+                  나의 프로필 변경
+                  <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                </span>
               </span>
             </div>
             <div className="bottom-box border border-[#ccc] px-5 py-[13px]" role="group">

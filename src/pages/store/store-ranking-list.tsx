@@ -44,16 +44,17 @@ const StoreRankingList: React.FC = () => {
           <div
             className={cn(
               "grid grid-cols-4 justify-around gap-y-[30px] pb-[50px] [grid-template-columns:repeat(4,215px)]",
-              "[&_.best-icon]:hidden [&_.object_box]:relative [&_.object_box>span]:absolute [&_.object_box>span]:left-[-22px] [&_.object_box>span]:top-3 [&_.object_box>span]:z-[9] [&_.object_box>span]:block [&_.object_box>span]:h-12 [&_.object_box>span]:w-12 [&_.object_box>span]:cursor-pointer [&_.object_box>span]:rounded-full [&_.object_box>span]:border-2 [&_.object_box>span]:border-primary [&_.object_box>span]:bg-white [&_.object_box>span]:text-center [&_.object_box>span]:text-xl [&_.object_box>span]:font-bold [&_.object_box>span]:leading-[48px] [&_.object_box>span]:text-primary",
-              "[&_.tags]:text-center [&_h5]:text-center"
+              "[&_.best-icon]:hidden [&_.tags]:text-center [&_h5]:text-center"
             )}
             style={objects?.length === 0 ? { display: "unset" } : {}}
           >
             {objects && objects?.length > 0 ? (
               objects?.map((item, index) => (
-                <div key={`fallback=${index}`} className="object_box">
-                  <span>{(index + 1).toString().padStart(2, "0")}</span>
-                  <ObjectCardColumn size="215px" data={item} />
+                <div key={`fallback=${index}`} className="object_box relative">
+                  <span className="absolute top-[10px] left-[-20px] z-[1] inline-block h-12 w-12 rounded-full border-2 border-[#f05a5e] bg-white text-center text-sm font-bold leading-[44px] text-[#f05a5e]">
+                    {(index + 1).toString().padStart(2, "0")}
+                  </span>
+                  <ObjectCardColumn size="215px" data={item} position="right" />
                 </div>
               ))
             ) : (

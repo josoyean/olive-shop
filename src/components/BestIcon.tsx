@@ -1,8 +1,8 @@
 import { cn } from "@/lib/cn";
 
-const BestIcon = ({ best, today }: { best: boolean; today: boolean }) => {
+const BestIcon = ({ best, today, position = 'right' }: { best: boolean; today: boolean; position?: 'right' | 'left' }) => {
   return (
-    <div className="absolute left-2.5 top-[7px] flex flex-col gap-[3px]" role="status">
+    <div className={cn("absolute top-[7px] flex flex-col gap-[3px]", position === 'right' ? 'right-2.5' : 'left-2.5')} role="status">
       {best && (
         <span
           className="inline-block h-12 w-12 rounded-full border-2 border-[#f05a5e] text-center text-sm font-bold leading-[44px] text-[#f05a5e] bg-white"

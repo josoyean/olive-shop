@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
+import { ChevronRight } from "lucide-react";
 import type { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { supabase } from "../../supabase";
@@ -28,8 +29,7 @@ const orderBoxClasses = cn(
   "[&_li]:relative [&_li]:flex [&_li]:flex-col [&_li]:items-center [&_li]:justify-center",
   "[&_li_em]:text-[40px] [&_li_em]:font-medium [&_li_em]:not-italic [&_li_em]:text-[#888]",
   "[&_li_em.on]:text-primary [&_li_span]:text-base [&_li_span]:text-[#666]",
-  "[&_li]:after:absolute [&_li]:after:right-0 [&_li]:after:top-1/2 [&_li]:after:-translate-y-1/2 [&_li]:after:text-[40px] [&_li]:after:font-bold [&_li]:after:text-[#888] [&_li]:after:content-['>']",
-  "[&_li:last-child]:after:hidden [&_.review-box_li]:after:hidden [&_.review-box_li_em]:text-primary"
+  "[&_.review-box_li_em]:text-primary"
 );
 
 const Mypage = () => {
@@ -124,7 +124,10 @@ const Mypage = () => {
               });
             }}
           >
-            더보기 &gt;
+            <span className="inline-flex items-center gap-0.5">
+              더보기
+              <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            </span>
           </span>
         </div>
         <ul className="order-box" role="list" aria-label="주문 상태">
@@ -133,24 +136,40 @@ const Mypage = () => {
               {orderData[1]?.length || 0}
             </em>
             <span>주문접수</span>
+            <ChevronRight
+              className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 text-[#888]"
+              aria-hidden
+            />
           </li>
           <li>
             <em className={cn(orderData[2]?.length > 0 && "on")}>
               {orderData[2]?.length || 0}
             </em>
             <span>결제완료</span>
+            <ChevronRight
+              className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 text-[#888]"
+              aria-hidden
+            />
           </li>
           <li>
             <em className={cn(orderData[3]?.length > 0 && "on")}>
               {orderData[3]?.length || 0}
             </em>
             <span>배송준비중</span>
+            <ChevronRight
+              className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 text-[#888]"
+              aria-hidden
+            />
           </li>
           <li>
             <em className={cn(orderData[4]?.length > 0 && "on")}>
               {orderData[4]?.length || 0}
             </em>
             <span>배송중</span>
+            <ChevronRight
+              className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 text-[#888]"
+              aria-hidden
+            />
           </li>
           <li>
             <em className={cn(orderData[5]?.length > 0 && "on")}>
@@ -174,7 +193,10 @@ const Mypage = () => {
               });
             }}
           >
-            더보기 &gt;
+            <span className="inline-flex items-center gap-0.5">
+              더보기
+              <ChevronRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            </span>
           </span>
         </div>
         <ul className="review-box" role="list" aria-label="리뷰 상태">

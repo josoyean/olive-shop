@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import moment from "moment";
 import { cn } from "@/lib/cn";
+import { ChevronRight } from "lucide-react";
 import { BlueButton, TableWrapper, WhiteButton } from "@/components/ui/FormElements";
 import { calculatePrice, handlePrice, handleSaleTF } from "../../utils/common";
 import type { RootState } from "../../redux/store";
@@ -31,9 +32,7 @@ const orderBoxClasses = cn(
   "[&_.order-box]:mt-5 [&_.order-box]:grid [&_.order-box]:h-[117px] [&_.order-box]:w-full [&_.order-box]:grid-cols-5 [&_.order-box]:overflow-hidden [&_.order-box]:rounded-[10px] [&_.order-box]:bg-[#f5f5f5]",
   "[&_li]:relative [&_li]:flex [&_li]:flex-col [&_li]:items-center [&_li]:justify-center",
   "[&_li_em]:text-[40px] [&_li_em]:font-medium [&_li_em]:not-italic [&_li_em]:text-[#888]",
-  "[&_li_em.on]:text-primary [&_li_span]:text-base [&_li_span]:text-[#666]",
-  "[&_li]:after:absolute [&_li]:after:right-0 [&_li]:after:top-1/2 [&_li]:after:-translate-y-1/2 [&_li]:after:text-[40px] [&_li]:after:font-bold [&_li]:after:text-[#888] [&_li]:after:content-['>']",
-  "[&_li:last-child]:after:hidden"
+  "[&_li_em.on]:text-primary [&_li_span]:text-base [&_li_span]:text-[#666]"
 );
 
 const searchClasses = cn(
@@ -322,24 +321,40 @@ const StoreOrderDelivery = () => {
               {orderData[1]?.length || 0}
             </em>
             <span>주문접수</span>
+            <ChevronRight
+              className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 text-[#888]"
+              aria-hidden
+            />
           </li>
           <li role="listitem">
             <em className={`${orderData[2]?.length > 0 && "on"}`}>
               {orderData[2]?.length || 0}
             </em>
             <span>결제완료</span>
+            <ChevronRight
+              className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 text-[#888]"
+              aria-hidden
+            />
           </li>
           <li role="listitem">
             <em className={`${orderData[3]?.length > 0 && "on"}`}>
               {orderData[3]?.length || 0}
             </em>
             <span>배송준비중</span>
+            <ChevronRight
+              className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 text-[#888]"
+              aria-hidden
+            />
           </li>
           <li role="listitem">
             <em className={`${orderData[4]?.length > 0 && "on"}`}>
               {orderData[4]?.length || 0}
             </em>
             <span>배송중</span>
+            <ChevronRight
+              className="absolute right-0 top-1/2 h-10 w-10 -translate-y-1/2 text-[#888]"
+              aria-hidden
+            />
           </li>
           <li role="listitem">
             <em className={`${orderData[5]?.length > 0 && "on"}`}>
