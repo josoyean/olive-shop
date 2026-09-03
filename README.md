@@ -5,7 +5,7 @@
 상품 조회부터 장바구니, 주문/결제, 리뷰까지 구매 흐름을 직접 구현했고  
 DB는 SQL로 다루고 싶어서 Supabase를 사용했습니다.
 
-배포: [Vercel](https://vercel.app)
+배포: [https://olive-shop.kro.kr/](https://olive-shop.kro.kr/)
 
 ---
 
