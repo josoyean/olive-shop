@@ -1,345 +1,193 @@
-## **Intor**
+## Intro
 
-리액트 기반으로 타입스크립트로 제작한 올리브영 클론 페이지 <올리브샵>입니다.
+리액트 + 타입스크립트로 만든 올리브영 클론 페이지 **올리브샵**입니다.
 
-DB는 SQL로 자유롭게 사용하고 싶어서 슈퍼베이스를 사용을해서 페이지를 제작했습니다.
+상품 조회부터 장바구니, 주문/결제, 리뷰까지 구매 흐름을 직접 구현했고  
+DB는 SQL로 다루고 싶어서 Supabase를 사용했습니다.
 
-## **사용기술**
+배포: [Vercel](https://vercel.app)
 
-lang - react, styled-components , typesjavascript, react-query, redex
+---
 
-배포 - vercel.app
+## Skills
 
-## **개발 기간**
+- **React + TypeScript**  
+  공통 UI 컴포넌트와 페이지를 분리해 재사용성을 높이고, 타입으로 props/폼 데이터 안정성을 맞춤
+
+- **React Query**  
+  서버 상태와 UI 상태를 분리하고, 상품·장바구니 등 API 응답 캐싱에 활용
+
+- **Redux Toolkit**  
+  로그인 유저, 장바구니 수량, 최근 본 상품 같은 UI 상태를 전역으로 관리
+
+- **Supabase**  
+  인증/DB/API를 빠르게 구성하기 위해 선택. 상품·주문·리뷰 조회·저장과 결제 후처리에 사용
+
+- **Firebase**  
+  회원 인증과 배송지 정보 갱신에 사용
+
+---
+
+## 주문/결제 페이지
+
+주문/결제 화면은 단독으로 구현했습니다.
+
+- Toss Payments SDK 연동  
+  신용카드, 토스페이, 네이버페이, 휴대폰결제, 계좌이체 5가지 수단별 결제 요청 파라미터를 분기 처리
+- React Hook Form + Daum 주소 API  
+  수령인/연락처/배송지 입력과 필수값 검증, 우편번호 검색까지 연결
+- 결제 후처리  
+  Supabase에 주문 저장 → 장바구니 삭제 → Firebase 배송지 정보 업데이트 순으로 처리
+
+테스트 키 기준이라 실제 결제는 완료되지 않을 수 있고, 포트폴리오용으로 결제창 흐름까지 확인 가능하게 구성했습니다.
+
+---
+
+## 개발 기간
 
 2025.03 ~ 진행중
 
-## **구현 기능**
+---
 
-\- Supabase API를 활용해 데이터 조회 및 관리 기능 구현,로그인, 아이디·비밀번호 찾기 기능 연동
+## 구현 기능
 
-\- Toss Payments 결제 모듈 연동 및 결제 프로세스 구현, 장바구니 추가·삭제 기능을 통해 사용자의 구매 흐름을 완성
+- Supabase로 상품/장바구니/주문/리뷰 데이터 조회·관리, 로그인·아이디/비밀번호 찾기
+- Toss Payments 결제 모듈 연동 및 장바구니 추가·삭제까지 구매 흐름 연결
+- 카테고리 필터링, 브랜드 YouTube 영상 연동
+- 프로필 사진 변경
+- 배송 완료 상품 리뷰 작성·수정
+- react-simple-captcha로 로그인 보안 강화
+- button / aria-label 등으로 접근성 보완
 
-\- 카테고리별 상품 분류 및 필터링 기능을 적용해 사용자가 원하는 상품을 효율적으로 탐색할 수 있도록 개선했습니다.또한 브랜드 관련 유튜브 영상을 연동해 콘텐츠 다양성을 확보
+### 1) Supabase API — 주문 저장 / 장바구니 삭제 / 비밀번호 변경
 
-\-  사용자 프로필 사진 변경 기능을 구현해 개인화된 사용자 경험을 제공
+```ts
+await supabase.from("payment").insert(insertDate);
 
-\- 사용자가 구매한 제품에 대해 리뷰 작성·수정·삭제 기능을 구현하여, 서비스 내 사용자 참여 요소를 강화
-
-\- react-simple-captcha를 적용해 로그인 시 보안 요소를 강화
-
-\- 클릭 요소를 button 태그로 통일하고 아이콘 버튼에 aria-label을 적용해 접근성 개선
-
-#### 1) Supabase API를 활용해 데이터 조회 및 관리 기능 구현,로그인, 아이디·비밀번호 찾기 기능 연동
-
-```
- await supabase.from("payment").insert(insertDate);
-
-    const { data: paymentsData } = await supabase
-      .from("carts")
-      .delete()
-      .eq("userId", userToken)
-      .in("object_seq", selectObject);
+const { data: paymentsData } = await supabase
+  .from("carts")
+  .delete()
+  .eq("userId", userToken)
+  .in("object_seq", selectObject);
 ```
 
-Supabase API 장바구니 관련 데이터를 삭제하는 슈퍼베이스 api 형식으로 작업,
+결제 완료 후 주문 데이터를 넣고, 결제한 상품만 장바구니에서 지웁니다.  
+검색(select) / 수정(update) / 삭제(delete)도 같은 방식으로 호출했습니다.
 
-검색(select),업데이트(update),삭제(delete) 이용해서 api 호출,수정,삭제를 했습니다
-
-```
-  const { data: update } = await supabase.auth.updateUser({
-      password: data.password,
-    });
-```
-
-Supabase.auth.updateUser 이용해서 슈퍼베이스에 저장되어있는 사용자 정보(비밀번호)을 수정했습니다
-
-#### 2) Toss Payments 결제 모듈 연동 및 결제 프로세스 구현, 장바구니 추가·삭제 기능을 통해 사용자의 구매 흐름을 완성
-
-```
- const orderId = moment().format("YYYYMMDDhhmmss");
-
-    const PaymentMethod =
-      data.paymentType === "P"
-        ? "MOBILE_PHONE"
-        : data.paymentType === "AT"
-        ? "TRANSFER"
-        : "CARD";
-
-    await payment?.requestPayment({
-      method: PaymentMethod, // 카드 및 간편결제
-      amount: {
-        currency: "KRW",
-        value:
-          (priceData?.totalPrice ?? 0) >= 20000
-            ? priceData?.totalPrice
-            : (priceData?.totalPrice ?? 0) + 2500,
-        //100,
-      },
-      orderId: orderId, // 고유 주문번호
-      orderName:
-        product[0].name +
-        (product?.length === 1 ? "" : ` 외 ${product?.length - 1}건`),
-      customerEmail: user?.email,
-      customerName: data?.getName,
-      customerMobilePhone: data?.phoneNumber,
-      ...(data.paymentType === "P"
-        ? {}
-        : data.paymentType === "AT"
-        ? {
-            transfer: {
-              cashReceipt: {
-                type: "소득공제",
-              },
-              useEscrow: false,
-            },
-          }
-        : {
-            card: {
-              useEscrow: true,
-              flowMode: "DIRECT", // 자체창 여는 옵션
-              useCardPoint: false,
-              cardInstallmentPlan: !data?.installment ? 0 : data?.installment,
-              useAppCardOnly: false,
-              ...(data.paymentType === "C"
-                ? { cardCompany: data.cardType }
-                : {}),
-              ...(data.paymentType === "N" ? { easyPay: "네이버페이" } : {}),
-              ...(data.paymentType === "T" ? { easyPay: "토스페이" } : {}),
-            },
-          }),
-      metadata: {
-        userId: user.userId,
-        paymentDt: new Date(),
-        orderId: "Y" + orderId,
-      },
-    });
+```ts
+const { data: update } = await supabase.auth.updateUser({
+  password: data.password,
+});
 ```
 
-결제 수단을 선택후 결제하기 클릭하면 tosspayments-테스트버전 연결 했습니다
+비밀번호 찾기는 `supabase.auth.updateUser`로 처리했습니다.
 
-테스트 버전이라 결제해도 시간 지나면 자동으로 취소가 되고 결제수단이 다양할수록 간편하게 결제를 해서 사용자가 많이 질거라 예상하고 할수있는만큼 작업을 했습니다
+### 2) Toss Payments — 결제수단별 요청
 
-#### 3) 카테고리별 상품 분류 및 필터링 기능을 적용해 사용자가 원하는 상품을 효율적으로 탐색할 수 있도록 개선했습니다.또한 브랜드 관련 유튜브 영상을 연동해 콘텐츠 다양성을 확보
+```ts
+const PaymentMethod =
+  data.paymentType === "P"
+    ? "MOBILE_PHONE"
+    : data.paymentType === "AT"
+    ? "TRANSFER"
+    : "CARD";
 
-```
-  const { data: cartInfo } = await supabase
-    .from("carts")
-    .select("*")
-    .eq("userId", user?.uid)
-    .eq("object_seq", objects.object_seq)
-    .single();
-
-  if (!cartInfo || cartInfo?.length === 0) {
-    // 장바구니 없음
-
-    const { saleItem, addCount, ...cleanedObject } = objects;
-    if (!addCount || !saleItem) {
-      return;
-    }
-    const { error } = await supabase.from("carts").insert([
-      {
-        object_count: objects?.addCount,
-        ...cleanedObject,
-        created_at: new Date().toISOString(),
-        userId: user?.uid, // 사용자 ID 추가
-      },
-    ]);
-
-    if (error) {
-      alert("장바구니 추가 실패했습니다. 다시 시도해주세요");
-      return;
-    }
-  } else {
-    // 장바구니 있음
-    const count: number = cartInfo?.object_count + objects?.addCount;
-
-    const { error } = await supabase
-      .from("carts")
-      .update({
-        object_count: count,
-      })
-      .eq("userId", user?.uid)
-      .eq("object_seq", objects?.object_seq);
-
-    if (error) {
-      alert("장바구니 추가 실패했습니다. 다시 시도해주세요");
-      return;
-    }
-  }
+await payment.requestPayment({
+  method: PaymentMethod,
+  amount: {
+    currency: "KRW",
+    value:
+      (priceData?.totalPrice ?? 0) >= 20000
+        ? priceData?.totalPrice
+        : (priceData?.totalPrice ?? 0) + 2500,
+  },
+  orderId,
+  orderName:
+    (product[0]?.objects?.name ?? "상품") +
+    (product?.length === 1 ? "" : ` 외 ${product?.length - 1}건`),
+  customerEmail: user?.email,
+  customerName: data?.getName,
+  customerMobilePhone: data?.phoneNumber?.replace(/[^0-9]/g, ""),
+  // 카드 / 간편결제 / 계좌이체 옵션 분기
+});
 ```
 
-```
-    // 장바구니 삭제
-    cartDataDelete(userToken, seq)
-      .then((data) => {
-        if (!data) {
-          alert("제품 삭제가 되었습니다");
-          handleCartItems(userToken, dispatch);
-          return;
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-```
+결제수단을 고른 뒤 `requestPayment`로 토스 결제창을 엽니다.  
+카드사 선택, 할부, 네이버페이/토스페이 easyPay 옵션도 같이 넘깁니다.
 
-우선 내 장바구니에 그제품이 있는지 확인후에 있으면 장바구니 갯수추가, 없으면 장바구니에 제품을 추가을 했습니다. 
+### 3) 장바구니 추가·삭제 / 브랜드 유튜브
 
-장바구니 삭제는 슈퍼베이스에 있는 데이터를 전부 삭제했습니다.
+장바구니에 같은 상품이 있으면 수량만 올리고, 없으면 insert 합니다.  
+삭제는 Supabase `carts`에서 해당 상품을 지운 뒤 Redux 수량도 맞춥니다.
 
-```
-import YouTube, { YouTubeProps } from "react-youtube";
-  const opts: YouTubeProps["opts"] = {
-    height: "394",
-    width: "700",
-    playerVars: {
-      modestbranding: 1,
-      autoplay: 1,
-      rel: 0,
-      controls: 0,
-      loop: 0,
-      mute: 1,
-      cc_load_policy: 0,
-    },
-  };
-    <YouTube videoId={brandInfo?.videoLink} opts={opts} onEnd={(e) => { e.target.stopVideo(0)}}/>
+```ts
+<YouTube
+  videoId={brandInfo?.videoLink}
+  opts={opts}
+  onEnd={(e) => {
+    e.target.stopVideo(0);
+  }}
+/>
 ```
 
-react-youtube 이용해서 제품에 맞는 유튜브 광고를 보게했고 옵션에 크기와 재생시작 위치,반복 다양한 옵션을 이용해서 사용자가 광보를 보고 제품을 구입하게끔 적용했습니다.
+브랜드 상세에는 `react-youtube`로 소개 영상을 붙였습니다.
 
-#### 4) 사용자 프로필 사진 변경 기능을 구현해 개인화된 사용자 경험을 제공
+### 4) 프로필 사진 변경
 
-```
-<input
-                    type="file"
-                    accept="image/*"
-                    style={{ display: "none" }}
-                    onChange={handleImageUpload}
-                    ref={fileInputRef}
-                  />
-                  <span
-                    className="thumbnailFile"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      fileInputRef?.current?.click();
-                    }}
-                  >
-                  
-  	const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e?.target?.files?.[0];
-    if (!file) return;
+파일 선택 → `FileReader`로 Data URL 변환 → 화면에 미리보기.  
+마음에 안 들면 삭제도 가능합니다.
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setMyInfoData(
-        (prevState: UserInfoType) =>
-          ({
-            ...prevState,
-            profileImg: reader.result,
-          } as UserInfoType)
-      );
-    };
-    reader.readAsDataURL(file);
-  };
-```
+### 5) 리뷰 작성·수정
 
-파일 선택을 하면 선택한 사진url로 변환하고 나서 화면에 보이게 했습니다.   
-반대로 사진 프로필이 마음에 안들면 삭제도 가능하게 만들었습니다
+배송 완료된 상품만 리뷰를 남길 수 있게 했고,  
+작성은 `insert`, 수정은 `update`로 처리했습니다.  
+별점, 텍스트, 포토(최대 5장)까지 같이 저장합니다.
 
-#### 5) 사용자가 구매한 제품에 대해 리뷰 작성·수정·삭제 기능을 구현하여, 서비스 내 사용자 참여 요소를 강화
+### 6) 로그인 캡차
 
-```
- // 리뷰 작성
- const items = {
-      created_at: new Date().toISOString(),
-      reviewImg: reviewImages,
-      reviewText: data.textValue,
-      score: Number(data.ratingValue),
-      userId: token,
-      objectInfo: selectReview?.object_seq,
-      payment_seq: selectReview?.payment_seq,
-      orderId: selectReview?.orderId,
-      order_at: selectReview?.created_at,
-      likeUserId: [],
-    };
+```ts
+loadCaptchaEnginge(6);
 
-    const { data: existingItem, error } = await supabase
-      .from("reviews")
-      .insert([items]);
-    if (error) {
-      console.log("error", error);
-      return;
-    }
-    if (!existingItem) {
-      handlePaymentList(selectReview?.payment_seq || "");
-    }
-    
-  // 리뷰 수정
-   const { data: editData, error: errorData } = await supabase
-        .from("reviews")
-        .update({
-          reviewImg: reviewImages,
-          reviewText: data.textValue,
-          score: Number(data.ratingValue),
-        })
-        .eq("id", selectReview?.id)
-        .eq("payment_seq", selectReview?.payment_seq)
-        .eq("userId", token);
-      if (errorData) {
-        console.log("error", errorData);
-        return;
-      }
-
-      if (!editData) {
-        alert("리뷰 수정이 완료되었습니다.");
-        handleWriteReview();
-      }
-```
-
-리뷰 추가는 insert,수정은 update 이용해서 구매하고 배송 완료된 상품은 리뷰를 추가 또는 수정하게끔 헸습니다.
-
-#### 6) react-simple-captcha를 적용해 로그인 시 보안 요소를 강화
-
-```
-   <LoadCanvasTemplateNoReload reloadColor="red" reloadText="reload"/>
-              <span onClick={() => loadCaptchaAgain()}>&#x21bb;</span>
-              
-//react-simple-captcha 갯수 지정
-useEffect(() => {
-    loadCaptchaEnginge(6);
-  }, []);
-  
-  // react-simple-captcha 실헹시
 if (!validateCaptcha(data.captcha)) {
-      alert("자동입력 방지문자를 확인해주세요.");
-    }
+  alert("자동입력 방지문자를 확인해주세요.");
+}
 ```
 
-로그인시 보안 강화를 위해 자동 입력 방지 문자를 사용해서 사용자가 안심하게 서비스를 이용할수있도록 적용했습니다.
+`react-simple-captcha`로 자동입력 방지 문자를 넣었습니다.
 
-#### 7) 클릭 요소를 button 태그로 통일하고 아이콘 버튼에 aria-label을 적용해 접근성 개선
-​
+### 7) 접근성
+
+모달에는 `role="dialog"`, `aria-modal`, `aria-labelledby`를 넣고  
+아이콘 버튼에는 `aria-label`을 붙여 키보드·스크린리더 사용을 맞춰 두었습니다.
+
+---
+
+## 실행 방법
+
+```bash
+nvm use   # Node 20 이상
+npm install
+npm run dev
 ```
-  <Modal
-      isOpen={isOpen}
-      ariaHideApp={false}
-      onRequestClose={() => onClose()}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      shouldCloseOnOverlayClick={false}
-    >
+
+`.env` 예시:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_KEY=your-anon-key
+VITE_FIREBASE_API_KEY=
+VITE_WAB_NAME=your-firebase-project-id
 ```
-​
-role,aria-modal,aria-label 를 사용해서 적용해 키보드·스크린리더 접근성을 개선 했습니다
+
+---
+
+## 데모 계정
+
+포트폴리오 확인용 계정은 로그인 페이지에 안내되어 있습니다.  
+데모 로그인 버튼으로 captcha 없이 바로 들어가 볼 수 있습니다.
+
+---
+
+## Repository
 
 [https://github.com/josoyean/olive-shop](https://github.com/josoyean/olive-shop)
-
- [GitHub - josoyean/olive-shop
-
-Contribute to josoyean/olive-shop development by creating an account on GitHub.
-
-github.com](https://github.com/josoyean/olive-shop)
-
