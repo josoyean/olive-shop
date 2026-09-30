@@ -9,13 +9,22 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script type="text/javascript" src="//wcs.pstatic.net/wcslog.js"></script>
     <script type="text/javascript">
-      if (!wcs_add) var wcs_add = {};
-      wcs_add["wa"] = "152887cfb838980";
-      if (window.wcs) {
-        wcs_do();
-      }
+      (function () {
+        var host = location.hostname;
+        var isLocal =
+          host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+        if (isLocal) return;
+
+        var s = document.createElement("script");
+        s.src = "//wcs.pstatic.net/wcslog.js";
+        s.onload = function () {
+          if (!window.wcs_add) window.wcs_add = {};
+          window.wcs_add["wa"] = "152887cfb838980";
+          if (window.wcs) wcs_do();
+        };
+        document.body.appendChild(s);
+      })();
     </script>
   </body>
 </html>

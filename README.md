@@ -28,63 +28,45 @@ DB는 SQL로 다루고 싶어서 Supabase를 사용했습니다.
 
 ---
 
-## 주문/결제 페이지
+## Description
 
-주문/결제 화면은 단독으로 구현했습니다.
+### React + TypeScript 기반 주문/결제 페이지 단독 개발
 
-- Toss Payments SDK 연동  
-  신용카드, 토스페이, 네이버페이, 휴대폰결제, 계좌이체 5가지 수단별 결제 요청 파라미터를 분기 처리
-- React Hook Form + Daum 주소 API  
-  수령인/연락처/배송지 입력과 필수값 검증, 우편번호 검색까지 연결
-- 결제 후처리  
-  Supabase에 주문 저장 → 장바구니 삭제 → Firebase 배송지 정보 업데이트 순으로 처리
+주문/결제 화면(`store-user-cart-payment.tsx`)을 단독으로 구현했습니다.  
+장바구니에서 `t_header_type=2`로 진입하면 결제 페이지가 렌더되고,  
+배송지 입력 → 결제수단 선택 → Toss 결제 → 후처리 → 주문완료까지 한 흐름으로 이어집니다.
 
-테스트 키 기준이라 실제 결제는 완료되지 않을 수 있고, 포트폴리오용으로 결제창 흐름까지 확인 가능하게 구성했습니다.
+테스트 키 기준이라 실제 결제는 완료되지 않을 수 있고,  
+포트폴리오용으로 결제창 흐름까지 확인 가능하게 구성했습니다.
+
+```tsx
+{headerType === "2" && <StoreUserPayment priceData={price} />}
+{headerType === "3" && <StoreUserOrder />}
+```
 
 ---
 
-## 개발 기간
-
-2025.03 ~ 진행중
-
----
-
-## 구현 기능
-
-- Supabase로 상품/장바구니/주문/리뷰 데이터 조회·관리, 로그인·아이디/비밀번호 찾기
-- Toss Payments 결제 모듈 연동 및 장바구니 추가·삭제까지 구매 흐름 연결
-- 카테고리 필터링, 브랜드 YouTube 영상 연동
-- 프로필 사진 변경
-- 배송 완료 상품 리뷰 작성·수정
-- react-simple-captcha로 로그인 보안 강화
-- button / aria-label 등으로 접근성 보완
-
-### 1) Supabase API — 주문 저장 / 장바구니 삭제 / 비밀번호 변경
+### Toss Payments SDK를 연동하고 5가지 결제수단에 따른 결제 흐름 구현
 
 ```ts
-await supabase.from("payment").insert(insertDate);
+/**
+ * C  신용카드  → CARD + cardCompany / 할부
+ * T  토스페이  → CARD + easyPay: "토스페이"
+ * N  네이버페이 → CARD + easyPay: "네이버페이"
+ * P  휴대폰    → MOBILE_PHONE
+ * AT 계좌이체  → TRANSFER + 현금영수증
+ */
+import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 
-const { data: paymentsData } = await supabase
-  .from("carts")
-  .delete()
-  .eq("userId", userToken)
-  .in("object_seq", selectObject);
-```
+useEffect(() => {
+  async function fetchPayment() {
+    const tossPayments = await loadTossPayments(clientKey);
+    const paymentInstance = tossPayments.payment({ customerKey });
+    setPayment(paymentInstance);
+  }
+  fetchPayment();
+}, []);
 
-결제 완료 후 주문 데이터를 넣고, 결제한 상품만 장바구니에서 지웁니다.  
-검색(select) / 수정(update) / 삭제(delete)도 같은 방식으로 호출했습니다.
-
-```ts
-const { data: update } = await supabase.auth.updateUser({
-  password: data.password,
-});
-```
-
-비밀번호 찾기는 `supabase.auth.updateUser`로 처리했습니다.
-
-### 2) Toss Payments — 결제수단별 요청
-
-```ts
 const PaymentMethod =
   data.paymentType === "P"
     ? "MOBILE_PHONE"
@@ -94,13 +76,7 @@ const PaymentMethod =
 
 await payment.requestPayment({
   method: PaymentMethod,
-  amount: {
-    currency: "KRW",
-    value:
-      (priceData?.totalPrice ?? 0) >= 20000
-        ? priceData?.totalPrice
-        : (priceData?.totalPrice ?? 0) + 2500,
-  },
+  amount: { currency: "KRW", value: amountValue },
   orderId,
   orderName:
     (product[0]?.objects?.name ?? "상품") +
@@ -108,57 +84,121 @@ await payment.requestPayment({
   customerEmail: user?.email,
   customerName: data?.getName,
   customerMobilePhone: data?.phoneNumber?.replace(/[^0-9]/g, ""),
-  // 카드 / 간편결제 / 계좌이체 옵션 분기
+  ...(data.paymentType === "P"
+    ? {}
+    : data.paymentType === "AT"
+    ? {
+        transfer: {
+          cashReceipt: { type: "소득공제" },
+          useEscrow: false,
+        },
+      }
+    : {
+        card: {
+          useEscrow: true,
+          flowMode: "DIRECT",
+          useCardPoint: false,
+          cardInstallmentPlan: !data?.installment ? 0 : data?.installment,
+          useAppCardOnly: false,
+          ...(data.paymentType === "C" ? { cardCompany: data.cardType } : {}),
+          ...(data.paymentType === "N" ? { easyPay: "네이버페이" } : {}),
+          ...(data.paymentType === "T" ? { easyPay: "토스페이" } : {}),
+        },
+      }),
 });
 ```
 
-결제수단을 고른 뒤 `requestPayment`로 토스 결제창을 엽니다.  
-카드사 선택, 할부, 네이버페이/토스페이 easyPay 옵션도 같이 넘깁니다.
+---
 
-### 3) 장바구니 추가·삭제 / 브랜드 유튜브
-
-장바구니에 같은 상품이 있으면 수량만 올리고, 없으면 insert 합니다.  
-삭제는 Supabase `carts`에서 해당 상품을 지운 뒤 Redux 수량도 맞춥니다.
+### React Hook Form과 Daum 주소 API를 활용한 배송지 입력 및 유효성 검증 구현
 
 ```ts
-<YouTube
-  videoId={brandInfo?.videoLink}
-  opts={opts}
-  onEnd={(e) => {
-    e.target.stopVideo(0);
-  }}
-/>
+import { useForm, Controller } from "react-hook-form";
+import { useDaumPostcodePopup } from "react-daum-postcode";
+
+const open = useDaumPostcodePopup(postcodeScriptUrl);
+const { register, handleSubmit, setFocus, setValue, control } =
+  useForm<DataType>({ mode: "onChange" });
+
+const handleComplete = (data) => {
+  setValue("addressMain", data?.roadAddress);
+  setValue("postNumber", data?.zonecode);
+  setValue("addressSub", "");
+};
+
+<form onSubmit={handleSubmit(onSubmit, onError)}>
+  <input
+    {...register("getName", {
+      required: "받는분을 입력하세요.",
+      minLength: { value: 2, message: "받는분을 정확하게 입력해주세요" },
+    })}
+  />
+  <input {...register("phoneNumber", { required: "연락처를 입력하세요." })} />
+  <input {...register("postNumber", { required: "주소를 입력하세요." })} disabled />
+  <button type="button" onClick={() => open({ onComplete: handleComplete })}>
+    우편번호 찾기
+  </button>
+  <input {...register("addressMain", { required: "주소를 입력하세요." })} disabled />
+  <input {...register("addressSub", { required: "상세 주소를 입력하세요" })} />
+</form>
 ```
 
-브랜드 상세에는 `react-youtube`로 소개 영상을 붙였습니다.
+---
 
-### 4) 프로필 사진 변경
-
-파일 선택 → `FileReader`로 Data URL 변환 → 화면에 미리보기.  
-마음에 안 들면 삭제도 가능합니다.
-
-### 5) 리뷰 작성·수정
-
-배송 완료된 상품만 리뷰를 남길 수 있게 했고,  
-작성은 `insert`, 수정은 `update`로 처리했습니다.  
-별점, 텍스트, 포토(최대 5장)까지 같이 저장합니다.
-
-### 6) 로그인 캡차
+### Supabase를 활용한 주문 저장, 장바구니 삭제 및 Firebase 배송지 갱신 등 결제 후처리 구현
 
 ```ts
-loadCaptchaEnginge(6);
+/**
+ * 1. Supabase payment 주문 저장
+ * 2. Supabase carts 장바구니 삭제
+ * 3. Firebase users 배송지 갱신
+ * 4. Redux 장바구니 카운트 반영 + 주문완료 이동
+ */
+const selectObject = product.map((item: CartType) => item.object_seq);
+await supabase.from("payment").insert(insertDate);
 
-if (!validateCaptcha(data.captcha)) {
-  alert("자동입력 방지문자를 확인해주세요.");
+const { data: paymentsData } = await supabase
+  .from("carts")
+  .delete()
+  .eq("userId", userToken)
+  .in("object_seq", selectObject);
+
+if (!paymentsData) {
+  await updateDoc(doc(db, "users", userToken), {
+    addressMain: data?.addressMain,
+    addressSub: data?.addressSub,
+    postNumber: data?.postNumber,
+    deliveryPhone: data?.phoneNumber,
+    deliveryName: data?.getName,
+    enterInfo: data?.enter,
+  });
+  dispatch(deleteCart(selectObject.length));
+  navigate("/store/mypage/user-cart?t_header_type=3", {
+    state: {
+      searchParams: { t_header_type: "3" },
+      orderId: orderId,
+    },
+  });
+  getUserInfo(userToken, dispatch);
 }
 ```
 
-`react-simple-captcha`로 자동입력 방지 문자를 넣었습니다.
+---
 
-### 7) 접근성
+## 개발 기간
 
-모달에는 `role="dialog"`, `aria-modal`, `aria-labelledby`를 넣고  
-아이콘 버튼에는 `aria-label`을 붙여 키보드·스크린리더 사용을 맞춰 두었습니다.
+2025.03 ~ 진행중
+
+---
+
+## 그 외 구현 기능
+
+- Supabase로 상품/장바구니/리뷰 데이터 조회·관리, 로그인·아이디/비밀번호 찾기
+- 카테고리 필터링, 브랜드 YouTube 영상 연동
+- 프로필 사진 변경
+- 배송 완료 상품 리뷰 작성·수정
+- react-simple-captcha로 로그인 보안 강화
+- button / aria-label 등으로 접근성 보완
 
 ---
 
