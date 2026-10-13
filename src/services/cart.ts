@@ -8,6 +8,30 @@ interface CartItem extends CardImageType {
   addCount: number | undefined;
 }
 
+/** carts 테이블에 없는 필드(brands, saleItem 등)는 제외하고 insert */
+function toCartInsertRow(
+  dataInfo: CardImageType,
+  userId: string,
+  objectCount: number,
+) {
+  return {
+    userId,
+    name: dataInfo.name,
+    img: dataInfo.img,
+    sale: dataInfo.sale ?? false,
+    discount_rate: dataInfo.discount_rate ?? 0,
+    count: dataInfo.count ?? 0,
+    best: dataInfo.best ?? false,
+    attention: dataInfo.attention ?? false,
+    recommend: dataInfo.recommend ?? false,
+    created_at: new Date().toISOString(),
+    object_seq: dataInfo.object_seq,
+    brand: dataInfo.brand,
+    brand_seq: dataInfo.brand_seq,
+    object_count: objectCount,
+  };
+}
+
 async function checkSoldOut(objectSeq?: number): Promise<boolean> {
   if (!objectSeq) return false;
 
@@ -26,7 +50,7 @@ async function checkSoldOut(objectSeq?: number): Promise<boolean> {
 
 async function upsertCartItem(
   userId: string,
-  objects: CartItem
+  objects: CartItem,
 ): Promise<boolean> {
   const { data: cartInfo } = await supabase
     .from("carts")
@@ -36,17 +60,11 @@ async function upsertCartItem(
     .single();
 
   if (!cartInfo) {
-    const { saleItem, addCount, ...cleanedObject } = objects;
-    if (!addCount || !saleItem) return false;
+    if (!objects.addCount || !objects.saleItem) return false;
 
-    const { error } = await supabase.from("carts").insert([
-      {
-        object_count: addCount,
-        ...cleanedObject,
-        created_at: new Date().toISOString(),
-        userId,
-      },
-    ]);
+    const { error } = await supabase
+      .from("carts")
+      .insert([toCartInsertRow(objects, userId, objects.addCount)]);
 
     if (error) {
       alert("장바구니 추가 실패했습니다. 다시 시도해주세요.");
@@ -127,15 +145,9 @@ export async function addToCart({
       return false;
     }
   } else {
-    const { saleItem, ...cleanedObject } = dataInfo;
-    const { error } = await supabase.from("carts").insert([
-      {
-        object_count: addCount,
-        ...cleanedObject,
-        created_at: new Date().toISOString(),
-        userId: user.uid,
-      },
-    ]);
+    const { error } = await supabase
+      .from("carts")
+      .insert([toCartInsertRow(dataInfo, user.uid, addCount)]);
 
     if (error) {
       alert("장바구니 추가 실패했습니다. 다시 시도해주세요.");
