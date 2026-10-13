@@ -17,7 +17,6 @@ export function useAddToCart() {
     async (event: React.MouseEvent, data?: CardImageType) => {
       event.preventDefault();
       event.stopPropagation();
-
       if (!data) return;
 
       if (token === "") {
@@ -37,7 +36,7 @@ export function useAddToCart() {
         dispatch,
       });
     },
-    [token, navigate, dispatch]
+    [token, navigate, dispatch],
   );
 
   return { handleAddToCart, cartIconUrl: CART_ICON_URL };

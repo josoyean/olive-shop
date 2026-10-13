@@ -8,7 +8,7 @@ interface CartItem extends CardImageType {
   addCount: number | undefined;
 }
 
-/** carts 테이블에 없는 필드(brands, saleItem 등)는 제외하고 insert */
+/** brands/saleItem 등 관계 객체는 제외하고 carts 컬럼만 insert */
 function toCartInsertRow(
   dataInfo: CardImageType,
   userId: string,
@@ -16,17 +16,26 @@ function toCartInsertRow(
 ) {
   return {
     userId,
-    name: dataInfo.name,
-    img: dataInfo.img,
+    name: dataInfo.name ?? "",
+    img: dataInfo.img ?? "",
+    detailImg: dataInfo.detailImg ?? "",
+    subImg: dataInfo.subImg ?? [],
     sale: dataInfo.sale ?? false,
     discount_rate: dataInfo.discount_rate ?? 0,
     count: dataInfo.count ?? 0,
     best: dataInfo.best ?? false,
     attention: dataInfo.attention ?? false,
     recommend: dataInfo.recommend ?? false,
+    coupon: dataInfo.coupon ?? false,
+    option: dataInfo.option ?? false,
+    soldOut: dataInfo.soldOut ?? false,
+    one_more: dataInfo.one_more ?? null,
+    view_count: dataInfo.view_count ?? 0,
+    objectTypeMain: dataInfo.objectTypeMain ?? "",
+    objectTypeSub: dataInfo.objectTypeSub ?? "",
     created_at: new Date().toISOString(),
     object_seq: dataInfo.object_seq,
-    brand: dataInfo.brand,
+    brand: dataInfo.brand ?? "",
     brand_seq: dataInfo.brand_seq,
     object_count: objectCount,
   };
@@ -39,7 +48,7 @@ async function checkSoldOut(objectSeq?: number): Promise<boolean> {
     .from("objects")
     .select("soldOut")
     .eq("object_seq", objectSeq)
-    .single();
+    .maybeSingle();
 
   if (data?.soldOut) {
     alert("품절된 상품입니다.");
@@ -52,19 +61,22 @@ async function upsertCartItem(
   userId: string,
   objects: CartItem,
 ): Promise<boolean> {
+  const addCount =
+    objects.addCount && objects.addCount > 0 ? objects.addCount : 1;
+
+  // 장바구니에 이미 있는지 확인 (0건이면 null)
   const { data: cartInfo } = await supabase
     .from("carts")
     .select("*")
     .eq("userId", userId)
     .eq("object_seq", objects.object_seq!)
-    .single();
+    .maybeSingle();
 
   if (!cartInfo) {
-    if (!objects.addCount || !objects.saleItem) return false;
-
+    // 없으면 새로 추가
     const { error } = await supabase
       .from("carts")
-      .insert([toCartInsertRow(objects, userId, objects.addCount)]);
+      .insert([toCartInsertRow(objects, userId, addCount)]);
 
     if (error) {
       alert("장바구니 추가 실패했습니다. 다시 시도해주세요.");
@@ -72,7 +84,8 @@ async function upsertCartItem(
       return false;
     }
   } else {
-    const count = cartInfo.object_count + (objects.addCount ?? 0);
+    // 있으면 수량만 추가
+    const count = (cartInfo.object_count ?? 0) + addCount;
     const { error } = await supabase
       .from("carts")
       .update({ object_count: count })
@@ -81,6 +94,7 @@ async function upsertCartItem(
 
     if (error) {
       alert("장바구니 추가 실패했습니다. 다시 시도해주세요.");
+      console.error(error);
       return false;
     }
   }
