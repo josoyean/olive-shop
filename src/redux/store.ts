@@ -7,7 +7,7 @@ import recentProductsState from "./reducers/recentProductsData";
 import userSearchState from "./reducers/userSearch";
 import cartDataState from "./reducers/userCartData";
 import userInfoState from "./reducers/userInfo";
-import chatbotState from "./reducers/chatbotList";
+
 const persistConfig = {
   key: "root",
   storage,
@@ -18,7 +18,6 @@ const persistConfig = {
     "searchData",
     "cartDate",
     "userInfo",
-    "chatbotData", // 여기에 chatbotData를 추가
   ],
 };
 const rootReducer = combineReducers({
@@ -28,7 +27,6 @@ const rootReducer = combineReducers({
   searchData: userSearchState,
   cartDate: cartDataState,
   userInfo: userInfoState,
-  chatbotData: chatbotState, // chatbotState를 추가
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

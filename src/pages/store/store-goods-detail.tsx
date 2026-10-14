@@ -27,6 +27,8 @@ import { Center } from "@/components/ui/Center";
 import { StarBox } from "@/components/ui/FormElements";
 import { cn } from "@/lib/cn";
 import { Minus, Plus } from "lucide-react";
+import { explainIngredients } from "@/services/ingredientHelper";
+import { isBeautyObjectType } from "@/services/beautyCurator";
 
 function GraphBar({ height }: { height: string }) {
   return (
@@ -60,6 +62,10 @@ const StoreGoodsDetail = () => {
   const [detailImgOpened, setDetailImgOpened] = useState<boolean>(false);
   const [detailImgIndex, setDetailImgIndex] = useState<string>("0");
   const [imgOpened, setImgOpened] = useState<boolean>(false);
+  const [ingredientOpened, setIngredientOpened] = useState(false);
+  const [ingredientLoading, setIngredientLoading] = useState(false);
+  const [ingredientText, setIngredientText] = useState("");
+  const [ingredientError, setIngredientError] = useState("");
   const handleData = async (item: string) => {
     const { data: selectedData } = await supabase
       .from("objects")
@@ -147,6 +153,10 @@ const StoreGoodsDetail = () => {
     if (!searchObject) return;
     handleData(searchObject);
     setBuyCount(1);
+    setIngredientOpened(false);
+    setIngredientLoading(false);
+    setIngredientText("");
+    setIngredientError("");
   }, [searchObject]);
 
   const settings = {
@@ -528,6 +538,96 @@ const StoreGoodsDetail = () => {
           </div>
           {openedTabs === 1 ? (
             <div className="py-[50px]">
+              {isBeautyObjectType(objects?.objectTypeMain) && (
+                <div className="mb-8 rounded border border-line-main px-5 py-5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-text-main">
+                        AI 성분 설명 도우미
+                      </h3>
+                      <p className="mt-1 text-sm text-text-sub">
+                        전성분을 초보자도 이해하기 쉽게 풀어드려요
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="h-11 shrink-0 rounded bg-primary px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={ingredientLoading}
+                      onClick={async (event) => {
+                        event.preventDefault();
+                        if (ingredientOpened) {
+                          setIngredientOpened(false);
+                          return;
+                        }
+                        setIngredientOpened(true);
+                        if (ingredientText) return;
+
+                        const ingredients = objects?.ingredients?.trim();
+                        if (!ingredients) {
+                          setIngredientError(
+                            "이 상품에 등록된 성분 정보가 없습니다. Supabase objects.ingredients에 전성분을 넣어주세요.",
+                          );
+                          return;
+                        }
+
+                        setIngredientLoading(true);
+                        setIngredientError("");
+                        try {
+                          const text = await explainIngredients({
+                            productName: objects?.name,
+                            ingredients,
+                            objectSeq: objects?.object_seq,
+                          });
+                          setIngredientText(text);
+                        } catch (error) {
+                          setIngredientError(
+                            error instanceof Error
+                              ? error.message
+                              : "성분 설명을 불러오지 못했습니다.",
+                          );
+                        } finally {
+                          setIngredientLoading(false);
+                        }
+                      }}
+                    >
+                      {ingredientOpened
+                        ? "접기"
+                        : ingredientLoading
+                          ? "분석 중..."
+                          : "AI 성분 쉽게 보기"}
+                    </button>
+                  </div>
+
+                  {ingredientOpened && (
+                    <div className="mt-4 border-t border-line-sub pt-4">
+                      {objects?.ingredients?.trim() && (
+                        <p className="mb-3 text-xs leading-5 text-text-sub">
+                          <span className="font-bold text-text-main">
+                            전성분{" "}
+                          </span>
+                          {objects.ingredients}
+                        </p>
+                      )}
+                      {ingredientLoading && (
+                        <p className="text-sm text-text-sub">
+                          AI가 성분을 쉽게 풀어서 설명하는 중이에요...
+                        </p>
+                      )}
+                      {ingredientError && (
+                        <p role="alert" className="text-sm text-sale">
+                          {ingredientError}
+                        </p>
+                      )}
+                      {ingredientText && (
+                        <article className="whitespace-pre-wrap text-[15px] leading-7 text-text-main">
+                          {ingredientText}
+                        </article>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div
                 className={cn(
                   detailOpened ? "h-auto overflow-visible" : "h-[500px] overflow-hidden"

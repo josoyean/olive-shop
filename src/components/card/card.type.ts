@@ -16,6 +16,8 @@ export interface CardImageType {
   detailImg?: string;
   objectTypeMain?: string;
   objectTypeSub?: string;
+  /** 전성분 텍스트 (쉼표/줄바꿈 구분) */
+  ingredients?: string | null;
   brand_seq?: number;
   brand?: string;
   object_seq?: number;

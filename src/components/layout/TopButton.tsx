@@ -3,22 +3,18 @@ import { cn } from "@/lib/cn";
 import { useLocation } from "react-router-dom";
 
 const TopButton = () => {
-  const [block, setBlock] = useState<boolean>(false);
+  const [block, setBlock] = useState(false);
   const location = useLocation();
+
   const handleScroll = useCallback(() => {
-    if (window.pageYOffset > 180) {
-      setBlock(true);
-    } else {
-      setBlock(false);
-    }
-  }, [location.pathname]);
+    setBlock(window.scrollY > 180);
+  }, []);
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [handleScroll]);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll, location.pathname]);
 
   return (
     <div
@@ -29,8 +25,8 @@ const TopButton = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }}
       className={cn(
-        "fixed bottom-[75px] right-[calc((100vw-1020px)/2-210px)] h-[55px] w-[55px] cursor-pointer rounded-full border border-line-main bg-primary text-center text-sm leading-[55px] text-white transition-[opacity,visibility] duration-500",
-        block ? "visible opacity-100" : "invisible opacity-0"
+        "fixed right-4 bottom-[75px] z-[1200] h-[55px] w-[55px] cursor-pointer rounded-full border border-line-main bg-primary text-center text-sm leading-[55px] text-white transition-[opacity,visibility] duration-500",
+        block ? "visible opacity-100" : "invisible opacity-0 pointer-events-none",
       )}
     >
       TOP

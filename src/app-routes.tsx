@@ -17,7 +17,7 @@ import StoreEvents from "./pages/store/store-events";
 import StoreEventDetail from "./pages/store/store-event-detail";
 import StoreUserCart from "./pages/carts/store-user-cart";
 import StoreMypage from "./pages/mypage/store-mypage";
-import ChatbotContainer from "./pages/chatbot/Chatbot-Container";
+import BeautyCuratorPage from "./pages/beauty-curator/BeautyCuratorPage";
 
 const routes: RouteObject[] = [
   {
@@ -92,11 +92,11 @@ const routes: RouteObject[] = [
         path: "store/mypage",
         element: <StoreMypage />,
       },
+      {
+        path: "beauty-curator",
+        element: <BeautyCuratorPage />,
+      },
     ],
-  },
-  {
-    path: "/chatbot",
-    element: <ChatbotContainer />,
   },
 ];
 export { routes };

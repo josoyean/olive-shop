@@ -11,7 +11,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import TopButton from "@/components/layout/TopButton";
 import FooterContainer from "@/components/layout/Footer";
 import RecentProducts from "@/components/layout/RecentProducts";
-import ChatButton from "@/components/layout/ChatButton";
+import BeautyCuratorButton from "@/components/layout/BeautyCuratorButton";
 import { useCookies } from "react-cookie";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
@@ -41,11 +41,35 @@ const memberNav: NavItem[] = [
 ];
 
 const gnbNav: NavItem[] = [
-  { path: "/store/hot-deal", name: "오늘의 특가", img: "../assets/images/icons/bargains.png" },
-  { path: "/store/ranking?menuType=전체", name: "랭킹", img: "../assets/images/icons/ranking.png" },
-  { path: "/store/plan-shop?menuType=전체", name: "기획전", img: "../assets/images/icons/cosmetics.png" },
-  { path: "/store/goods-sale?menuType=전체&tabsType=핫인기세일", name: "세일", img: "../assets/images/icons/sale.png" },
-  { path: "/store/events?tabsType=모든회원", name: "이벤트", img: "../assets/images/icons/event.png" },
+  {
+    path: "/store/hot-deal",
+    name: "오늘의 특가",
+    img: "../assets/images/icons/bargains.png",
+  },
+  {
+    path: "/store/ranking?menuType=전체",
+    name: "랭킹",
+    img: "../assets/images/icons/ranking.png",
+  },
+  {
+    path: "/store/plan-shop?menuType=전체",
+    name: "기획전",
+    img: "../assets/images/icons/cosmetics.png",
+  },
+  {
+    path: "/store/goods-sale?menuType=전체&tabsType=핫인기세일",
+    name: "세일",
+    img: "../assets/images/icons/sale.png",
+  },
+  {
+    path: "/store/events?tabsType=모든회원",
+    name: "이벤트",
+    img: "../assets/images/icons/event.png",
+  },
+  {
+    path: "/beauty-curator",
+    name: "AI 큐레이터",
+  },
 ];
 
 const AppLayout: React.FC = () => {
@@ -135,7 +159,7 @@ const AppLayout: React.FC = () => {
   return (
     <div>
       <TopButton />
-      <ChatButton />
+      <BeautyCuratorButton />
       <header role="banner" className="pt-[15px]">
         <Center className="relative">
           <div
@@ -146,7 +170,7 @@ const AppLayout: React.FC = () => {
               "[&_.subNav>span:focus]:outline ",
               "[&_.subNavBtn]:after:absolute [&_.subNavBtn]:after:right-[-8px] [&_.subNavBtn]:after:top-0 [&_.subNavBtn]:after:content-['_|_']",
               "[&_.nav]:mt-5 [&_.nav]:flex [&_.nav]:items-end [&_.nav]:justify-between",
-              "[&_#my-tooltip-click]:left-0 [&_#my-tooltip-click]:top-5 [&_#my-tooltip-click]:opacity-100"
+              "[&_#my-tooltip-click]:left-0 [&_#my-tooltip-click]:top-5 [&_#my-tooltip-click]:opacity-100",
             )}
           >
             <nav className="subNav" role="navigation" aria-label="사용자 메뉴">
@@ -154,7 +178,9 @@ const AppLayout: React.FC = () => {
                 <span
                   key={item.name}
                   className={index === tooltipIndex ? "" : "subNavBtn"}
-                  data-tooltip-id={index === tooltipIndex ? "my-tooltip-click" : ""}
+                  data-tooltip-id={
+                    index === tooltipIndex ? "my-tooltip-click" : ""
+                  }
                   tabIndex={0}
                   role="button"
                   onClick={(event) => {
@@ -216,7 +242,10 @@ const AppLayout: React.FC = () => {
                   }
                 }}
               />
-              <Search setSearchValue={setSearchValue} searchValue={searchValue} />
+              <Search
+                setSearchValue={setSearchValue}
+                searchValue={searchValue}
+              />
             </div>
           </div>
         </Center>
@@ -265,13 +294,17 @@ const AppLayout: React.FC = () => {
                   }}
                   className={item.path === location.pathname ? "active" : ""}
                 >
-                  <img src={item.img} alt={item.name} />
                   <span>{item.name}</span>
                 </li>
               ))}
             </ul>
             {menuBar && (
-              <div className="open-gub" ref={componentRef} role="menu" aria-label="카테고리 메뉴">
+              <div
+                className="open-gub"
+                ref={componentRef}
+                role="menu"
+                aria-label="카테고리 메뉴"
+              >
                 {GUB_MENU.map((menu, index) => (
                   <div
                     key={menu.title.name}
@@ -298,7 +331,7 @@ const AppLayout: React.FC = () => {
                               event.preventDefault();
                               setMenuBar(false);
                               navigate(
-                                `/store/goods?menu=${menu.title.name}&item=${items.title.name}`
+                                `/store/goods?menu=${menu.title.name}&item=${items.title.name}`,
                               );
                             }}
                             onKeyDown={(event) => {
@@ -306,14 +339,17 @@ const AppLayout: React.FC = () => {
                                 event.preventDefault();
                                 setMenuBar(false);
                                 navigate(
-                                  `/store/goods?menu=${menu.title.name}&item=${items.title.name}`
+                                  `/store/goods?menu=${menu.title.name}&item=${items.title.name}`,
                                 );
                               }
                             }}
                           >
                             <span className="inline-flex items-center gap-0.5">
                               {items.title.name}
-                              <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
+                              <ChevronRight
+                                className="h-4 w-4 shrink-0"
+                                aria-hidden
+                              />
                             </span>
                           </h3>
                           <ul role="menu">
@@ -327,15 +363,18 @@ const AppLayout: React.FC = () => {
                                   event.preventDefault();
                                   setMenuBar(false);
                                   navigate(
-                                    `/store/goods?menu=${menu.title.name}&item=${items.title.name}&title=${item.name}`
+                                    `/store/goods?menu=${menu.title.name}&item=${items.title.name}&title=${item.name}`,
                                   );
                                 }}
                                 onKeyDown={(event) => {
-                                  if (event.key === "Enter" || event.key === " ") {
+                                  if (
+                                    event.key === "Enter" ||
+                                    event.key === " "
+                                  ) {
                                     event.preventDefault();
                                     setMenuBar(false);
                                     navigate(
-                                      `/store/goods?menu=${menu.title.name}&item=${items.title.name}&title=${item.name}`
+                                      `/store/goods?menu=${menu.title.name}&item=${items.title.name}&title=${item.name}`,
                                     );
                                   }
                                 }}
