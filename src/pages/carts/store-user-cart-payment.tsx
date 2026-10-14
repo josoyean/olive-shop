@@ -17,7 +17,11 @@ import FormControl from "@mui/material/FormControl";
 import { useDaumPostcodePopup } from "react-daum-postcode";
 import Select from "@mui/material/Select";
 import moment from "moment";
-import type { CartType, PaymentObjectType, UserInfoType } from "components/card/card.type";
+import type {
+  CartType,
+  PaymentObjectType,
+  UserInfoType,
+} from "components/card/card.type";
 import {
   calculatePrice,
   handlePrice,
@@ -27,8 +31,8 @@ import {
 import { deleteCart } from "../../redux/reducers/userCartCount";
 import type { PriceType } from "./store-user-cart";
 
-
-const tagClasses = "!text-white whitespace-normal px-1.5 py-0.5 rounded-[10px] text-xs mr-0.5";
+const tagClasses =
+  "!text-white whitespace-normal px-1.5 py-0.5 rounded-[10px] text-xs mr-0.5";
 const informationClasses = cn(
   "flex items-center gap-5",
   "[&_.img-wrapper]:relative [&_.img-wrapper]:h-[85px] [&_.img-wrapper]:w-[85px] [&_.img-wrapper]:overflow-hidden [&_.img-wrapper]:rounded-[10px]",
@@ -36,7 +40,7 @@ const informationClasses = cn(
   "[&_.img-wrapper_span]:absolute [&_.img-wrapper_span]:bottom-0 [&_.img-wrapper_span]:left-0 [&_.img-wrapper_span]:right-0 [&_.img-wrapper_span]:h-[22px] [&_.img-wrapper_span]:bg-black/50 [&_.img-wrapper_span]:text-center [&_.img-wrapper_span]:text-xs [&_.img-wrapper_span]:leading-[22px] [&_.img-wrapper_span]:text-white",
   "[&_.infor-wrapper]:max-w-[228px] [&_.infor-wrapper_span]:mb-1 [&_.infor-wrapper_span]:block [&_.infor-wrapper_span]:font-bold [&_.infor-wrapper_span]:text-[#fff]",
   "[&_.infor-wrapper_em]:mb-1 [&_.infor-wrapper_em]:block [&_.infor-wrapper_em]:text-xs [&_.infor-wrapper_em]:font-bold [&_.infor-wrapper_em]:text-[#fff]",
-  "[&_.infor-wrapper_p]:mb-[5px] [&_.infor-wrapper_p]:line-clamp-2 [&_.infor-wrapper_p]:max-h-9 [&_.infor-wrapper_p]:overflow-hidden [&_.infor-wrapper_p]:text-sm [&_.infor-wrapper_p]:leading-[18px] [&_.infor-wrapper_p]:text-black"
+  "[&_.infor-wrapper_p]:mb-[5px] [&_.infor-wrapper_p]:line-clamp-2 [&_.infor-wrapper_p]:max-h-9 [&_.infor-wrapper_p]:overflow-hidden [&_.infor-wrapper_p]:text-sm [&_.infor-wrapper_p]:leading-[18px] [&_.infor-wrapper_p]:text-black",
 );
 const tableBoxClasses = cn(
   "[&>div:first-child]:mt-5 [&>div:not(:first-child)]:mt-10 [&_h3]:font-light",
@@ -50,7 +54,7 @@ const tableBoxClasses = cn(
   "[&_.address_td>div]:flex [&_.address_td>div]:flex-col [&_.address_td>div]:gap-2.5",
   "[&_.objects_table]:table-fixed [&_.objects_th]:p-2.5 [&_.objects_th]:text-center",
   "[&_.MuiFormControlLabel-label]:text-[13px] [&_.MuiFormControlLabel-label]:text-black",
-  "[&_.MuiButtonBase-root]:p-[5px] [&_.Mui-checked>span]:text-primary"
+  "[&_.MuiButtonBase-root]:p-[5px] [&_.Mui-checked>span]:text-primary",
 );
 const postcodeScriptUrl =
   "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
@@ -151,7 +155,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
 
     setValue(
       "phoneNumber",
-      userInfoData.deliveryPhone || userInfoData?.phoneNumber || ""
+      userInfoData.deliveryPhone || userInfoData?.phoneNumber || "",
     );
     setValue("getName", userInfoData.deliveryName || userInfoData?.name || "");
     setValue("addressMain", userInfoData?.addressMain || "");
@@ -178,11 +182,11 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           data?.enter === "P"
             ? "공동현관 비밀번호"
             : data?.enter === "S"
-            ? "경비실 호출"
-            : data?.enter === "F"
-            ? "자유 출입 가능"
-            : "기타 상세내용",
-        enterText: data?.enter === "F" ? "" : data?.enterText ?? "",
+              ? "경비실 호출"
+              : data?.enter === "F"
+                ? "자유 출입 가능"
+                : "기타 상세내용",
+        enterText: data?.enter === "F" ? "" : (data?.enterText ?? ""),
         enterMessage: data?.deliveryMessage ?? "",
       },
       paymentInfo: {
@@ -196,12 +200,12 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           data?.paymentType === "C"
             ? "신용카드"
             : data?.paymentType === "T"
-            ? "토스페이"
-            : data?.paymentType === "N"
-            ? "네이버페이"
-            : data?.paymentType === "P"
-            ? "휴대폰결제"
-            : "계좌이체",
+              ? "토스페이"
+              : data?.paymentType === "N"
+                ? "네이버페이"
+                : data?.paymentType === "P"
+                  ? "휴대폰결제"
+                  : "계좌이체",
         installment:
           !data?.installment || data?.installment === 0 ? 1 : data?.installment,
       },
@@ -225,7 +229,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
 
         if (typeof tossPayments.payment !== "function") {
           throw new Error(
-            "tossPayments.payment 함수가 존재하지 않습니다. SDK 버전과 문서를 확인하세요."
+            "tossPayments.payment 함수가 존재하지 않습니다. SDK 버전과 문서를 확인하세요.",
           );
         }
 
@@ -252,7 +256,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
       sale_count: calculatePrice(
         item?.object_count ?? 0,
         item?.objects?.saleItem?.one_more,
-        handlePrice(item?.objects?.saleItem, item?.objects?.count)
+        handlePrice(item?.objects?.saleItem, item?.objects?.count),
       ),
       payment_seq: moment().format("YYYYMMDDhhmmss") + item.object_seq,
       object_seq: item.object_seq,
@@ -261,7 +265,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
   }) as PaymentObjectType[];
   const onSubmit = async (data: DataType) => {
     alert(
-      "테스트(포트폴리오) 환경에서는 실제 결제가 완료되지 않을 수 있습니다.\n확인을 누르면 결제창으로 이동합니다."
+      "테스트(포트폴리오) 환경입니다.\n확인을 누르면 결제창이 열리고, 결제창에서 취소해도 주문 완료 화면으로 이동합니다.\n(실제 결제는 진행되지 않을 수 있습니다.)",
     );
 
     if (!payment) {
@@ -275,12 +279,12 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
       data.paymentType === "P"
         ? "MOBILE_PHONE"
         : data.paymentType === "AT"
-        ? "TRANSFER"
-        : "CARD";
+          ? "TRANSFER"
+          : "CARD";
 
     const amountValue =
       (priceData?.totalPrice ?? 0) >= 20000
-        ? priceData?.totalPrice ?? 0
+        ? (priceData?.totalPrice ?? 0)
         : (priceData?.totalPrice ?? 0) + 2500;
 
     try {
@@ -300,28 +304,32 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
         ...(data.paymentType === "P"
           ? {}
           : data.paymentType === "AT"
-          ? {
-              transfer: {
-                cashReceipt: {
-                  type: "소득공제",
+            ? {
+                transfer: {
+                  cashReceipt: {
+                    type: "소득공제",
+                  },
+                  useEscrow: false,
                 },
-                useEscrow: false,
-              },
-            }
-          : {
-              card: {
-                useEscrow: true,
-                flowMode: "DIRECT", // 자체창 여는 옵션
-                useCardPoint: false,
-                cardInstallmentPlan: !data?.installment ? 0 : data?.installment,
-                useAppCardOnly: false,
-                ...(data.paymentType === "C"
-                  ? { cardCompany: data.cardType }
-                  : {}),
-                ...(data.paymentType === "N" ? { easyPay: "네이버페이" } : {}),
-                ...(data.paymentType === "T" ? { easyPay: "토스페이" } : {}),
-              },
-            }),
+              }
+            : {
+                card: {
+                  useEscrow: true,
+                  flowMode: "DIRECT", // 자체창 여는 옵션
+                  useCardPoint: false,
+                  cardInstallmentPlan: !data?.installment
+                    ? 0
+                    : data?.installment,
+                  useAppCardOnly: false,
+                  ...(data.paymentType === "C"
+                    ? { cardCompany: data.cardType }
+                    : {}),
+                  ...(data.paymentType === "N"
+                    ? { easyPay: "네이버페이" }
+                    : {}),
+                  ...(data.paymentType === "T" ? { easyPay: "토스페이" } : {}),
+                },
+              }),
         metadata: {
           userId: user?.userId,
           paymentDt: new Date().toISOString(),
@@ -330,10 +338,10 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
         // 결제수단별 파라미터가 union으로 묶여 SDK 오버로드와 맞지 않아 캐스팅합니다.
       } as unknown as Parameters<typeof payment.requestPayment>[0]);
     } catch (error) {
-      console.error("결제 요청 실패:", error);
-      alert("결제가 취소되었거나 실패했습니다.");
-      return;
+      // 포트폴리오 테스트: 결제창 취소/실패여도 주문 완료 플로우로 진행
+      console.warn("결제창 취소/실패 — 테스트용 주문 완료로 진행:", error);
     }
+
     const insertDate = {
       id: undefined, // 넣지 않아도 uuid 자동 생성됨
       userId: userToken,
@@ -347,11 +355,11 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           data?.enter === "P"
             ? "공동현관 비밀번호"
             : data?.enter === "S"
-            ? "경비실 호출"
-            : data?.enter === "F"
-            ? "자유 출입 가능"
-            : "기타 상세내용",
-        enterText: data?.enter === "F" ? "" : data?.enterText ?? "",
+              ? "경비실 호출"
+              : data?.enter === "F"
+                ? "자유 출입 가능"
+                : "기타 상세내용",
+        enterText: data?.enter === "F" ? "" : (data?.enterText ?? ""),
         enterMessage: data?.deliveryMessage ?? "",
       },
       paymentInfo: {
@@ -365,12 +373,12 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           data?.paymentType === "C"
             ? "신용카드"
             : data?.paymentType === "T"
-            ? "토스페이"
-            : data?.paymentType === "N"
-            ? "네이버페이"
-            : data?.paymentType === "P"
-            ? "휴대폰결제"
-            : "계좌이체",
+              ? "토스페이"
+              : data?.paymentType === "N"
+                ? "네이버페이"
+                : data?.paymentType === "P"
+                  ? "휴대폰결제"
+                  : "계좌이체",
         installment:
           !data?.installment || data?.installment === 0 ? 1 : data?.installment,
       },
@@ -644,8 +652,8 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                       (getValues("enter") === "P"
                         ? "공동현관 비밀번호"
                         : getValues("enter") === "S"
-                        ? "경비실 호출 방법"
-                        : "기타 상세")}
+                          ? "경비실 호출 방법"
+                          : "기타 상세")}
                     <InfoText>*</InfoText>
                   </th>
                   <td>
@@ -656,8 +664,8 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                           (getValues("enter") === "P"
                             ? "공동현관 비밀번호"
                             : getValues("enter") === "S"
-                            ? "경비실 호출 방법"
-                            : "기타 상세내용") + "을(를) 입력해주새요",
+                              ? "경비실 호출 방법"
+                              : "기타 상세내용") + "을(를) 입력해주새요",
                       })}
                     />
                     {enterType && getValues("enter") === "P" && (
@@ -681,10 +689,18 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           <table className="objects_table">
             <thead>
               <tr>
-                <th className="objects_th" style={{ width: "50%" }}>상품정보</th>
-                <th className="objects_th" style={{ width: "20%" }}>판매가</th>
-                <th className="objects_th" style={{ width: "15%" }}>수량</th>
-                <th className="objects_th" style={{ width: "15%" }}>구매가</th>
+                <th className="objects_th" style={{ width: "50%" }}>
+                  상품정보
+                </th>
+                <th className="objects_th" style={{ width: "20%" }}>
+                  판매가
+                </th>
+                <th className="objects_th" style={{ width: "15%" }}>
+                  수량
+                </th>
+                <th className="objects_th" style={{ width: "15%" }}>
+                  구매가
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -699,15 +715,15 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                       <div className="infor-wrapper">
                         {moment().isBetween(
                           item?.objects?.saleItem?.start_sale_date,
-                          item?.objects?.saleItem?.end_sale_date
+                          item?.objects?.saleItem?.end_sale_date,
                         ) && (
                           <em>
                             {moment(
-                              item?.objects?.saleItem?.start_sale_date
+                              item?.objects?.saleItem?.start_sale_date,
                             ).format("MM/DD")}
                             ~
                             {moment(
-                              item?.objects?.saleItem?.end_sale_date
+                              item?.objects?.saleItem?.end_sale_date,
                             ).format("MM/DD")}
                             까지
                           </em>
@@ -716,10 +732,14 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                         <p>{item?.objects?.name}</p>
                         <div className="!justify-normal gap-px flex flex-row">
                           {item?.objects?.saleItem !== null && (
-                            <span className={cn(tagClasses, "bg-sale")}>세일</span>
+                            <span className={cn(tagClasses, "bg-sale")}>
+                              세일
+                            </span>
                           )}
                           {item?.objects?.coupon && (
-                            <span className={cn(tagClasses, "bg-coupon")}>쿠폰</span>
+                            <span className={cn(tagClasses, "bg-coupon")}>
+                              쿠폰
+                            </span>
                           )}
                           {item?.objects?.saleItem?.one_more && (
                             <span className={cn(tagClasses, "bg-one-more")}>
@@ -728,9 +748,11 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                           )}
                           {moment().isBetween(
                             item?.objects?.saleItem?.start_today_sale_date,
-                            item?.objects?.saleItem?.end_today_sale_date
+                            item?.objects?.saleItem?.end_today_sale_date,
                           ) && (
-                            <span className={cn(tagClasses, "bg-today-sale")}>오특</span>
+                            <span className={cn(tagClasses, "bg-today-sale")}>
+                              오특
+                            </span>
                           )}
                         </div>
                       </div>
@@ -745,14 +767,14 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                   <td className="discount border-r-0 text-center [&_em]:block [&_em]:text-[13px] [&_em]:text-[#b5b5b5] [&_em]:line-through [&_p]:mt-[3px] [&_p]:block [&_p]:text-[15px] [&_p]:font-medium [&_p]:text-text-red">
                     {moment().isBetween(
                       item?.objects?.saleItem?.start_sale_date,
-                      item?.objects?.saleItem?.end_sale_date
+                      item?.objects?.saleItem?.end_sale_date,
                     ) ? (
                       <>
                         <em>
                           {calculatePrice(
                             item?.object_count ?? 0,
                             item?.objects?.saleItem?.one_more,
-                            handlePrice(null, item?.objects?.count)
+                            handlePrice(null, item?.objects?.count),
                           )?.toLocaleString()}
                           원
                         </em>
@@ -762,8 +784,8 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                             item?.objects?.saleItem?.one_more,
                             handlePrice(
                               item?.objects?.saleItem,
-                              item?.objects?.count
-                            )
+                              item?.objects?.count,
+                            ),
                           )?.toLocaleString()}
                           원
                         </p>
@@ -772,7 +794,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                       calculatePrice(
                         item?.object_count ?? 0,
                         item?.objects?.saleItem?.one_more,
-                        handlePrice(null, item?.objects?.count)
+                        handlePrice(null, item?.objects?.count),
                       )?.toLocaleString()
                     )}
                   </td>
@@ -909,7 +931,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                                       >
                                         {option.label}
                                       </MenuItem>
-                                    )
+                                    ),
                                   )}
                               </Select>
                             </FormControl>
@@ -929,7 +951,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                                 {...field}
                                 disabled={
                                   ((priceData?.totalPrice ?? 0) >= 20000
-                                    ? priceData?.totalPrice ?? 0
+                                    ? (priceData?.totalPrice ?? 0)
                                     : (priceData?.totalPrice ?? 0) + 2500) <
                                   50000
                                 }
@@ -942,7 +964,7 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
                                   event.preventDefault();
                                   setValue(
                                     "installment",
-                                    Number(event.target.value)
+                                    Number(event.target.value),
                                   );
                                 }}
                               >
@@ -972,7 +994,8 @@ const StoreUserPayment: React.FC<PropsType> = ({ priceData }) => {
           <div style={{ width: "40%" }}>
             <h3>최종 결제정보</h3>
             <p className="mt-2 text-xs leading-5 text-text-sub">
-              ※ 테스트(포트폴리오) 환경에서는 실제 결제가 완료되지 않을 수 있습니다.
+              ※ 테스트(포트폴리오) 환경에서는 실제 결제가 완료되지 않을 수
+              있습니다.
             </p>
             <div className="my-2.5 w-full rounded-sm border-2 border-black p-[15px] [&_li]:flex [&_li]:justify-between [&_li]:py-2 [&_li>*]:text-sm [&_li>*]:text-[#222] [&_li_span]:font-semibold [&_li_span.color]:text-star [&_.total]:mt-2.5 [&_.total]:border-t [&_.total]:border-black [&_.total_li]:p-3 [&_.total_li>*]:text-[17px] [&_.total_li>*]:font-semibold [&_.total_button]:block [&_.total_button]:w-full [&_.total_button]:rounded-[5px] [&_.total_button]:bg-star [&_.total_button]:p-[15px] [&_.total_button]:text-[19px] [&_.total_button]:text-white">
               <ul>

@@ -19,16 +19,16 @@ import ObjectCardRow from "../../components/card/ObjectCardRow";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { addProducts } from "../../redux/reducers/recentProductsData";
-import { addItemCart } from "@/services/cart";
+import { addItemCart } from "../../services/cart";
 import EmptyComponent from "../../components/EmptyComponent";
 import moment from "moment";
 import ModalContainer from "../../components/ModalContainer";
-import { Center } from "@/components/ui/Center";
-import { StarBox } from "@/components/ui/FormElements";
-import { cn } from "@/lib/cn";
+import { Center } from "../../components/ui/Center";
+import { StarBox } from "../../components/ui/FormElements";
+import { cn } from "../../lib/cn";
 import { Minus, Plus } from "lucide-react";
-import { explainIngredients } from "@/services/ingredientHelper";
-import { isBeautyObjectType } from "@/services/beautyCurator";
+import { explainIngredients } from "../../services/ingredientHelper";
+import { isBeautyObjectType } from "../../constants/beauty";
 
 function GraphBar({ height }: { height: string }) {
   return (
@@ -94,7 +94,7 @@ const StoreGoodsDetail = () => {
     setObjectItems(
       !objectData
         ? []
-        : objectData?.filter((data) => data?.object_seq !== Number(item))
+        : objectData?.filter((data) => data?.object_seq !== Number(item)),
     );
 
     handleReviewData(item);
@@ -118,7 +118,7 @@ const StoreGoodsDetail = () => {
       (reviews?.flatMap((item) =>
         item?.reviewImg?.map((img, index) => {
           return { ...item, img: img, index: String(index) };
-        })
+        }),
       ) as ReviewType[]) ?? [];
 
     setReviewImages(img ?? []);
@@ -144,7 +144,7 @@ const StoreGoodsDetail = () => {
           console.error("에러 발생:", error);
           return null;
         }
-      }) as ReviewType[]) ?? []
+      }) as ReviewType[]) ?? [],
     );
 
     return (updatedData ?? [])?.filter(Boolean);
@@ -255,7 +255,7 @@ const StoreGoodsDetail = () => {
                 src={objects?.img}
                 className={cn(
                   "h-20 w-20 overflow-hidden rounded-[3px] border-2 border-transparent object-cover",
-                  0 === imgIndex && "border-primary"
+                  0 === imgIndex && "border-primary",
                 )}
                 alt="제품 이미지"
                 onClick={() => setImageIndex(0)}
@@ -268,7 +268,7 @@ const StoreGoodsDetail = () => {
                   alt="제품 이미지"
                   className={cn(
                     "h-20 w-20 overflow-hidden rounded-[3px] border-2 border-transparent object-cover",
-                    index + 1 === imgIndex && "border-primary"
+                    index + 1 === imgIndex && "border-primary",
                   )}
                 />
               ))}
@@ -281,13 +281,15 @@ const StoreGoodsDetail = () => {
                 onClick={(event) => {
                   event.preventDefault();
                   navigate(
-                    `/store/brand-detail?getBrand=${objects?.brands?.brand_seq}`
+                    `/store/brand-detail?getBrand=${objects?.brands?.brand_seq}`,
                   );
                 }}
               >
                 {objects?.brands?.name + " >"}{" "}
               </h3>
-              <h2 className="mt-[15px] text-2xl font-normal">{objects?.name}</h2>
+              <h2 className="mt-[15px] text-2xl font-normal">
+                {objects?.name}
+              </h2>
 
               <div className="mt-2.5 flex items-center gap-2.5">
                 {handleSaleTF(objects?.saleItem) && (
@@ -298,7 +300,7 @@ const StoreGoodsDetail = () => {
                 <em className="text-[26px] font-bold text-text-red">
                   {handlePrice(
                     objects?.saleItem,
-                    objects?.count
+                    objects?.count,
                   ).toLocaleString()}
                   원{objects?.option && "~"}
                 </em>
@@ -321,9 +323,11 @@ const StoreGoodsDetail = () => {
                 )}
                 {moment().isBetween(
                   objects?.saleItem?.start_today_sale_date,
-                  objects?.saleItem?.end_today_sale_date
+                  objects?.saleItem?.end_today_sale_date,
                 ) && (
-                  <span className="today_sale bg-[#6fcff7] text-white">오특</span>
+                  <span className="today_sale bg-[#6fcff7] text-white">
+                    오특
+                  </span>
                 )}
               </div>
             </div>
@@ -357,11 +361,7 @@ const StoreGoodsDetail = () => {
                   >
                     <Minus className="h-5 w-5" aria-hidden />
                   </button>
-                  <span
-                    className={cn(
-                      soldOut ? "bg-[#efeded]" : "bg-white"
-                    )}
-                  >
+                  <span className={cn(soldOut ? "bg-[#efeded]" : "bg-white")}>
                     {buyCount}
                   </span>
 
@@ -392,7 +392,7 @@ const StoreGoodsDetail = () => {
                   {calculatePrice(
                     buyCount,
                     objects?.saleItem?.one_more,
-                    handlePrice(objects?.saleItem, objects?.count)
+                    handlePrice(objects?.saleItem, objects?.count),
                   )?.toLocaleString() || 0}
                   원
                 </span>
@@ -401,7 +401,7 @@ const StoreGoodsDetail = () => {
                 className={cn(
                   "mt-5 grid gap-[5px]",
                   soldOut ? "grid-cols-1" : "grid-cols-2",
-                  "[&_button]:h-[60px] [&_button]:border [&_button]:border-line-main [&_button]:text-lg [&_button]:font-extrabold [&_button]:leading-[60px] [&_.buy]:bg-primary [&_.buy]:text-white [&_.soldOut]:bg-[#f5f5f5]"
+                  "[&_button]:h-[60px] [&_button]:border [&_button]:border-line-main [&_button]:text-lg [&_button]:font-extrabold [&_button]:leading-[60px] [&_.buy]:bg-primary [&_.buy]:text-white [&_.soldOut]:bg-[#f5f5f5]",
                 )}
               >
                 {objects?.soldOut ? (
@@ -425,7 +425,7 @@ const StoreGoodsDetail = () => {
                         if (userData === "") {
                           if (
                             window.confirm(
-                              `로그인후 이용해주세요\n로그인 하시겠습니까?`
+                              `로그인후 이용해주세요\n로그인 하시겠습니까?`,
                             )
                           ) {
                             navigate("/login");
@@ -450,7 +450,7 @@ const StoreGoodsDetail = () => {
                         if (userData === "") {
                           if (
                             window.confirm(
-                              `로그인후 이용해주세요\n로그인 하시겠습니까?`
+                              `로그인후 이용해주세요\n로그인 하시겠습니까?`,
                             )
                           ) {
                             navigate("/login");
@@ -462,7 +462,7 @@ const StoreGoodsDetail = () => {
                           objects?.saleItem !== null &&
                           calculatePriceNY(
                             buyCount,
-                            objects?.saleItem?.one_more
+                            objects?.saleItem?.one_more,
                           )
                         ) {
                           alert("추가상품을 선택해주세요.");
@@ -471,12 +471,12 @@ const StoreGoodsDetail = () => {
                         const totalCount = calculatePrice(
                           buyCount,
                           objects?.saleItem?.one_more,
-                          handlePrice(null, objects?.count)
+                          handlePrice(null, objects?.count),
                         );
                         const totalPrice = calculatePrice(
                           buyCount,
                           objects?.saleItem?.one_more,
-                          handlePrice(objects?.saleItem, objects?.count)
+                          handlePrice(objects?.saleItem, objects?.count),
                         );
 
                         navigate("/store/mypage/user-cart?t_header_type=2", {
@@ -630,7 +630,9 @@ const StoreGoodsDetail = () => {
 
               <div
                 className={cn(
-                  detailOpened ? "h-auto overflow-visible" : "h-[500px] overflow-hidden"
+                  detailOpened
+                    ? "h-auto overflow-visible"
+                    : "h-[500px] overflow-hidden",
                 )}
               >
                 <img
@@ -662,7 +664,7 @@ const StoreGoodsDetail = () => {
                         {Math.floor(
                           ((reviewScore ?? [])?.reduce((a, c) => a + c) /
                             (reviewScore?.length || 0)) *
-                            10
+                            10,
                         ) / 10}{" "}
                         점
                       </em>
@@ -702,7 +704,8 @@ const StoreGoodsDetail = () => {
                               key={index}
                               className={cn(
                                 "relative h-[120px] w-[120px] cursor-pointer overflow-hidden rounded-[5px] border border-line-main",
-                                index === 7 && "[&_em]:block [&_img]:brightness-[0.8]"
+                                index === 7 &&
+                                  "[&_em]:block [&_img]:brightness-[0.8]",
                               )}
                               onClick={(event) => {
                                 event.preventDefault();
@@ -718,7 +721,7 @@ const StoreGoodsDetail = () => {
                               <em
                                 className={cn(
                                   "absolute inset-0 z-[19] hidden text-center leading-[120px] text-white",
-                                  index === 7 && "block"
+                                  index === 7 && "block",
                                 )}
                               >
                                 더보기{" "}
@@ -729,7 +732,7 @@ const StoreGoodsDetail = () => {
                                 alt="reviews-img"
                               />
                             </div>
-                          )
+                          ),
                       )}
                     </div>
                   )}
@@ -764,7 +767,7 @@ const StoreGoodsDetail = () => {
                                     style={{
                                       width: getStarIndividualWidth(
                                         i,
-                                        item?.score ?? 0
+                                        item?.score ?? 0,
                                       ),
                                     }}
                                   ></span>
@@ -812,7 +815,7 @@ const StoreGoodsDetail = () => {
                                 item.likeUserId?.includes(userData) &&
                                   "[&_button]:border-primary [&_button]:bg-primary [&_button]:text-white",
                                 item.userId === userData &&
-                                  "[&_button]:border-[#ccc] [&_button]:bg-[#eeeeee] [&_button]:text-[#333333]"
+                                  "[&_button]:border-[#ccc] [&_button]:bg-[#eeeeee] [&_button]:text-[#333333]",
                               )}
                             >
                               <strong>이 리뷰가 도움이 돼요! </strong>
@@ -822,7 +825,7 @@ const StoreGoodsDetail = () => {
                                   if (!userData) {
                                     if (
                                       window.confirm(
-                                        `로그인후 이용해주세요\n로그인 하시겠습니까?`
+                                        `로그인후 이용해주세요\n로그인 하시겠습니까?`,
                                       )
                                     ) {
                                       navigate("/login");
@@ -954,7 +957,7 @@ const StoreGoodsDetail = () => {
                         style={{
                           width: getStarIndividualWidth(
                             i,
-                            detailReviews?.score ?? 0
+                            detailReviews?.score ?? 0,
                           ),
                         }}
                       ></span>

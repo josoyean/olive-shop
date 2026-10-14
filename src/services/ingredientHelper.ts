@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 
 const GEMINI_MODEL = "gemini-3.5-flash-lite";
 const CACHE_PREFIX = "olive-ingredient-ai:";
@@ -71,7 +71,7 @@ export async function explainIngredients(params: {
     config: {
       maxOutputTokens: 160,
       thinkingConfig: {
-        thinkingLevel: "minimal",
+        thinkingLevel: ThinkingLevel.MINIMAL,
       },
     },
   });

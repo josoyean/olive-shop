@@ -1,7 +1,13 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import type { CardImageType } from "@/components/card/card.type";
+import {
+  BEAUTY_OBJECT_TYPES,
+  isBeautyObjectType,
+} from "@/constants/beauty";
 import { supabase } from "@/supabase";
 import { handlePrice } from "@/utils/common";
+
+export { BEAUTY_OBJECT_TYPES, isBeautyObjectType } from "@/constants/beauty";
 
 /**
  * 속도 전략:
@@ -12,12 +18,6 @@ import { handlePrice } from "@/utils/common";
 const GEMINI_MODEL = "gemini-3.5-flash-lite";
 /** AI 문구용으로만 상위 몇 개 상품명 전달 (화면에는 전체 표시) */
 const ANALYSIS_NAME_COUNT = 3;
-const ALLOWED_OBJECT_TYPES = [
-  "선케어",
-  "스킨케어",
-  "바디케어",
-  "마스크팩",
-] as const;
 
 export const SKIN_TYPES = ["건성", "지성", "복합성", "민감성"] as const;
 export const SKIN_CONCERNS = [
@@ -123,7 +123,7 @@ export async function pickCuratorProducts(
   const { data, error } = await supabase
     .from("objects")
     .select("*,saleItem(*)")
-    .in("objectTypeMain", [...ALLOWED_OBJECT_TYPES])
+    .in("objectTypeMain", [...BEAUTY_OBJECT_TYPES])
     .lte("count", form.budget)
     .order("view_count", { ascending: false });
 
@@ -132,11 +132,7 @@ export async function pickCuratorProducts(
   }
 
   const withinBudget = ((data ?? []) as CardImageType[])
-    .filter((item) =>
-      ALLOWED_OBJECT_TYPES.includes(
-        item.objectTypeMain as (typeof ALLOWED_OBJECT_TYPES)[number],
-      ),
-    )
+    .filter((item) => isBeautyObjectType(item.objectTypeMain))
     .filter((item) => !item.soldOut)
     .filter((item) => getEffectivePrice(item) > 0)
     .filter((item) => getEffectivePrice(item) <= form.budget);
@@ -188,7 +184,7 @@ export async function generateCuratorAnalysis(
       config: {
         maxOutputTokens: 80,
         thinkingConfig: {
-          thinkingLevel: "minimal",
+          thinkingLevel: ThinkingLevel.MINIMAL,
         },
       },
     });
