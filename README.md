@@ -26,6 +26,10 @@ DB는 SQL로 다루고 싶어서 Supabase를 사용했습니다.
 - **Firebase**  
   회원 인증과 배송지 정보 갱신에 사용
 
+- **Google Gemini (`@google/genai`)**  
+  AI 뷰티 큐레이터 추천 문구, 상품 상세 성분 설명에 사용.  
+  상품 카드 선정은 DB·로컬 스코어링으로 처리하고, AI는 짧은 문구 생성에만 사용해 속도와 토큰을 줄임
+
 ---
 
 ## Description
@@ -185,6 +189,60 @@ if (!paymentsData) {
 
 ---
 
+### Gemini AI 뷰티 큐레이터 · 성분 설명 도우미 구현
+
+피부 타입 / 고민(복수) / 예산을 고르면 맞춤 상품을 보여주고,  
+상품 상세에서는 전성분을 AI가 쉽게 풀어 설명합니다.
+
+**진입**
+- GNB `AI 큐레이터` 또는 우측 하단 플로팅 버튼 → `/beauty-curator`
+- 상품 상세(선케어·스킨케어·바디케어·마스크팩) → `AI 성분 쉽게 보기`
+
+**구조 (`src/services/beautyCurator.ts`)**
+- 상품: Supabase `objects`에서 예산·카테고리 필터 후 키워드 스코어로 정렬 (즉시)
+- 문구: `gemini-3.5-flash-lite` + `thinkingLevel: MINIMAL`로 짧은 추천문만 생성
+- 성분: `src/services/ingredientHelper.ts` — 버튼 클릭 시 설명 생성, `localStorage` 캐시로 재요청 최소화
+
+```ts
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
+
+const GEMINI_MODEL = "gemini-3.5-flash-lite";
+
+const ai = new GoogleGenAI({
+  apiKey: import.meta.env.VITE_GEMINI_API_KEY,
+});
+
+const response = await ai.models.generateContent({
+  model: GEMINI_MODEL,
+  contents: prompt,
+  config: {
+    maxOutputTokens: 80,
+    thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
+  },
+});
+```
+
+**Supabase 설정**
+- `objects.ingredients` (`text`) — 전성분 (쉼표 구분, 예: `정제수, 글리세린, 나이아신아마이드`)
+- 큐레이터/성분 UI 대상 카테고리: `objectTypeMain` ∈ `선케어 | 스킨케어 | 바디케어 | 마스크팩`
+
+```sql
+alter table objects
+add column if not exists ingredients text;
+```
+
+**환경 변수**
+- [Google AI Studio](https://aistudio.google.com/apikey)에서 API 키 발급 후 `.env`에 추가
+
+```env
+VITE_GEMINI_API_KEY=your-gemini-api-key
+```
+
+> Vite `VITE_` 키는 브라우저에 노출됩니다. 포트폴리오/데모용으로 HTTP referrer 제한을 걸고,  
+> 운영 환경에서는 서버(Edge Function 등)로 옮기는 것을 권장합니다.
+
+---
+
 ## 개발 기간
 
 2025.03 ~ 진행중
@@ -199,6 +257,7 @@ if (!paymentsData) {
 - 배송 완료 상품 리뷰 작성·수정
 - react-simple-captcha로 로그인 보안 강화
 - button / aria-label 등으로 접근성 보완
+- AI 뷰티 큐레이터, 상품 상세 AI 성분 설명
 
 ---
 
@@ -217,6 +276,7 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_KEY=your-anon-key
 VITE_FIREBASE_API_KEY=
 VITE_WAB_NAME=your-firebase-project-id
+VITE_GEMINI_API_KEY=your-gemini-api-key
 ```
 
 ---
